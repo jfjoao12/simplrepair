@@ -37,22 +37,22 @@ fun BottomNav(navController: NavController) {
             label = { Text(text = Destination.Main.route) }
         )
         // Inventory navbar item
-        NavigationBarItem(
-            selected = currentDestination?.route == Destination.Inventory.route,
-            onClick = {
-                navController.navigate(Destination.Inventory.route) {
-                    popUpTo(Destination.Main.route)
-                    launchSingleTop = true
-                }
-            },
-            icon = {
-                Icon(
-                    Icons.AutoMirrored.Rounded.List,
-                    contentDescription = "Inventory"
-                )
-            },
-            label = {Text(text = Destination.Inventory.route)}
-        )
+//        NavigationBarItem(
+//            selected = currentDestination?.route == Destination.Inventory.route,
+//            onClick = {
+//                navController.navigate(Destination.Inventory.route) {
+//                    popUpTo(Destination.Main.route)
+//                    launchSingleTop = true
+//                }
+//            },
+//            icon = {
+//                Icon(
+//                    Icons.AutoMirrored.Rounded.List,
+//                    contentDescription = "Inventory"
+//                )
+//            },
+//            label = {Text(text = Destination.Inventory.route)}
+//        )
         NavigationBarItem(
             selected = currentDestination?.route == Destination.Appointments.route,
             onClick = {
