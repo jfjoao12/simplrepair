@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.List
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -25,15 +26,16 @@ fun BottomNav(navController: NavController) {
             selected = currentDestination?.route == Destination.Main.route,
             onClick = {
                 navController.navigate(Destination.Main.route) {
-                popUpTo(Destination.Main.route)
-                launchSingleTop = true
-            }
-                      },
+                    popUpTo(Destination.Main.route)
+                    launchSingleTop = true
+                }
+            },
             icon = {
                 Icon(
                     Icons.Rounded.Build,
                     contentDescription = "Repair"
-                ) },
+                )
+            },
             label = { Text(text = Destination.Main.route) }
         )
         // Inventory navbar item
@@ -67,7 +69,24 @@ fun BottomNav(navController: NavController) {
                     contentDescription = "Appointments"
                 )
             },
-            label = {Text(text = Destination.Appointments.route)}
+            label = { Text(text = Destination.Appointments.route) }
+        )
+
+        NavigationBarItem(
+            selected = currentDestination?.route == Destination.Search.route,
+            onClick = {
+                navController.navigate(Destination.Search.route) {
+                    popUpTo(Destination.Main.route)
+                    launchSingleTop = true
+                }
+            },
+            icon = {
+                Icon(
+                    Icons.Rounded.Search,
+                    contentDescription = "Search"
+                )
+            },
+            label = {Text(text = Destination.Search.route)}
         )
     }
 }

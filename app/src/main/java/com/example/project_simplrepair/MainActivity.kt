@@ -46,6 +46,7 @@ import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
 import com.example.project_simplrepair.Screen.InventoryScreen
 import com.example.project_simplrepair.Screen.RepairScreen
+import com.example.project_simplrepair.Screen.SearchScreen
 import com.example.project_simplrepair.Screen.SettingsScreen
 import com.example.project_simplrepair.ui.theme.ProjectSimplRepairTheme
 import kotlinx.coroutines.launch
@@ -161,6 +162,9 @@ fun App (navController: NavController, modifier: Modifier) {
                 }
                 composable(Destination.Appointments.route) {
                     AppointmentsScreen(modifier, paddingValues)
+                }
+                composable(Destination.Search.route){
+                    SearchScreen(modifier, paddingValues)
                 }
             }
 
