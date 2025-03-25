@@ -17,16 +17,18 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Operations.TaxesCalculation
 
 @Composable
-fun GeneralCard() {
+fun GeneralCard(navController: NavController) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(20.dp),
-        onClick = {/* Open specific repair page - TO BE IMPLEMENTED LATER */}
+        onClick = {navController.navigate(Destination.RepairDetails.route)}
     ) {
         Column(
             modifier = Modifier

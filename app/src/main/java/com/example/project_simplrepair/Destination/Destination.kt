@@ -7,5 +7,6 @@ sealed class Destination (val route: String) {
     object Settings : Destination("Settings")
     object Inventory : Destination("Inventory")
     object Appointments : Destination("Appointments")
+    object RepairDetails : Destination("Repair Details")
 
 }
