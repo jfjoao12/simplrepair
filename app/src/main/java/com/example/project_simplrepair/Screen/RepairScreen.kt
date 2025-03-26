@@ -11,10 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavController
+import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Layouts.GeneralCard
 
 @Composable
 fun RepairScreen(paddingValues: PaddingValues, navController: NavController) {
+    val db = AppDatabase.getInstance()
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -26,7 +29,7 @@ fun RepairScreen(paddingValues: PaddingValues, navController: NavController) {
             modifier = Modifier.align(Alignment.Center),
             text = "Repairs Screen"
         )
-        GeneralCard(navController)
+        GeneralCard(navController, db)
     }
 }
 

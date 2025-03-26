@@ -10,7 +10,7 @@ import com.example.project_simplrepair.Models.Repair
 @Database(entities = [Repair::class], version = 1, exportSchema = false)
 //@TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
-    abstract fun favouritesDao(): RepairDAO
+    abstract fun repairDAO(): RepairDAO
 
     // COMPANION OBJECT
     companion object {
