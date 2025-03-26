@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 
 @Composable
@@ -24,5 +25,6 @@ fun RepairDetailsScreen(modifier: Modifier = Modifier, paddingValues: PaddingVal
             modifier = modifier.align(Alignment.Center),
             text="Repair Details Screen"
         )
+        InsertRepairScreen()
     }
 }
