@@ -45,6 +45,7 @@ import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
 import com.example.project_simplrepair.Screen.InventoryScreen
+import com.example.project_simplrepair.Screen.RepairDetailsScreen
 import com.example.project_simplrepair.Screen.RepairScreen
 import com.example.project_simplrepair.Screen.SearchScreen
 import com.example.project_simplrepair.Screen.SettingsScreen
@@ -151,13 +152,16 @@ fun App (navController: NavController, modifier: Modifier) {
                 startDestination = Destination.Main.route,
             ) {
                 composable(Destination.Main.route) {
-                    RepairScreen(paddingValues)
+                    RepairScreen(paddingValues, navController)
                 }
                 composable(Destination.Settings.route) {
                     SettingsScreen(modifier, paddingValues)
                 }
                 composable(Destination.Inventory.route) {
                     InventoryScreen(modifier, paddingValues)
+                }
+                composable(Destination.RepairDetails.route) {
+                    RepairDetailsScreen(modifier, paddingValues)
                 }
                 composable(Destination.Appointments.route) {
                     AppointmentsScreen(modifier, paddingValues)
