@@ -16,7 +16,6 @@ import com.example.project_simplrepair.Layouts.GeneralCard
 
 @Composable
 fun RepairScreen(paddingValues: PaddingValues, navController: NavController) {
-    val db = AppDatabase.getInstance()
 
     Box(
         modifier = Modifier
@@ -29,7 +28,7 @@ fun RepairScreen(paddingValues: PaddingValues, navController: NavController) {
             modifier = Modifier.align(Alignment.Center),
             text = "Repairs Screen"
         )
-        GeneralCard(navController, db)
+        GeneralCard(navController)
     }
 }
 

@@ -9,10 +9,10 @@ import com.example.project_simplrepair.Models.Repair
 @Dao
 interface RepairDAO {
     @Insert (onConflict = OnConflictStrategy.ABORT)
-    fun insert(repair: Repair)
+    suspend fun insert(repair: Repair)
 
     @Query ("SELECT * FROM repair WHERE id = :id")
-    fun getRepairById(id: Int): Repair?
+    suspend fun getRepairById(id: Int): Repair?
 
 
 

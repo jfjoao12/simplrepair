@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -45,6 +46,7 @@ import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
+import com.example.project_simplrepair.Screen.InsertRepairScreen
 import com.example.project_simplrepair.Screen.InventoryScreen
 import com.example.project_simplrepair.Screen.RepairDetailsScreen
 import com.example.project_simplrepair.Screen.RepairScreen
@@ -169,6 +171,9 @@ fun App (navController: NavController, modifier: Modifier) {
                 }
                 composable(Destination.Search.route){
                     SearchScreen(modifier, paddingValues)
+                }
+                composable(Destination.NewRepair.route) {
+                    InsertRepairScreen(AppDatabase.getInstance(context = LocalContext.current))
                 }
             }
 

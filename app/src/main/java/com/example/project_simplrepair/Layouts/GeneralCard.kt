@@ -28,7 +28,7 @@ fun GeneralCard(navController: NavController) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(20.dp),
-        onClick = {navController.navigate(Destination.RepairDetails.route)}
+        onClick = {navController.navigate(Destination.NewRepair.route)}
     ) {
         Column(
             modifier = Modifier

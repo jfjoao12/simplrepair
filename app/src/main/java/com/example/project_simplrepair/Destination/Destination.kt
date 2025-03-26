@@ -9,4 +9,5 @@ sealed class Destination (val route: String) {
     object Appointments : Destination("Appointments")
     object Search : Destination("Search")
     object RepairDetails : Destination("Repair Details")
+    object NewRepair : Destination("Create new repair")
 }
