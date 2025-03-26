@@ -82,7 +82,6 @@ fun App (navController: NavController, modifier: Modifier) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scopeMenu = rememberCoroutineScope()
     ModalNavigationDrawer(
-
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
