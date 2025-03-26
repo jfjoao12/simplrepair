@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.materialIcon
@@ -22,10 +23,12 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButtonDefaults.Icon
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -63,7 +66,8 @@ class MainActivity : ComponentActivity() {
             ProjectSimplRepairTheme {
                 Scaffold (
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxSize(),
+
                 ) { innerPadding ->
                     val navController = rememberNavController()
 
@@ -141,10 +145,14 @@ fun App (navController: NavController, modifier: Modifier) {
                         }
                     }
                 )
+
             },
             bottomBar = { BottomNav(navController = navController) }
-        ) { paddingValues ->
+
+        ) {
+            paddingValues ->
             paddingValues.calculateBottomPadding()
+
             Spacer(
                 modifier = Modifier
                     .padding(paddingValues)
@@ -155,7 +163,7 @@ fun App (navController: NavController, modifier: Modifier) {
                 startDestination = Destination.Main.route,
             ) {
                 composable(Destination.Main.route) {
-                    RepairScreen(paddingValues, navController)
+                    RepairScreen(paddingValues, navController, AppDatabase.getInstance(context = LocalContext.current))
                 }
                 composable(Destination.Settings.route) {
                     SettingsScreen(modifier, paddingValues)
@@ -173,7 +181,7 @@ fun App (navController: NavController, modifier: Modifier) {
                     SearchScreen(modifier, paddingValues)
                 }
                 composable(Destination.NewRepair.route) {
-                    InsertRepairScreen(AppDatabase.getInstance(context = LocalContext.current))
+                    InsertRepairScreen(paddingValues, AppDatabase.getInstance(context = LocalContext.current), navController)
                 }
             }
 

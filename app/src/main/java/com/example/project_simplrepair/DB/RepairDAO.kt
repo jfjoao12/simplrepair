@@ -14,6 +14,7 @@ interface RepairDAO {
     @Query ("SELECT * FROM repair WHERE id = :id")
     suspend fun getRepairById(id: Int): Repair?
 
-
+    @Query ("SELECT * FROM repair")
+    suspend fun getAllRepairs(): List<Repair>
 
 }

@@ -1,6 +1,5 @@
 package com.example.project_simplrepair.Layouts
 
-import android.icu.text.IDNA.Info
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,17 +17,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.example.project_simplrepair.Destination.Destination
-import com.example.project_simplrepair.Operations.TaxesCalculation
+import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Operations.showRepairID
+import com.example.project_simplrepair.Operations.taxesCalculation
 
 @Composable
-fun GeneralCard(navController: NavController) {
+fun GeneralCard(navController: NavController, repair: Repair) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
-        onClick = {navController.navigate(Destination.NewRepair.route)}
+            .padding(10.dp),
+        onClick = {}
     ) {
         Column(
             modifier = Modifier
@@ -46,8 +46,8 @@ fun GeneralCard(navController: NavController) {
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text("John Doe", fontWeight = FontWeight.Bold)
-                    Text("RP00001", fontStyle = FontStyle.Italic)
+                    Text(repair.costumerName, fontWeight = FontWeight.Bold)
+                    Text(showRepairID(repair.id), fontStyle = FontStyle.Italic)
                 }
 
                 // Technician name and repair status
@@ -55,7 +55,7 @@ fun GeneralCard(navController: NavController) {
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.End
                 ) {
-                    Text("Joao Magalhaes")
+                    Text(repair.technicianName)
                     Text("In Repair", fontStyle = FontStyle.Italic)
                 }
             }
@@ -68,8 +68,8 @@ fun GeneralCard(navController: NavController) {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Screen + Battery", fontSize = 24.sp)
-                    Text("Galaxy S24 Grey", fontSize = 24.sp)
+                    Text(repair.repairType.displayName, fontSize = 24.sp)
+                    Text(repair.model, fontSize = 24.sp)
                 }
             }
 
@@ -80,7 +80,7 @@ fun GeneralCard(navController: NavController) {
                     .align(Alignment.CenterHorizontally),
                 horizontalArrangement = Arrangement.End
             ) {
-                Text("$${TaxesCalculation(299.99)}")
+                Text("$${taxesCalculation(repair.price)}")
             }
         }
     }

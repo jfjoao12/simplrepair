@@ -6,7 +6,7 @@ import com.example.project_simplrepair.Operations.RepairType
 @Entity
 //@JsonClass(generateAdapter = true)
 data class Repair(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     val id: Int,
     val model: String,
     val serial: String,
