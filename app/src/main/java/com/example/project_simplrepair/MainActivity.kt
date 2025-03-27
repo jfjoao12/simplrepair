@@ -45,8 +45,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.project_simplrepair.API.PhonesApiManager
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
+import com.example.project_simplrepair.Models.PhoneBrands
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
 import com.example.project_simplrepair.Screen.InsertRepairScreen
@@ -70,11 +72,13 @@ class MainActivity : ComponentActivity() {
 
                 ) { innerPadding ->
                     val navController = rememberNavController()
-
+                    val db = AppDatabase.getInstance(applicationContext)
+                    val allPhoneBrands = PhonesApiManager(db)
                     App(
                         navController = navController,
                         modifier = Modifier
-                            .padding(innerPadding)
+                            .padding(innerPadding),
+                        allPhoneBrands
                         )
                 }
             }
@@ -83,7 +87,7 @@ class MainActivity : ComponentActivity() {
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun App (navController: NavController, modifier: Modifier) {
+fun App (navController: NavController, modifier: Modifier, phonesApiManager: PhonesApiManager) {
 //    var option by remember {
 //        mutableStateOf()
 //    }

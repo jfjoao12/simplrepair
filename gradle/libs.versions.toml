@@ -7,20 +7,22 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2024.04.01"
-navigationRuntimeKtx = "2.8.8"
-navigationCompose = "2.8.8"
+composeBom = "2025.03.01"
+navigationRuntimeKtx = "2.8.9"
+navigationCompose = "2.8.9"
 roomCommon = "2.6.1"
+coilCompose = "3.1.0"
+moshiKotlin = "1.9.3"
+converterMoshi = "2.9.0"
 
-roomCompiler = "2.5.2"
-roomCompilerVersion = "2.6.1"
+#roomCompiler = "2.5.2"
+#roomCompilerVersion = "2.6.1"
 roomRuntime = "2.6.1"
 ksp="2.0.21-1.0.27"
 appcompat = "1.7.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-androidx-room-compiler-v250 = { module = "androidx.room:room-compiler", version.ref = "roomCompilerVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -37,6 +39,13 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
+moshi-kotlin = { module = "com.squareup.moshi:moshi-kotlin", version.ref = "moshiKotlin" }
+converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
+
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
+
+
 #ROOM
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
@@ -48,6 +57,5 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-#ROOM
 devtoolsKsp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
 

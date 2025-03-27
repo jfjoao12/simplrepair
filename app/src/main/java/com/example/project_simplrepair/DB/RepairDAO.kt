@@ -11,10 +11,10 @@ interface RepairDAO {
     @Insert (onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(repair: Repair)
 
-    @Query ("SELECT * FROM repair WHERE id = :id")
+    @Query ("SELECT * FROM repairs_table WHERE repair_id = :id")
     suspend fun getRepairById(id: Int): Repair?
 
-    @Query ("SELECT * FROM repair")
+    @Query ("SELECT * FROM repairs_table")
     suspend fun getAllRepairs(): List<Repair>
 
 }

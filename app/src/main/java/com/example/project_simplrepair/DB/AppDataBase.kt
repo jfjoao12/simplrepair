@@ -5,12 +5,24 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.*
 
-@Database(entities = [Repair::class], version = 4, exportSchema = false)
+
+@Database(
+    entities =
+        [
+            Repair::class,
+            Customer::class,
+            Device::class,
+            PhoneBrands::class
+        ],
+    version = 6,
+    exportSchema = false
+)
 //@TypeConverters(Converters::class)
 abstract class AppDatabase: RoomDatabase() {
     abstract fun repairDAO(): RepairDAO
+    abstract fun phoneBrandsDAO(): PhoneBrandsDAO
 
     // COMPANION OBJECT
     companion object {

@@ -33,6 +33,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
     var costumerName by remember { mutableStateOf("") }
     var technicianName by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+    var customerId by remember { mutableStateOf(0) }
 
     var expanded by remember { mutableStateOf(false) }
     var selectedType by remember { mutableStateOf(RepairType.BATTERY) } // Default selection
@@ -162,7 +163,8 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                             costumerName = costumerName,
                             technicianName = technicianName,
                             price = price.toDoubleOrNull() ?: 0.0,
-                            repairType = selectedType
+                            repairType = selectedType,
+                            //customerId = customerId
                         )
                         db.repairDAO().insert(repair)
                     }

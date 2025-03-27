@@ -69,6 +69,14 @@ dependencies {
     annotationProcessor(libs.androidx.room.room.compiler)
     ksp(libs.androidx.room.room.compiler)
 
+    // moshi
+    implementation(libs.moshi.kotlin)
+    implementation(libs.converter.moshi)
+
+    //coil compose
+    implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+
 
 }
 
