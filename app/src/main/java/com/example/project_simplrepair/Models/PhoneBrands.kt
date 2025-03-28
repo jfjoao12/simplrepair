@@ -14,8 +14,8 @@ import com.squareup.moshi.JsonClass
 data class PhoneBrands (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "brand_id")
-    val id: Int = 0, // Default value added
+    val id: Int = 0,
     @Json(name = "brandValue")
-    @ColumnInfo(name = "brand_type")
+    @ColumnInfo(name = "brand_name")
     val brandValue: String
 )
