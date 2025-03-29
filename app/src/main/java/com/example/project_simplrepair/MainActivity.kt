@@ -49,6 +49,7 @@ import com.example.project_simplrepair.API.PhonesApiManager
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.PhoneBrands
+import com.example.project_simplrepair.Models.PhoneSpecs
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
 import com.example.project_simplrepair.Screen.InsertRepairScreen
@@ -74,6 +75,10 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val db = AppDatabase.getInstance(applicationContext)
                     val allPhoneBrands = PhonesApiManager(db)
+
+                    val phonesApiManager = PhonesApiManager(db)
+                    phonesApiManager.getPhoneSpecs("Apple", "iPhone 13 Pro Max", db)
+
                     App(
                         navController = navController,
                         modifier = Modifier

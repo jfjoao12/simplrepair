@@ -2,10 +2,10 @@ package com.example.project_simplrepair.API
 
 import com.example.project_simplrepair.Models.PhoneBrands
 import com.example.project_simplrepair.Models.PhoneModels
-import com.example.project_simplrepair.Models.PhoneSpecifications
+import com.example.project_simplrepair.Models.PhoneSpecs
+import com.example.project_simplrepair.Models.PhoneSpecsResponse
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Query
 import retrofit2.http.Header
 import retrofit2.http.Path
 
@@ -28,5 +28,5 @@ interface PhoneApiService {
         @Path("brand") brandName: String,
         @Path("model") modelName: String,
         @Header("X-RapidAPI-Key") apiKey: String
-    ): Call<List<PhoneSpecifications>>
+    ): Call<PhoneSpecsResponse>
 }
