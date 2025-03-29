@@ -29,9 +29,7 @@ class PhonesApiManager(database: AppDatabase) {
     }
     @OptIn(DelicateCoroutinesApi::class)
     private fun getPhonesBrands(database: AppDatabase){
-
         val service = Api.retrofitService.getAllPhoneBrands(api_key)
-
             service.enqueue(object : Callback<List<PhoneBrands>> {
             override fun onResponse(
                 call: Call<List<PhoneBrands>>,
