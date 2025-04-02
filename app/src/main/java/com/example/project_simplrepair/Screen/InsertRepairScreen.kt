@@ -45,6 +45,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
     var deviceId by remember { mutableIntStateOf(0) }
     var phoneModel by remember { mutableStateOf<PhoneModels?>(null) }
     var device by remember { mutableStateOf<Device?>(null) }
+    var newRepair by remember { mutableStateOf<Repair?>(null) }
     var technicianName by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
 
@@ -402,10 +403,12 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                 .align(Alignment.BottomEnd)
                 .padding(20.dp),
             onClick = {
+
                 if (modelName.isEmpty() || serial.isEmpty() || customerName.isEmpty()) {
                     Toast.makeText(context, "Please fill out the form!", Toast.LENGTH_SHORT).show()
                 } else {
                     coroutineScope.launch {
+
                         val repair = Repair(
                             id = id.toIntOrNull() ?: 0, // Ideally, use null for auto-generation
                             model = modelName,
@@ -419,7 +422,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                         )
                         db.repairDAO().insert(repair)
                     }
-                    navController.navigate(Destination.RepairDetails.route)
+                    navController.navigate(Destination.Main.route)
                 }
             },
             containerColor = MaterialTheme.colorScheme.primary,

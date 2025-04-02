@@ -83,14 +83,12 @@ class MainActivity : ComponentActivity() {
                     val db = AppDatabase.getInstance(applicationContext)
                     val allPhoneBrands = PhonesApiManager(db)
 
-                    val phonesApiManager = PhonesApiManager(db)
-                    phonesApiManager.getPhoneSpecs("Apple", "iPhone 13 Pro Max", db)
+                    allPhoneBrands.getPhoneSpecs("Apple", "iPhone 13 Pro Max", db)
 
                     App(
                         navController = navController,
                         modifier = Modifier
                             .padding(innerPadding),
-                        allPhoneBrands,
                         db = db
                     )
                 }
@@ -100,7 +98,7 @@ class MainActivity : ComponentActivity() {
 }
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
-fun App (navController: NavController, modifier: Modifier, phonesApiManager: PhonesApiManager, db: AppDatabase) {
+fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     var repair by remember {
         mutableStateOf<Repair?>(null)
     }

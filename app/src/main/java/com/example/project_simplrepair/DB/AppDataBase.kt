@@ -18,7 +18,7 @@ import com.example.project_simplrepair.Models.*
             PhoneModels::class,
             PhoneSpecs::class
         ],
-    version = 18,
+    version = 20,
     exportSchema = false
 )
 //@TypeConverters(Converters::class)

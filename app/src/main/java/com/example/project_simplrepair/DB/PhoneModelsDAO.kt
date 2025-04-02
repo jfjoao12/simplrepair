@@ -16,8 +16,8 @@ interface PhoneModelsDAO {
     @Query("SELECT * FROM phone_models_table WHERE brand_id = :id")
     fun getBrandById(id: Int): PhoneModels?
 
-    @Query("SELECT * FROM phone_models_table WHERE id = 124")
-    fun checkIfExists(): List<PhoneModels>
+    @Query("SELECT COUNT(*) FROM phone_models_table")
+    fun checkIfExists(): Int
 
     @Query("SELECT * FROM phone_models_table WHERE phone_model_name LIKE '%' || :phoneName || '%'")
     fun getModelByName(phoneName: String): Flow<List<PhoneModels>>
