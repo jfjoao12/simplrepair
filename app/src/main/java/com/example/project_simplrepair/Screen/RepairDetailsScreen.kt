@@ -106,9 +106,7 @@ fun RepairDetailsScreen(
     }
 }
 
-/**
- * A reusable Card layout for sections.
- */
+
 @Composable
 fun CardSection(title: String, content: @Composable () -> Unit) {
     ElevatedCard(

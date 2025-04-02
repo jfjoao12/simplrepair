@@ -138,7 +138,7 @@ fun InsertCustomerScreen(paddingValues: PaddingValues, db: AppDatabase, navContr
                         Log.i("Customer", "$customer")
                         db.customerDao().insert(customer)
                     }
-                    navController.navigate(Destination.RepairDetails.route)
+                    navController.navigate(Destination.NewRepair.route)
 
                 }
             },
