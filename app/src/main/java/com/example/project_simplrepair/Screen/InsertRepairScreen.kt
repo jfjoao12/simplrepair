@@ -1,16 +1,27 @@
 package com.example.project_simplrepair.Screen
 
+import android.provider.Settings.Global
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,20 +31,20 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
-import com.example.project_simplrepair.MainActivity
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.RepairType
+import kotlinx.coroutines.GlobalScope
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navController: NavController) {
     var id by remember { mutableStateOf("") }
     var model by remember { mutableStateOf("") }
+    var brand by remember { mutableStateOf("") }
     var serial by remember { mutableStateOf("") }
     var costumerName by remember { mutableStateOf("") }
     var technicianName by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
-    var customerId by remember { mutableStateOf(0) }
 
     var expanded by remember { mutableStateOf(false) }
     var selectedType by remember { mutableStateOf(RepairType.BATTERY) } // Default selection
@@ -41,12 +52,15 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    // Bottom Sheet State
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -58,17 +72,42 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 text = "New Repair"
             )
-            Column (
-                modifier = Modifier
-                    .padding(horizontal = 50.dp)
+            // Modal Bottom sheet
+            Column(
+                modifier = Modifier.padding(horizontal = 50.dp)
             ) {
+                Button(
+                    onClick = {
+                        showBottomSheet = true
+                    }
+                ) {
+                    Text("Select Brand")
+                }
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                        .clickable { showBottomSheet = true }, // Opens Bottom Sheet
+                    value = brand,
+                    onValueChange = {},
+                    label = { Text("Brand") },
+                    readOnly = true,
+                    enabled = false,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        disabledContainerColor = MaterialTheme.colorScheme.surface // Use the same as your enabled background
+                    )
+                )
+
                 OutlinedTextField(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp),
                     value = model,
                     onValueChange = { model = it },
-                    label = { Text("Phone Model") },
+                    label = { Text("Model") }
                 )
 
                 OutlinedTextField(
@@ -93,7 +132,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(5.dp)
-                            .menuAnchor() // Ensures proper anchoring for the dropdown
+                            .menuAnchor()
                     )
                     ExposedDropdownMenu(
                         expanded = expanded,
@@ -118,7 +157,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)
-                    )
+                )
 
                 OutlinedTextField(
                     value = technicianName,
@@ -127,7 +166,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)
-                    )
+                )
 
                 OutlinedTextField(
                     value = price,
@@ -137,18 +176,62 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(5.dp)
-                    )
+                )
+
                 Spacer(modifier = Modifier.height(16.dp))
             }
-
-
         }
 
+        // ✅ Modal Bottom Sheet (Only appears when `showBottomSheet` is true)
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showBottomSheet = false },
+                sheetState = sheetState,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Select a Brand",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    // Sample brands (Replace with real data)
+                    val brands by db.phoneBrandsDAO().getAllNames().collectAsState(initial = emptyList())
+
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        columns = GridCells.Fixed(3)
+
+                    ) {
+                        items(brands) { selectedBrand ->
+                            Text(
+                                text = selectedBrand,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        brand = selectedBrand // Updates selected brand
+                                        showBottomSheet = false // Closes modal
+                                    }
+                                    .padding(8.dp)
+                            )
+                        }
+                    }
+
+                }
+            }
+        }
+
+        // ✅ Floating Action Button to save repair
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(20.dp),
-
             onClick = {
                 // Error handling
                 if (model.isEmpty() || serial.isEmpty() || costumerName.isEmpty()) {
@@ -159,25 +242,21 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                             id = id.toIntOrNull() ?: 0,
                             model = model,
                             serial = serial,
-                            type = selectedType.name,  // Store enum name instead of text
+                            type = selectedType.name,
                             costumerName = costumerName,
                             technicianName = technicianName,
                             price = price.toDoubleOrNull() ?: 0.0,
                             repairType = selectedType,
-                            //customerId = customerId
                         )
                         db.repairDAO().insert(repair)
                     }
-                    navController.navigate(Destination.RepairDetails.route) // CHANGE TO TICKET VIEW
+                    navController.navigate(Destination.RepairDetails.route) // Navigate after saving
                 }
             },
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
+        ) {
             Icon(Icons.Filled.Add, contentDescription = "Save new repair")
         }
-
     }
 }
-
-

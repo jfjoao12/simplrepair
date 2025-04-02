@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.project_simplrepair.Models.PhoneBrands
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PhoneBrandsDAO {
@@ -13,6 +14,10 @@ interface PhoneBrandsDAO {
 
     @Query("SELECT * FROM phone_brands")
     fun getAll(): List<PhoneBrands>
+
+    @Query("SELECT brand_name FROM phone_brands")
+    fun getAllNames(): Flow<List<String>>
+
 
     @Query("SELECT brand_id FROM phone_brands")
     fun getAllIds(): List<Int>
