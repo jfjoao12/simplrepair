@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,20 +28,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.GeneralCard
 import com.example.project_simplrepair.Models.Repair
-import kotlinx.coroutines.launch
 
 @Composable
-fun RepairScreen(paddingValues: PaddingValues, navController: NavController, db: AppDatabase) {
+fun RepairScreen(paddingValues: PaddingValues, navController: NavHostController, db: AppDatabase) {
     val coroutineScope = rememberCoroutineScope()
 
-    // **State to store repair list**
+
     var repairList by remember { mutableStateOf(emptyList<Repair>()) }
 
-    // **Fetch data when the screen loads**
     LaunchedEffect(Unit) {
         repairList = db.repairDAO().getAllRepairs()  // Fetch all repairs from DB
     }
@@ -67,7 +65,6 @@ fun RepairScreen(paddingValues: PaddingValues, navController: NavController, db:
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // **Display repairs if available**
             if (repairList.isEmpty()) {
                 Text(
                     text = "No repairs found.",

@@ -23,7 +23,7 @@ import com.squareup.moshi.Json
 data class PhoneModels(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
 
-    @ColumnInfo(name = "brand_id") // ✅ Better naming for clarity
+    @ColumnInfo(name = "brand_id")
     val brandId: Int = 0,
 
     @Json(name = "modelValue")

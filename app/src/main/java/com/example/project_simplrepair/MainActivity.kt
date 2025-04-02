@@ -34,8 +34,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,8 +53,10 @@ import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.PhoneBrands
 import com.example.project_simplrepair.Models.PhoneSpecs
+import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
+import com.example.project_simplrepair.Screen.InsertCustomerScreen
 import com.example.project_simplrepair.Screen.InsertRepairScreen
 import com.example.project_simplrepair.Screen.InventoryScreen
 import com.example.project_simplrepair.Screen.RepairDetailsScreen
@@ -59,6 +64,8 @@ import com.example.project_simplrepair.Screen.RepairScreen
 import com.example.project_simplrepair.Screen.SearchScreen
 import com.example.project_simplrepair.Screen.SettingsScreen
 import com.example.project_simplrepair.ui.theme.ProjectSimplRepairTheme
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -83,19 +90,20 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         modifier = Modifier
                             .padding(innerPadding),
-                        allPhoneBrands
-                        )
+                        allPhoneBrands,
+                        db = db
+                    )
                 }
             }
         }
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
-fun App (navController: NavController, modifier: Modifier, phonesApiManager: PhonesApiManager) {
-//    var option by remember {
-//        mutableStateOf()
-//    }
+fun App (navController: NavController, modifier: Modifier, phonesApiManager: PhonesApiManager, db: AppDatabase) {
+    var repair by remember {
+        mutableStateOf<Repair?>(null)
+    }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scopeMenu = rememberCoroutineScope()
     ModalNavigationDrawer(
@@ -115,7 +123,19 @@ fun App (navController: NavController, modifier: Modifier, phonesApiManager: Pho
                     content = {
                         Text("Inventory")
                     }
-
+                )
+                TextButton(
+                    onClick = {
+                        scopeMenu.launch {
+                            drawerState.apply {
+                                close()
+                            }
+                        }
+                        navController.navigate(Destination.NewCustomer.route)
+                    },
+                    content = {
+                        Text("New Customer")
+                    }
                 )
                 // Add more items here for navigation if needed
             }
@@ -180,8 +200,16 @@ fun App (navController: NavController, modifier: Modifier, phonesApiManager: Pho
                 composable(Destination.Inventory.route) {
                     InventoryScreen(modifier, paddingValues)
                 }
-                composable(Destination.RepairDetails.route) {
-                    RepairDetailsScreen(modifier, paddingValues)
+                composable(Destination.RepairDetails.route) { navBackStackEntry ->
+                    var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")
+                    GlobalScope.launch {
+                        if (repairId != null) {
+                            repair = db.repairDAO().getRepairById(repairId.toInt())
+                        }
+                    }
+                    repair?.let { RepairDetailsScreen(
+                        modifier = Modifier.padding(paddingValues), repairItem = it, db = db, paddingValues = paddingValues
+                    ) }
                 }
                 composable(Destination.Appointments.route) {
                     AppointmentsScreen(modifier, paddingValues)
@@ -191,6 +219,9 @@ fun App (navController: NavController, modifier: Modifier, phonesApiManager: Pho
                 }
                 composable(Destination.NewRepair.route) {
                     InsertRepairScreen(paddingValues, AppDatabase.getInstance(context = LocalContext.current), navController)
+                }
+                composable(Destination.NewCustomer.route) {
+                    InsertCustomerScreen(paddingValues, AppDatabase.getInstance(context = LocalContext.current), navController)
                 }
             }
 

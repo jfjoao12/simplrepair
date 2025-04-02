@@ -8,6 +8,7 @@ sealed class Destination (val route: String) {
     object Inventory : Destination("Inventory")
     object Appointments : Destination("Appointments")
     object Search : Destination("Search")
-    object RepairDetails : Destination("Repair Details")
+    object RepairDetails : Destination("repair_details/{repair_id}")
     object NewRepair : Destination("Create new repair")
+    object NewCustomer: Destination("Add new customer")
 }

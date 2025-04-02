@@ -1,48 +1,50 @@
 package com.example.project_simplrepair.Screen
 
+import android.provider.ContactsContract.CommonDataKinds.Phone
 import android.provider.Settings.Global
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
+import com.example.project_simplrepair.Models.Device
+import com.example.project_simplrepair.Models.PhoneModels
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.RepairType
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
 fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navController: NavController) {
     var id by remember { mutableStateOf("") }
-    var model by remember { mutableStateOf("") }
+    var modelName by remember { mutableStateOf("") }
     var brand by remember { mutableStateOf("") }
     var serial by remember { mutableStateOf("") }
-    var costumerName by remember { mutableStateOf("") }
+    var customerName by remember { mutableStateOf("") }
+    var customerId by remember { mutableIntStateOf(0) }
+    var deviceId by remember { mutableIntStateOf(0) }
+    var phoneModel by remember { mutableStateOf<PhoneModels?>(null) }
+    var device by remember { mutableStateOf<Device?>(null) }
     var technicianName by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
 
@@ -52,141 +54,214 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
-    // Bottom Sheet State
-    val sheetState = rememberModalBottomSheetState()
-    var showBottomSheet by remember { mutableStateOf(false) }
+    // Brand Selection Bottom Sheet
+    val brandSheetState = rememberModalBottomSheetState()
+    var brandBottomModalSheet by remember { mutableStateOf(false) }
+
+    // Customer Selection Bottom Sheet
+    val customerSheetState = rememberModalBottomSheetState()
+    var customerBottomModalSheet by remember { mutableStateOf(false) }
+
+    // Device Selection Bottom Sheet
+    val deviceSheetState = rememberModalBottomSheetState()
+    var deviceBottomModalSheet by remember { mutableStateOf(false) }
+
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues)
+            .padding(paddingValues),
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues)
-        ) {
+        Column {
             Text(
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
                 text = "New Repair"
             )
-            // Modal Bottom sheet
-            Column(
-                modifier = Modifier.padding(horizontal = 50.dp)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
-                Button(
-                    onClick = {
-                        showBottomSheet = true
-                    }
-                ) {
-                    Text("Select Brand")
-                }
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                        .clickable { showBottomSheet = true }, // Opens Bottom Sheet
-                    value = brand,
-                    onValueChange = {},
-                    label = { Text("Brand") },
-                    readOnly = true,
-                    enabled = false,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                        disabledBorderColor = MaterialTheme.colorScheme.outline,
-                        disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        disabledContainerColor = MaterialTheme.colorScheme.surface // Use the same as your enabled background
-                    )
-                )
 
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
-                    value = model,
-                    onValueChange = { model = it },
-                    label = { Text("Model") }
-                )
-
-                OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
-                    value = serial,
-                    onValueChange = { serial = it },
-                    label = { Text("Serial Number") }
-                )
-
-                // Dropdown for Repair Type Selection
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = it }
-                ) {
-                    OutlinedTextField(
-                        value = selectedType.displayName,
-                        onValueChange = {},
-                        label = { Text("Repair Type") },
-                        readOnly = true,
+                // Create device section
+                item {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(5.dp)
-                            .menuAnchor()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                            .padding(16.dp)
                     ) {
-                        RepairType.entries.forEach { type ->
-                            DropdownMenuItem(
-                                text = { Text(type.displayName) },
-                                onClick = {
-                                    selectedType = type
-                                    expanded = false
-                                }
+                        Column(
+                            modifier = Modifier
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Device",
+                                modifier = Modifier.padding(10.dp)
+                            )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp)
+                                    .clickable { brandBottomModalSheet = true },
+                                value = brand,
+                                onValueChange = {},
+                                label = { Text("Brand") },
+                                readOnly = true,
+                                enabled = false,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surface
+                                )
+                            )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp),
+                                value = modelName,
+                                onValueChange = { modelName = it },
+                                label = { Text("Model") }
+                            )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp),
+                                value = serial,
+                                onValueChange = { serial = it },
+                                label = { Text("Serial Number / IMEI") }
+                            )
+                            
+                            Button(
+                                onClick = { 
+                                    deviceBottomModalSheet = true
+                                },
+                            ) {
+                                Text ("Search Device")
+                            }
+                        }
+                    }
+                }
+
+                // Customer selection section
+                item {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Customer",
+                                modifier = Modifier.padding(10.dp)
+                            )
+                            OutlinedTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp)
+                                    .clickable { customerBottomModalSheet = true },
+                                value = customerName,
+                                onValueChange = {},
+                                label = { Text("Customer") },
+                                readOnly = true,
+                                enabled = false,
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    disabledContainerColor = MaterialTheme.colorScheme.surface
+                                )
                             )
                         }
                     }
                 }
 
-                OutlinedTextField(
-                    value = costumerName,
-                    onValueChange = { costumerName = it },
-                    label = { Text("Customer Name") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                )
-
-                OutlinedTextField(
-                    value = technicianName,
-                    onValueChange = { technicianName = it },
-                    label = { Text("Technician Name") },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                )
-
-                OutlinedTextField(
-                    value = price,
-                    onValueChange = { price = it },
-                    label = { Text("Price") },
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
+                // Repair info section
+                item {
+                    Card(
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )  {
+                        Column(
+                            modifier = Modifier
+                                .padding(20.dp)
+                        ) {
+                            Text(
+                                text = "Repair Info",
+                                modifier = Modifier.padding(10.dp)
+                            )
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = it }
+                            ) {
+                                OutlinedTextField(
+                                    value = selectedType.displayName,
+                                    onValueChange = {},
+                                    label = { Text("Repair Type") },
+                                    readOnly = true,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(5.dp)
+                                        .menuAnchor()
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    RepairType.entries.forEach { type ->
+                                        DropdownMenuItem(
+                                            text = { Text(type.displayName) },
+                                            onClick = {
+                                                selectedType = type
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                            OutlinedTextField(
+                                value = technicianName,
+                                onValueChange = { technicianName = it },
+                                label = { Text("Technician Name") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp)
+                            )
+                            OutlinedTextField(
+                                value = price,
+                                onValueChange = { price = it },
+                                label = { Text("Price") },
+                                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                    }
+                }
             }
         }
 
-        // ✅ Modal Bottom Sheet (Only appears when `showBottomSheet` is true)
-        if (showBottomSheet) {
+
+        // Brand Bottom Modal Sheet
+        if (brandBottomModalSheet) {
             ModalBottomSheet(
-                onDismissRequest = { showBottomSheet = false },
-                sheetState = sheetState,
+                onDismissRequest = { brandBottomModalSheet = false },
+                sheetState = brandSheetState,
             ) {
                 Column(
                     modifier = Modifier
@@ -198,16 +273,12 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-
-                    // Sample brands (Replace with real data)
                     val brands by db.phoneBrandsDAO().getAllNames().collectAsState(initial = emptyList())
-
                     LazyVerticalGrid(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
                         columns = GridCells.Fixed(3)
-
                     ) {
                         items(brands) { selectedBrand ->
                             Text(
@@ -216,41 +287,139 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                     .fillMaxWidth()
                                     .clickable {
                                         brand = selectedBrand // Updates selected brand
-                                        showBottomSheet = false // Closes modal
+                                        brandBottomModalSheet = false // Closes modal
                                     }
                                     .padding(8.dp)
                             )
                         }
                     }
-
                 }
             }
         }
 
-        // ✅ Floating Action Button to save repair
+        // Device Bottom Modal Sheet
+        if (deviceBottomModalSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { deviceBottomModalSheet = false },
+                sheetState = deviceSheetState,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Select a Device",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    val devices by db.phoneModelsDAO().getModelByName(modelName).collectAsState(initial = emptyList())
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                            .align(Alignment.CenterHorizontally),
+                        columns = GridCells.Fixed(1)
+                    ) {
+                        items(devices) { selectedDeviceModel ->
+                            Text(
+                                text = selectedDeviceModel.phoneModelName,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        phoneModel = selectedDeviceModel
+                                        modelName = selectedDeviceModel.phoneModelName
+                                        device = Device(
+                                            deviceId = 0,
+                                            phoneModelId = selectedDeviceModel.id,
+                                            deviceSerial = serial,
+                                        )
+                                        GlobalScope.launch {
+                                            db.deviceDao().insert(device!!)
+                                        }
+                                        deviceBottomModalSheet = false
+                                    }
+                                    .padding(8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // Customer Selection Bottom Modal Sheet
+        if (customerBottomModalSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { customerBottomModalSheet = false },
+                sheetState = customerSheetState,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Select a Customer",
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    val customerList by db.customerDao().getAllNames().collectAsState(initial = emptyList())
+                    LazyVerticalGrid(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        columns = GridCells.Fixed(1)
+                    ) {
+                        items(customerList) { selectedCustomer ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        customerName =
+                                            selectedCustomer.customerName // Updates selected customer
+                                        customerId = selectedCustomer.customerId!!
+                                        customerBottomModalSheet = false // Closes modal
+                                    },
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = selectedCustomer.customerName,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                                Text(
+                                    text = selectedCustomer.customerPhone,
+                                    modifier = Modifier.padding(8.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(20.dp),
             onClick = {
-                // Error handling
-                if (model.isEmpty() || serial.isEmpty() || costumerName.isEmpty()) {
+                if (modelName.isEmpty() || serial.isEmpty() || customerName.isEmpty()) {
                     Toast.makeText(context, "Please fill out the form!", Toast.LENGTH_SHORT).show()
                 } else {
                     coroutineScope.launch {
                         val repair = Repair(
-                            id = id.toIntOrNull() ?: 0,
-                            model = model,
+                            id = id.toIntOrNull() ?: 0, // Ideally, use null for auto-generation
+                            model = modelName,
                             serial = serial,
-                            type = selectedType.name,
-                            costumerName = costumerName,
+                            costumerName = customerName,
                             technicianName = technicianName,
                             price = price.toDoubleOrNull() ?: 0.0,
                             repairType = selectedType,
+                            customerId = customerId, // Ensure this corresponds to an existing customer
+                            deviceId = device?.deviceId ?: 0    // Ensure this corresponds to an existing device
                         )
                         db.repairDAO().insert(repair)
                     }
-                    navController.navigate(Destination.RepairDetails.route) // Navigate after saving
+                    navController.navigate(Destination.RepairDetails.route)
                 }
             },
             containerColor = MaterialTheme.colorScheme.primary,

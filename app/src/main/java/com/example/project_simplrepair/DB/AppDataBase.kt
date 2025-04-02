@@ -18,7 +18,7 @@ import com.example.project_simplrepair.Models.*
             PhoneModels::class,
             PhoneSpecs::class
         ],
-    version = 14,
+    version = 18,
     exportSchema = false
 )
 //@TypeConverters(Converters::class)
@@ -27,6 +27,8 @@ abstract class AppDatabase: RoomDatabase() {
     abstract fun phoneBrandsDAO(): PhoneBrandsDAO
     abstract fun phoneModelsDAO(): PhoneModelsDAO
     abstract fun phoneSpecsDAO(): PhoneSpecsDAO
+    abstract fun customerDao(): CustomerDAO
+    abstract fun deviceDao(): DeviceDAO
 
     // COMPANION OBJECT
     companion object {

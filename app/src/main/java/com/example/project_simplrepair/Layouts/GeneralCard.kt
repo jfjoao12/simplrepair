@@ -17,18 +17,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.showRepairID
 import com.example.project_simplrepair.Operations.taxesCalculation
 
 @Composable
-fun GeneralCard(navController: NavController, repair: Repair) {
+fun GeneralCard(navController: NavHostController, repairItem: Repair) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(10.dp),
-        onClick = {}
+        onClick = {
+            navController.navigate("repair_details/${repairItem.id}")
+        }
     ) {
         Column(
             modifier = Modifier
@@ -46,8 +50,8 @@ fun GeneralCard(navController: NavController, repair: Repair) {
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Text(repair.costumerName, fontWeight = FontWeight.Bold)
-                    Text(showRepairID(repair.id), fontStyle = FontStyle.Italic)
+                    Text(repairItem.costumerName, fontWeight = FontWeight.Bold)
+                    Text(showRepairID(repairItem.id), fontStyle = FontStyle.Italic)
                 }
 
                 // Technician name and repair status
@@ -55,7 +59,7 @@ fun GeneralCard(navController: NavController, repair: Repair) {
                     modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.End
                 ) {
-                    Text(repair.technicianName)
+                    Text(repairItem.technicianName)
                     Text("In Repair", fontStyle = FontStyle.Italic)
                 }
             }
@@ -68,8 +72,8 @@ fun GeneralCard(navController: NavController, repair: Repair) {
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(repair.repairType.displayName, fontSize = 24.sp)
-                    Text(repair.model, fontSize = 24.sp)
+                    Text(repairItem.repairType.displayName, fontSize = 24.sp)
+                    Text(repairItem.model, fontSize = 24.sp)
                 }
             }
 
@@ -80,7 +84,7 @@ fun GeneralCard(navController: NavController, repair: Repair) {
                     .align(Alignment.CenterHorizontally),
                 horizontalArrangement = Arrangement.End
             ) {
-                Text("$${taxesCalculation(repair.price)}")
+                Text("$${taxesCalculation(repairItem.price)}")
             }
         }
     }
