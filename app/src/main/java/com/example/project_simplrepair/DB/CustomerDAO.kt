@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.project_simplrepair.Models.Customer
+import com.example.project_simplrepair.Models.PhoneModels
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,4 +18,7 @@ interface CustomerDAO {
 
     @Query("SELECT * FROM customers_table")
     fun getAllNames(): Flow<List<Customer>>
+
+    @Query("SELECT * FROM customers_table WHERE customer_name LIKE '%' || :customerName || '%'")
+    fun getCustomerByName(customerName: String): Flow<List<Customer>>
 }

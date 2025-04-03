@@ -16,9 +16,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.showRepairID
 import com.example.project_simplrepair.Operations.taxesCalculation
@@ -47,7 +45,7 @@ fun GeneralCard(navController: NavHostController, repairItem: Repair) {
             ) {
                 // Customer name and repair number
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(, 1f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(repairItem.costumerName, fontWeight = FontWeight.Bold)

@@ -18,10 +18,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import com.example.project_simplrepair.DB.AppDatabase
@@ -67,7 +70,14 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
     val deviceSheetState = rememberModalBottomSheetState()
     var deviceBottomModalSheet by remember { mutableStateOf(false) }
 
+    // DocStrings
+    /**
+     * Add documentation!
+     */
 
+    // Look into shared intent
+    // Charting
+    // Attach image of before
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -98,29 +108,55 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                     ) {
                         Column(
                             modifier = Modifier
-                                .padding(20.dp)
+                                .padding(start = 16.dp, end = 16.dp, top = 0.dp, bottom = 0.dp),
                         ) {
                             Text(
                                 text = "Device",
                                 modifier = Modifier.padding(10.dp)
                             )
-                            OutlinedTextField(
+//                            OutlinedTextField(
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .padding(5.dp)
+//                                    .clickable { brandBottomModalSheet = true },
+//                                value = brand,
+//                                onValueChange = {},
+//                                label = { Text("Brand") },
+//                                readOnly = true,
+//                                enabled = false,
+//                                colors = OutlinedTextFieldDefaults.colors(
+//                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+//                                    disabledBorderColor = MaterialTheme.colorScheme.outline,
+//                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+//                                    disabledContainerColor = MaterialTheme.colorScheme.surface
+//                                )
+//                            )
+                            Row (
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(5.dp)
-                                    .clickable { brandBottomModalSheet = true },
-                                value = brand,
-                                onValueChange = {},
-                                label = { Text("Brand") },
-                                readOnly = true,
-                                enabled = false,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    disabledContainerColor = MaterialTheme.colorScheme.surface
+                                    .padding(start = 10.dp, end = 10.dp, top = 0.dp, bottom = 0.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text (
+                                    text = if (brand == "") {
+                                        "Brand: select a device "
+                                    } else {
+                                        "Brand: $brand"
+                                    },
+                                    fontStyle = FontStyle.Italic,
+                                    fontSize = 14.sp
                                 )
-                            )
+                                Text(
+                                    text = "list all brands",
+                                    modifier = Modifier
+                                        .clickable {
+                                            brandBottomModalSheet = true
+                                        },
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontStyle = FontStyle.Italic,
+                                    fontSize = 12.sp
+                                )
+                            }
                             OutlinedTextField(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -129,6 +165,8 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                 onValueChange = { modelName = it },
                                 label = { Text("Model") }
                             )
+
+
                             OutlinedTextField(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -137,11 +175,15 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                 onValueChange = { serial = it },
                                 label = { Text("Serial Number / IMEI") }
                             )
+
                             
                             Button(
                                 onClick = { 
                                     deviceBottomModalSheet = true
                                 },
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .padding(16.dp)
                             ) {
                                 Text ("Search Device")
                             }
@@ -169,20 +211,21 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                             OutlinedTextField(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(5.dp)
-                                    .clickable { customerBottomModalSheet = true },
+                                    .padding(5.dp),
                                 value = customerName,
-                                onValueChange = {},
-                                label = { Text("Customer") },
-                                readOnly = true,
-                                enabled = false,
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
-                                    disabledBorderColor = MaterialTheme.colorScheme.outline,
-                                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    disabledContainerColor = MaterialTheme.colorScheme.surface
-                                )
+                                onValueChange = { customerName = it },
+                                label = { Text("Name") }
                             )
+                            Button(
+                                onClick = {
+                                    customerBottomModalSheet = true
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.End)
+                                    .padding(16.dp)
+                            ) {
+                                Text ("Search Customer")
+                            }
                         }
                     }
                 }
@@ -328,6 +371,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
+
                                         phoneModel = selectedDeviceModel
                                         modelName = selectedDeviceModel.phoneModelName
                                         device = Device(
@@ -336,7 +380,11 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                             deviceSerial = serial,
                                         )
                                         GlobalScope.launch {
-                                            db.deviceDao().insert(device!!)
+                                            db
+                                                .deviceDao()
+                                                .insert(device!!)
+
+                                            brand = db.phoneModelsDAO().getBrandNameById(selectedDeviceModel.brandId)
                                         }
                                         deviceBottomModalSheet = false
                                     }
@@ -364,7 +412,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    val customerList by db.customerDao().getAllNames().collectAsState(initial = emptyList())
+                    val customerList by db.customerDao().getCustomerByName(customerName).collectAsState(initial = emptyList())
                     LazyVerticalGrid(
                         modifier = Modifier
                             .fillMaxWidth()

@@ -18,7 +18,6 @@ interface PhoneBrandsDAO {
     @Query("SELECT brand_name FROM phone_brands")
     fun getAllNames(): Flow<List<String>>
 
-
     @Query("SELECT brand_id FROM phone_brands")
     fun getAllIds(): List<Int>
 

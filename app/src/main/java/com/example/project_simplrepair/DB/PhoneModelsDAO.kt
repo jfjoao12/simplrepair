@@ -16,6 +16,13 @@ interface PhoneModelsDAO {
     @Query("SELECT * FROM phone_models_table WHERE brand_id = :id")
     fun getBrandById(id: Int): PhoneModels?
 
+    @Query("""SELECT phone_brands.brand_name 
+            FROM phone_brands
+            INNER JOIN phone_models_table
+            ON phone_brands.brand_id = phone_models_table.brand_id
+            WHERE phone_brands.brand_id = :id""")
+    fun getBrandNameById(id: Int): String
+
     @Query("SELECT COUNT(*) FROM phone_models_table")
     fun checkIfExists(): Int
 
