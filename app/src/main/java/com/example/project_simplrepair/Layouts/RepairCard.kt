@@ -45,7 +45,7 @@ fun GeneralCard(navController: NavHostController, repairItem: Repair) {
             ) {
                 // Customer name and repair number
                 Column(
-                    modifier = Modifier.weight(, 1f),
+                    modifier = Modifier.weight(1f),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Text(repairItem.costumerName, fontWeight = FontWeight.Bold)
