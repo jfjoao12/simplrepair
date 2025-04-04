@@ -1,9 +1,13 @@
 package com.example.project_simplrepair
 
+import RepairDetailsScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +36,7 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,7 +45,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -60,7 +69,7 @@ import com.example.project_simplrepair.Screen.AppointmentsScreen
 import com.example.project_simplrepair.Screen.InsertCustomerScreen
 import com.example.project_simplrepair.Screen.InsertRepairScreen
 import com.example.project_simplrepair.Screen.InventoryScreen
-import com.example.project_simplrepair.Screen.RepairDetailsScreen
+
 import com.example.project_simplrepair.Screen.RepairScreen
 import com.example.project_simplrepair.Screen.SearchScreen
 import com.example.project_simplrepair.Screen.SettingsScreen
@@ -96,7 +105,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
+@OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class,
+    ExperimentalSharedTransitionApi::class
+)
+
+
 @Composable
 fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     var repair by remember {
@@ -104,6 +117,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scopeMenu = rememberCoroutineScope()
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -122,6 +136,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         Text("Inventory")
                     }
                 )
+
                 TextButton(
                     onClick = {
                         scopeMenu.launch {
@@ -158,7 +173,22 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                             )
                         }
                     },
-                    title = { Text("Simpl Repair") },
+                    title = {
+                        Text(
+                            text = "Simpl Repair",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontStyle = FontStyle.Italic,
+                            fontWeight = FontWeight.Bold
+                        ) },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary, // Your custom background color here
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                        scrolledContainerColor = MaterialTheme.colorScheme.onPrimary
+
+
+                    ),
                     actions = {
                         IconButton(
                             onClick = {
@@ -170,7 +200,15 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 contentDescription = "Settings"
                             )
                         }
-                    }
+                    },
+                    modifier = Modifier
+                        .shadow(
+                            elevation = 4.dp, // Adjust the shadow elevation as needed
+                            shape = MaterialTheme.shapes.medium, // or choose another shape if you prefer
+                            clip = false // set to true if you want to clip the content to the shape
+                        )
+                        .background(MaterialTheme.colorScheme.onPrimary)
+
                 )
 
             },
@@ -185,41 +223,67 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                     .padding(paddingValues)
                     .fillMaxWidth()
             )
-            NavHost(
-                navController = navController as NavHostController,
-                startDestination = Destination.Main.route,
-            ) {
-                composable(Destination.Main.route) {
-                    RepairScreen(paddingValues, navController, AppDatabase.getInstance(context = LocalContext.current))
-                }
-                composable(Destination.Settings.route) {
-                    SettingsScreen(modifier, paddingValues)
-                }
-                composable(Destination.Inventory.route) {
-                    InventoryScreen(modifier, paddingValues)
-                }
-                composable(Destination.RepairDetails.route) { navBackStackEntry ->
-                    var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")
-                    GlobalScope.launch {
-                        if (repairId != null) {
-                            repair = db.repairDAO().getRepairById(repairId.toInt())
+            SharedTransitionLayout {
+                NavHost(
+                    navController = navController as NavHostController,
+                    startDestination = Destination.Main.route,
+                ) {
+                    composable(Destination.Main.route) {
+                        RepairScreen(
+                            paddingValues = paddingValues,
+                            navController = navController,
+                            db = db,
+                            sharedTransitionScope = this@SharedTransitionLayout,
+                            animatedContentScope = this,
+                            onItemClick = { repairId -> navController.navigate("repair_details/$repairId") }
+                        )
+                    }
+                    composable(Destination.Settings.route) {
+                        SettingsScreen(modifier, paddingValues)
+                    }
+                    composable(Destination.Inventory.route) {
+                        InventoryScreen(modifier, paddingValues)
+                    }
+                    composable(Destination.RepairDetails.route) { navBackStackEntry ->
+                        var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")
+                        GlobalScope.launch {
+                            if (repairId != null) {
+                                repair = db.repairDAO().getRepairById(repairId.toInt())
+                            }
+                        }
+                        repair?.let {
+                            RepairDetailsScreen(
+                                modifier = Modifier.padding(paddingValues),
+                                repairItem = it,
+                                db = db,
+                                paddingValues = paddingValues,
+                                sharedTransitionScope = this@SharedTransitionLayout,
+                                animatedContentScope = this,
+                                onItemClick = {
+                                }
+                            )
                         }
                     }
-                    repair?.let { RepairDetailsScreen(
-                        modifier = Modifier.padding(paddingValues), repairItem = it, db = db, paddingValues = paddingValues
-                    ) }
-                }
-                composable(Destination.Appointments.route) {
-                    AppointmentsScreen(modifier, paddingValues)
-                }
-                composable(Destination.Search.route){
-                    SearchScreen(modifier, paddingValues)
-                }
-                composable(Destination.NewRepair.route) {
-                    InsertRepairScreen(paddingValues, AppDatabase.getInstance(context = LocalContext.current), navController)
-                }
-                composable(Destination.NewCustomer.route) {
-                    InsertCustomerScreen(paddingValues, AppDatabase.getInstance(context = LocalContext.current), navController)
+                    composable(Destination.Appointments.route) {
+                        AppointmentsScreen(modifier, paddingValues)
+                    }
+                    composable(Destination.Search.route) {
+                        SearchScreen(modifier, paddingValues)
+                    }
+                    composable(Destination.NewRepair.route) {
+                        InsertRepairScreen(
+                            paddingValues,
+                            AppDatabase.getInstance(context = LocalContext.current),
+                            navController
+                        )
+                    }
+                    composable(Destination.NewCustomer.route) {
+                        InsertCustomerScreen(
+                            paddingValues,
+                            AppDatabase.getInstance(context = LocalContext.current),
+                            navController
+                        )
+                    }
                 }
             }
 

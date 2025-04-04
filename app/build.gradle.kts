@@ -78,6 +78,31 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    implementation(libs.androidx.animation) // or latest
+    implementation(libs.androidx.navigation.compose) // match your setup
+    implementation(libs.material3) // for Material3
+
+
+    val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+
+    // Choose one of the following:
+    // Material Design 3
+    implementation(libs.androidx.compose.material3.material3)
+    // or Material Design 2
+
+    // such as input and measurement/layout
+    implementation(libs.ui)
+
+    // Android Studio Preview support
+    implementation(libs.ui.tooling.preview)
+    debugImplementation(libs.ui.tooling)
+
+    // UI Tests
+    androidTestImplementation(libs.ui.test.junit4)
+    debugImplementation(libs.ui.test.manifest)
+
 
 }
 

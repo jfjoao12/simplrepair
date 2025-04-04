@@ -1,10 +1,7 @@
 package com.example.project_simplrepair.Screen
 
-import android.provider.ContactsContract.CommonDataKinds.Phone
-import android.provider.Settings.Global
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,7 +17,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,13 +27,13 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
+import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.PhoneModels
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.RepairType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
@@ -45,12 +41,17 @@ import kotlinx.coroutines.flow.first
 fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navController: NavController) {
     var id by remember { mutableStateOf("") }
     var modelName by remember { mutableStateOf("") }
-    var brand by remember { mutableStateOf("") }
     var serial by remember { mutableStateOf("") }
     var customerName by remember { mutableStateOf("") }
     var customerId by remember { mutableIntStateOf(0) }
     var deviceId by remember { mutableIntStateOf(0) }
+
+    var brand by remember { mutableStateOf("") }
     var phoneModel by remember { mutableStateOf<PhoneModels?>(null) }
+    // When Device is selected, the outlinetextfield placeholder will change to the
+    // brand of the device
+    var modelTextFieldLabel by remember { mutableStateOf("Model") }
+
     var device by remember { mutableStateOf<Device?>(null) }
     var newRepair by remember { mutableStateOf<Repair?>(null) }
     var technicianName by remember { mutableStateOf("") }
@@ -89,14 +90,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
             .padding(paddingValues),
     ) {
         Column {
-            Text(
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp),
-                text = "New Repair"
-            )
+            ScreenTitle("New Repair")
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -136,39 +130,17 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
 //                                    disabledContainerColor = MaterialTheme.colorScheme.surface
 //                                )
 //                            )
-                            Row (
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 10.dp, end = 10.dp, top = 0.dp, bottom = 0.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text (
-                                    text = if (brand == "") {
-                                        "Brand: select a device "
-                                    } else {
-                                        "Brand: $brand"
-                                    },
-                                    fontStyle = FontStyle.Italic,
-                                    fontSize = 14.sp
-                                )
-                                Text(
-                                    text = "list all brands",
-                                    modifier = Modifier
-                                        .clickable {
-                                            brandBottomModalSheet = true
-                                        },
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontStyle = FontStyle.Italic,
-                                    fontSize = 12.sp
-                                )
-                            }
                             OutlinedTextField(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(5.dp),
                                 value = modelName,
                                 onValueChange = { modelName = it },
-                                label = { Text("Model") }
+                                label = {
+                                    Text(
+                                        modelTextFieldLabel
+                                    )
+                                }
                             )
 
 
@@ -184,16 +156,18 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                 onClick = {
                                     GlobalScope.launch {
                                         var modelSearch = db.phoneModelsDAO().getModelByName(modelName).first()
+                                        val searchedModelBrandId = modelSearch.first().brandId
+                                        val brandName = db.phoneModelsDAO().getBrandNameById(searchedModelBrandId)
+
                                         if (modelSearch.size == 1) {
-                                            val searchedModelBrandId = modelSearch.first().brandId
-                                            val brandName = db.phoneModelsDAO().getBrandNameById(searchedModelBrandId)
 
                                             brand = brandName
-
+                                            modelTextFieldLabel = brandName
                                             Log.i("onClick if", "${modelSearch.count()}")
 
                                         } else {
                                             deviceBottomModalSheet = true
+
                                             Log.i("onClick else", "${modelSearch.count()}")
 
                                         }
@@ -392,6 +366,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
 
                                         phoneModel = selectedDeviceModel
                                         modelName = selectedDeviceModel.phoneModelName
+
                                         device = Device(
                                             deviceId = 0,
                                             phoneModelId = selectedDeviceModel.id,
@@ -402,7 +377,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                                 .deviceDao()
                                                 .insert(device!!)
 
-                                            brand = db.phoneModelsDAO().getBrandNameById(selectedDeviceModel.brandId)
+                                            modelTextFieldLabel = db.phoneModelsDAO().getBrandNameById(selectedDeviceModel.brandId)
                                         }
                                         deviceBottomModalSheet = false
                                     }
