@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.project_simplrepair"
-        minSdk = 24
+        minSdk = 25
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -54,6 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

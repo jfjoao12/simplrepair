@@ -90,7 +90,13 @@ fun GeneralCard(
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.End
                     ) {
-                        Text(repairItem.technicianName)
+                        Text(
+                            text = repairItem.technicianName,
+                            modifier = Modifier.sharedElement(
+                                sharedTransitionScope.rememberSharedContentState(key = "techName-${repairItem.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            ),
+                        )
                         Text("In Repair", fontStyle = FontStyle.Italic)
                     }
                 }

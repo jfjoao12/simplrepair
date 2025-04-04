@@ -104,8 +104,8 @@ fun RepairScreen(
             onClick = {
                 navController.navigate(Destination.NewRepair.route)
             },
-            containerColor = MaterialTheme.colorScheme.primary, // Visible color
-            contentColor = MaterialTheme.colorScheme.onPrimary // Icon visible
+            containerColor = MaterialTheme.colorScheme.primaryContainer, // Visible color
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer // Icon visible
         ) {
             Icon(Icons.Filled.Add, contentDescription = "Add new repair")
         }

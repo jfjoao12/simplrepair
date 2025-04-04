@@ -181,11 +181,11 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                             fontWeight = FontWeight.Bold
                         ) },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primary, // Your custom background color here
-                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                        scrolledContainerColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = MaterialTheme.colorScheme.primaryContainer, // Your custom background color here
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        scrolledContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
 
 
                     ),
@@ -255,7 +255,6 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                             RepairDetailsScreen(
                                 modifier = Modifier.padding(paddingValues),
                                 repairItem = it,
-                                db = db,
                                 paddingValues = paddingValues,
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedContentScope = this,

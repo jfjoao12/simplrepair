@@ -1,7 +1,14 @@
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +16,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -21,26 +30,49 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.wear.compose.material.ExperimentalWearMaterialApi
+import androidx.wear.compose.material.FractionalThreshold
+import androidx.wear.compose.material.rememberSwipeableState
+import androidx.wear.compose.material.swipeable
 import com.example.compose.backgroundDark
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.showRepairID
+import kotlin.math.roundToInt
 
-@OptIn(ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalWearMaterialApi::class)
 @Composable
 fun RepairDetailsScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     repairItem: Repair,
-    db: AppDatabase,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     onItemClick: (Int) -> Unit
 ) {
+
+    val swipeableState = rememberSwipeableState(0)
+    val width = 96.dp
+    val squareSize = 150.dp
+    val sizePx = with(LocalDensity.current) { squareSize.toPx() }
+    val anchors = mapOf(0f to 0, sizePx to 1) // Maps anchor points (in px) to
+
+    // To swipe the content down
+    val offsetDp = with(LocalDensity.current) { swipeableState.offset.value.toDp() }
+
+    val baseHeight = 160.dp
+    val thresholdPx = sizePx / 2
+
+
     with(sharedTransitionScope) {
         Box(
             modifier = Modifier
@@ -56,7 +88,13 @@ fun RepairDetailsScreen(
                 // Overlapped Group: ScreenTitle and Customer & Technician section
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .fillMaxSize()
+                        .swipeable(
+                            state = swipeableState,
+                            anchors = anchors,
+                            thresholds = { _, _ -> FractionalThreshold(0.3f) },
+                            orientation = Orientation.Vertical,
+                        ),
                 ) {
                     // Customer & Technician Card, shifted down a bit so the title overlaps
                     Box(
@@ -67,40 +105,90 @@ fun RepairDetailsScreen(
                                 shape = MaterialTheme.shapes.large, // or choose another shape if you prefer
                                 clip = false // set to true if you want to clip the content to the shape
                             )
-                            .clip (RoundedCornerShape(
-                                bottomStart = 20.dp,
-                                bottomEnd = 20.dp)
+                            .clip(
+                                RoundedCornerShape(
+                                    bottomStart = 20.dp,
+                                    bottomEnd = 20.dp
+                                )
                             )
                             .background(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
                             )
+                            .height(baseHeight + offsetDp)
+                            .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
+
 
                     ) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth()
-                                    .padding(top = 72.dp, bottom = 32.dp, start = 20.dp, end = 20.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column{
-                                Text(
-                                    text = "Customer",
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = repairItem.costumerName,
-                                    modifier = Modifier.sharedElement(
-                                        sharedTransitionScope.rememberSharedContentState(key = "customerName-${repairItem.id}"),
+                        if (swipeableState.offset.value > thresholdPx) {
+                            SwipeDownList(
+                                modifier = Modifier
+                                    .sharedElement(
+                                        sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
                                         animatedVisibilityScope = animatedContentScope,
+                                    ),
+                                repairItem = repairItem,
+                                sharedTransitionScope = sharedTransitionScope,
+                                animatedContentScope = animatedContentScope
+                            )
+                        } else {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        top = 72.dp,
+                                        bottom = 32.dp,
+                                        start = 20.dp,
+                                        end = 20.dp
+                                    ),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column {
+
+                                    Text(
+                                        text = "customer",
+                                        fontWeight = FontWeight.Thin,
+                                        fontStyle = FontStyle.Italic,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 12.sp
                                     )
-                                )
-                            }
-                            Column(horizontalAlignment = Alignment.End) {
-                                Text(
-                                    text = "Technician",
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(text = repairItem.technicianName)
+                                    Text(
+                                        text = repairItem.costumerName,
+                                        modifier = Modifier
+                                            .sharedElement(
+                                            sharedTransitionScope.rememberSharedContentState(key = "customerName-${repairItem.id}"),
+                                            animatedVisibilityScope = animatedContentScope,
+                                        ),
+                                        fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                                    )
+
+                                }
+                                Column(
+                                    horizontalAlignment = Alignment.End,
+                                    modifier = Modifier
+                                        .padding(0.dp)
+                                ) {
+                                    Text(
+                                        modifier = Modifier
+                                            .padding(0.dp),
+                                        text = "technician",
+                                        fontWeight = FontWeight.Thin,
+                                        fontStyle = FontStyle.Italic,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 12.sp
+                                    )
+                                    Text(
+                                        text = repairItem.technicianName,
+                                        modifier = Modifier
+                                            .padding(0.dp)
+                                            .sharedElement(
+                                                sharedTransitionScope.rememberSharedContentState(key = "techName-${repairItem.id}"),
+                                                animatedVisibilityScope = animatedContentScope,
+                                            ),
+                                        fontWeight = FontWeight.Bold
+                                    )
+
+                                }
                             }
                         }
                     }
@@ -176,4 +264,41 @@ fun CardSection(title: String, content: @Composable () -> Unit) {
             content()
         }
     }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+fun SwipeDownList(
+    modifier: Modifier,
+    repairItem: Repair,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+) {
+    with(sharedTransitionScope) {
+        AnimatedVisibility(
+            visible = true, // You can make this conditional as needed
+            enter = fadeIn(animationSpec = tween(durationMillis = 300)) +
+                    expandVertically(animationSpec = tween(durationMillis = 300)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 300)) +
+                    shrinkVertically(animationSpec = tween(durationMillis = 300))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = repairItem.costumerName,
+                    modifier = Modifier
+                        .sharedElement(
+                            sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
+                            animatedVisibilityScope = animatedContentScope,
+                        )
+                        .align(Alignment.TopCenter)
+                )
+            }
+        }
+    }
+
 }

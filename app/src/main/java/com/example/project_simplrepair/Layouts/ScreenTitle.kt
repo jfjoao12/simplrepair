@@ -24,9 +24,9 @@ fun ScreenTitle(
     Box(
         modifier = Modifier
             .shadow(
-                elevation = 4.dp, // Adjust the shadow elevation as needed
-                shape = MaterialTheme.shapes.large, // or choose another shape if you prefer
-                clip = false // set to true if you want to clip the content to the shape
+                elevation = 4.dp,
+                shape = MaterialTheme.shapes.large,
+                clip = false
             )
             .clip(
                 RoundedCornerShape(
@@ -34,7 +34,7 @@ fun ScreenTitle(
                     bottomEnd = 20.dp
                 )
             )
-            .background(MaterialTheme.colorScheme.secondary)
+            .background(MaterialTheme.colorScheme.secondaryContainer)
             .fillMaxWidth()
             .padding(
                 vertical = 16.dp
@@ -46,7 +46,7 @@ fun ScreenTitle(
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.Center),
             text = title,
-            color = MaterialTheme.colorScheme.onSecondary
+            color = MaterialTheme.colorScheme.onSecondaryContainer
         )
     }
 }
