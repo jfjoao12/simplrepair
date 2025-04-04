@@ -1,5 +1,8 @@
 package com.example.project_simplrepair.Screen
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,8 +37,17 @@ import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.GeneralCard
 import com.example.project_simplrepair.Models.Repair
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RepairScreen(paddingValues: PaddingValues, navController: NavHostController, db: AppDatabase) {
+fun RepairScreen(
+    paddingValues: PaddingValues,
+    navController: NavHostController,
+    db: AppDatabase,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    onItemClick: (Int) -> Unit
+
+) {
     val coroutineScope = rememberCoroutineScope()
 
 
@@ -72,7 +84,12 @@ fun RepairScreen(paddingValues: PaddingValues, navController: NavHostController,
                 )
             } else {
                 repairList.forEach { repair ->
-                    GeneralCard(navController, repair)
+                    GeneralCard(
+                        navController, repair,
+                        animatedVisibilityScope = animatedContentScope,
+                        sharedTransitionScope = sharedTransitionScope,
+                        onBackPressed = onItemClick() -> Unit
+                    )
                 }
             }
         }

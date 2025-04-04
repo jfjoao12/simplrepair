@@ -48,6 +48,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.compose.ProjectSimplRepairTheme
 import com.example.project_simplrepair.API.PhonesApiManager
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
@@ -63,7 +64,6 @@ import com.example.project_simplrepair.Screen.RepairDetailsScreen
 import com.example.project_simplrepair.Screen.RepairScreen
 import com.example.project_simplrepair.Screen.SearchScreen
 import com.example.project_simplrepair.Screen.SettingsScreen
-import com.example.project_simplrepair.ui.theme.ProjectSimplRepairTheme
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

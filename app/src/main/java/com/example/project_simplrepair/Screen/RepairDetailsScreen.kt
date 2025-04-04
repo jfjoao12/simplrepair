@@ -1,5 +1,8 @@
 package com.example.project_simplrepair.Screen
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,12 +31,16 @@ import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Repair
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun RepairDetailsScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     repairItem: Repair,
-    db: AppDatabase
+    db: AppDatabase,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    onItemClick: (Int) -> Unit
 ) {
     Box(
         modifier = Modifier

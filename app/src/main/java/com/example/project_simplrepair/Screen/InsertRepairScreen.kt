@@ -2,7 +2,9 @@ package com.example.project_simplrepair.Screen
 
 import android.provider.ContactsContract.CommonDataKinds.Phone
 import android.provider.Settings.Global
+import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,6 +37,8 @@ import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.RepairType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.count
+import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
@@ -69,6 +73,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
     // Device Selection Bottom Sheet
     val deviceSheetState = rememberModalBottomSheetState()
     var deviceBottomModalSheet by remember { mutableStateOf(false) }
+
 
     // DocStrings
     /**
@@ -175,11 +180,24 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                 onValueChange = { serial = it },
                                 label = { Text("Serial Number / IMEI") }
                             )
-
-                            
                             Button(
-                                onClick = { 
-                                    deviceBottomModalSheet = true
+                                onClick = {
+                                    GlobalScope.launch {
+                                        var modelSearch = db.phoneModelsDAO().getModelByName(modelName).first()
+                                        if (modelSearch.size == 1) {
+                                            val searchedModelBrandId = modelSearch.first().brandId
+                                            val brandName = db.phoneModelsDAO().getBrandNameById(searchedModelBrandId)
+
+                                            brand = brandName
+
+                                            Log.i("onClick if", "${modelSearch.count()}")
+
+                                        } else {
+                                            deviceBottomModalSheet = true
+                                            Log.i("onClick else", "${modelSearch.count()}")
+
+                                        }
+                                    }
                                 },
                                 modifier = Modifier
                                     .align(Alignment.End)
@@ -237,7 +255,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(16.dp),
                     )  {
                         Column(
                             modifier = Modifier

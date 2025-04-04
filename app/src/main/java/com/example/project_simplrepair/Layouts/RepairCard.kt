@@ -1,5 +1,8 @@
 package com.example.project_simplrepair.Layouts
 
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,8 +24,15 @@ import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.showRepairID
 import com.example.project_simplrepair.Operations.taxesCalculation
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun GeneralCard(navController: NavHostController, repairItem: Repair) {
+fun GeneralCard(
+    navController: NavHostController,
+    repairItem: Repair,
+    animatedVisibilityScope: AnimatedVisibilityScope,
+    sharedTransitionScope: SharedTransitionScope,
+    onBackPressed: () -> Unit
+) {
     ElevatedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
         modifier = Modifier
