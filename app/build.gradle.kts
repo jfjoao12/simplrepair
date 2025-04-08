@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.androidx.room.common)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.constraintlayout.compose.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

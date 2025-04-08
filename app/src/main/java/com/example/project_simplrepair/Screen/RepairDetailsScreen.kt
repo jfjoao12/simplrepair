@@ -1,12 +1,17 @@
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.with
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +24,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +32,11 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,7 +60,9 @@ import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.showRepairID
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalWearMaterialApi::class)
+@OptIn(ExperimentalSharedTransitionApi::class, ExperimentalWearMaterialApi::class,
+    ExperimentalAnimationApi::class
+)
 @Composable
 fun RepairDetailsScreen(
     modifier: Modifier = Modifier,
@@ -71,6 +84,10 @@ fun RepairDetailsScreen(
 
     val baseHeight = 160.dp
     val thresholdPx = sizePx / 2
+
+    var showDetails by remember {
+        mutableStateOf(false)
+    }
 
 
     with(sharedTransitionScope) {
@@ -114,79 +131,117 @@ fun RepairDetailsScreen(
                             .background(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
                             )
-                            .height(baseHeight + offsetDp)
+                            .height(if (showDetails) Modifier.wrapContentHeight() else baseHeight + offsetDp)
                             .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
 
 
                     ) {
-                        if (swipeableState.offset.value > thresholdPx) {
-                            SwipeDownList(
-                                modifier = Modifier
-                                    .sharedElement(
-                                        sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
-                                        animatedVisibilityScope = animatedContentScope,
-                                    ),
-                                repairItem = repairItem,
-                                sharedTransitionScope = sharedTransitionScope,
-                                animatedContentScope = animatedContentScope
-                            )
-                        } else {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(
-                                        top = 72.dp,
-                                        bottom = 32.dp,
-                                        start = 20.dp,
-                                        end = 20.dp
-                                    ),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
+//                        if (swipeableState.offset.value > thresholdPx) {
+//                            SwipeDownList(
+//                                modifier = Modifier
+//                                    .sharedElement(
+//                                        sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
+//                                        animatedVisibilityScope = animatedContentScope,
+//                                    ),
+//                                repairItem = repairItem,
+//                                sharedTransitionScope = sharedTransitionScope,
+//                                animatedContentScope = animatedContentScope
+//                            )
+//                        } else
 
-                                    Text(
-                                        text = "customer",
-                                        fontWeight = FontWeight.Thin,
-                                        fontStyle = FontStyle.Italic,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 12.sp
-                                    )
-                                    Text(
-                                        text = repairItem.costumerName,
-                                        modifier = Modifier
-                                            .sharedElement(
-                                            sharedTransitionScope.rememberSharedContentState(key = "customerName-${repairItem.id}"),
-                                            animatedVisibilityScope = animatedContentScope,
-                                        ),
-                                        fontWeight = MaterialTheme.typography.titleMedium.fontWeight
-                                    )
 
-                                }
-                                Column(
-                                    horizontalAlignment = Alignment.End,
-                                    modifier = Modifier
-                                        .padding(0.dp)
-                                ) {
-                                    Text(
+
+                        LaunchedEffect(swipeableState.offset.value) {
+                            showDetails = swipeableState.offset.value > thresholdPx
+                        }
+                        SharedTransitionLayout{
+                            AnimatedContent(
+                              targetState = showDetails,
+
+                                label = "pica"
+                            ) { targetState ->
+                                if (!targetState ){
+                                    Row(
                                         modifier = Modifier
-                                            .padding(0.dp),
-                                        text = "technician",
-                                        fontWeight = FontWeight.Thin,
-                                        fontStyle = FontStyle.Italic,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 12.sp
-                                    )
-                                    Text(
-                                        text = repairItem.technicianName,
-                                        modifier = Modifier
-                                            .padding(0.dp)
-                                            .sharedElement(
-                                                sharedTransitionScope.rememberSharedContentState(key = "techName-${repairItem.id}"),
-                                                animatedVisibilityScope = animatedContentScope,
+                                            .fillMaxWidth()
+                                            .padding(
+                                                top = 72.dp,
+                                                bottom = 32.dp,
+                                                start = 20.dp,
+                                                end = 20.dp
                                             ),
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+
+                                            Text(
+                                                text = "customer",
+                                                fontWeight = FontWeight.Thin,
+                                                fontStyle = FontStyle.Italic,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontSize = 12.sp
+                                            )
+                                            Text(
+                                                text = repairItem.costumerName,
+                                                modifier = Modifier
+                                                    .sharedElement(
+                                                        sharedTransitionScope.rememberSharedContentState(
+                                                            key = "customerName-${repairItem.id}"
+                                                        ),
+                                                        animatedVisibilityScope = animatedContentScope,
+                                                    ),
+                                                fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                                            )
+
+                                        }
+                                        Column(
+                                            horizontalAlignment = Alignment.End,
+                                            modifier = Modifier
+                                                .padding(0.dp)
+                                        ) {
+                                            Text(
+                                                modifier = Modifier
+                                                    .padding(0.dp),
+                                                text = "technician",
+                                                fontWeight = FontWeight.Thin,
+                                                fontStyle = FontStyle.Italic,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                fontSize = 12.sp
+                                            )
+                                            Text(
+                                                text = repairItem.technicianName,
+                                                modifier = Modifier
+                                                    .padding(0.dp)
+                                                    .sharedElement(
+                                                        sharedTransitionScope.rememberSharedContentState(
+                                                            key = "techName-${repairItem.id}"
+                                                        ),
+                                                        animatedVisibilityScope = animatedContentScope,
+                                                    ),
+                                                fontWeight = FontWeight.Bold
+                                            )
+
+                                        }
+                                    }
+                                } else {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                            .padding(16.dp)
+                                            .height(1000.dp)
+                                    ) {
+                                        Text(
+                                            text = repairItem.costumerName,
+                                            modifier = Modifier
+                                                .sharedElement(
+                                                    sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
+                                                    animatedVisibilityScope = animatedContentScope,
+                                                )
+                                                .align(Alignment.TopCenter)
+                                        )
+                                    }
 
                                 }
                             }
