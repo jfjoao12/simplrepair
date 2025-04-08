@@ -130,9 +130,9 @@ fun RepairDetailsScreen(
                             )
                             .background(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
-                            )
-                            .height(if (showDetails) Modifier.wrapContentHeight() else baseHeight + offsetDp)
-                            .offset { IntOffset(0, swipeableState.offset.value.roundToInt()) }
+                            ),
+                            //if (showDetails)
+                            //.height(if (showDetails) Modifier.wrapContentHeight() else baseHeight + offsetDp)
 
 
                     ) {
