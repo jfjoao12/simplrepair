@@ -5,26 +5,11 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
-@Entity (
-    tableName = "customers_table",
-    foreignKeys = [
-        ForeignKey (
-            entity = Device::class,
-            parentColumns = arrayOf("id"),
-            childColumns = arrayOf("device_id")
-        ),
-//        ForeignKey (
-//            entity = Repair::class,
-//            parentColumns = arrayOf("repair_id"),
-//            childColumns = arrayOf("repair_id")
-//        )
-    ]
-)
+@Entity(tableName = "customers_table",)
 data class Customer(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     val customerId: Int?,
-    @ColumnInfo(name = "device_id") val deviceId: Int? = null,
     @ColumnInfo(name = "customer_name") val customerName: String,
     @ColumnInfo(name = "customer_email") val customerEmail: String?,
     @ColumnInfo(name = "customer_city") val customerCity: String = "Winnipeg",

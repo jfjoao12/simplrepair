@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CustomerDAO {
     @Insert (onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(customer: Customer)
+    fun insert(customer: Customer)
 
     @Query ("Select customer_name from customers_table WHERE id = :id")
     fun getNameById(id: Int): String

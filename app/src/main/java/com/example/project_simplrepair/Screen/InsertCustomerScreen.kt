@@ -123,7 +123,6 @@ fun InsertCustomerScreen(paddingValues: PaddingValues, db: AppDatabase, navContr
                     GlobalScope.launch {
                         val customer = Customer(
                             customerId = null,
-                            deviceId = null,
                             customerName = customerName,
                             customerEmail = customerEmail,
                             customerCity = customerCity,

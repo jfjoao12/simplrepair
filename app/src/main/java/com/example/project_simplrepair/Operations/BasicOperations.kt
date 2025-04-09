@@ -14,7 +14,7 @@ fun taxesCalculation(price: Double): Double {
 
 }
 
-fun showRepairID(id: Int): String {
+fun showRepairID(id: Int?): String {
     val idPrefix = "RP00000"
     val idCount = id.toString().count()
 

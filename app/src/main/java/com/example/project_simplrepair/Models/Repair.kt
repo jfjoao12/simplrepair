@@ -1,6 +1,9 @@
 package com.example.project_simplrepair.Models
 
-import androidx.room.*
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.PrimaryKey
 import com.example.project_simplrepair.Operations.RepairType
 
 @Entity // (tableName = "repairs_table")
@@ -18,22 +21,27 @@ import com.example.project_simplrepair.Operations.RepairType
             entity = Device::class,
             parentColumns = arrayOf("id"),
             childColumns = arrayOf("device_id"),
-            onDelete = ForeignKey.CASCADE,
-            onUpdate = ForeignKey.SET_NULL,
+            onUpdate = ForeignKey.CASCADE,
+            onDelete = ForeignKey.NO_ACTION,
+        ),
+        ForeignKey(
+            entity = Technician::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("technician_id"),
+            onUpdate = ForeignKey.CASCADE,
+            onDelete = ForeignKey.NO_ACTION,
         )
     ]
 )
 data class Repair(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "repair_id") val id: Int,
+    @ColumnInfo(name = "id") val id: Int?,
     @ColumnInfo(name = "customer_id") val customerId: Int? = null,
-    @ColumnInfo(name = "device_id") val deviceId: Int,
-    @ColumnInfo(name = "model") val model: String,
-    @ColumnInfo(name = "serial") val serial: String,
-    @ColumnInfo(name = "customer_name") val costumerName: String,
-    @ColumnInfo(name = "technician_name") val technicianName: String,
+    @ColumnInfo(name = "device_id") val deviceId: Int? = null,
+    @ColumnInfo(name = "technician_id") val technicianId: Int? = null,
     @ColumnInfo(name = "price") val price: Double,
-    @ColumnInfo(name = "repair_type") val repairType: RepairType
+    @ColumnInfo(name = "notes") val notes: String,
+    @ColumnInfo(name = "repair_type") val repairType: RepairType,
 )
 
 

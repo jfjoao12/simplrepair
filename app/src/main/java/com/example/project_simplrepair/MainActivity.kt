@@ -9,17 +9,11 @@ import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
-import androidx.compose.material.icons.materialIcon
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -31,11 +25,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButtonDefaults.Icon
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -46,11 +37,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -61,9 +50,9 @@ import com.example.compose.ProjectSimplRepairTheme
 import com.example.project_simplrepair.API.PhonesApiManager
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
-import com.example.project_simplrepair.Models.PhoneBrands
-import com.example.project_simplrepair.Models.PhoneSpecs
+import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
 import com.example.project_simplrepair.Screen.InsertCustomerScreen
@@ -78,6 +67,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+    @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -94,6 +84,33 @@ class MainActivity : ComponentActivity() {
 
                     allPhoneBrands.getPhoneSpecs("Apple", "iPhone 13 Pro Max", db)
 
+                    GlobalScope.launch {
+                        db.technicianDao().insert(
+                            Technician(
+                                id = null,
+                                name = "Joao Magalhaes"
+                            )
+                        )
+                        db.customerDao().insert(
+                            Customer(
+                                customerId = null,
+                                customerName = "James Bond",
+                                customerEmail = "jbond007@rrc.ca",
+                                customerCity = "Winnipeg",
+                                customerCountry = "Canada",
+                                customerPostalCode = "R0H0H0",
+                                customerProv = "MB",
+                                customerAddress = "123 That Street",
+                                customerAddressTwo = "Unit 007",
+                                customerPhone = "2047000007",
+                                customerPhoneTwo = ""
+                            )
+                        )
+                    }
+
+
+
+
                     App(
                         navController = navController,
                         modifier = Modifier
@@ -106,10 +123,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class,
-    ExperimentalSharedTransitionApi::class
-)
-
-
+    ExperimentalSharedTransitionApi::class)
 @Composable
 fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     var repair by remember {
@@ -258,8 +272,9 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 paddingValues = paddingValues,
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedContentScope = this,
+                                appDatabase = db,
                                 onItemClick = {
-                                }
+                                },
                             )
                         }
                     }

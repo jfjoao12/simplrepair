@@ -1,5 +1,6 @@
 package com.example.project_simplrepair.Layouts
 
+import android.provider.Settings.Global
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -14,6 +15,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
@@ -24,18 +27,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import androidx.room.util.query
+import com.example.project_simplrepair.DB.AppDatabase
+import com.example.project_simplrepair.Models.Customer
+import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.showRepairID
 import com.example.project_simplrepair.Operations.taxesCalculation
-@OptIn(ExperimentalSharedTransitionApi::class)
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
+@OptIn(ExperimentalSharedTransitionApi::class, DelicateCoroutinesApi::class)
 @Composable
 fun GeneralCard(
     navController: NavHostController,
     repairItem: Repair,
+    database: AppDatabase,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
     onBackPressed: () -> Unit
 ) {
+
+    var customer = fetchCustomerDetails(database, repairItem.id)
+    var technician = fetchTechnicianDetails(database, repairItem.id)
 
     with(sharedTransitionScope) {
         ElevatedCard(
@@ -65,7 +81,7 @@ fun GeneralCard(
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = repairItem.costumerName,
+                            text = customer!!.customerName,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .sharedElement(
@@ -91,7 +107,7 @@ fun GeneralCard(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = repairItem.technicianName,
+                            text = technician!!.name,
                             modifier = Modifier.sharedElement(
                                 sharedTransitionScope.rememberSharedContentState(key = "techName-${repairItem.id}"),
                                 animatedVisibilityScope = animatedVisibilityScope,
@@ -117,7 +133,7 @@ fun GeneralCard(
                             modifier = Modifier
                         )
                         Text(
-                            text = repairItem.model, fontSize = 24.sp,
+                            text = "FIX THIS", fontSize = 24.sp,
                             modifier = Modifier
                                 .sharedElement(
                                     sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
@@ -142,5 +158,32 @@ fun GeneralCard(
             }
         }
     }
+}
 
+@OptIn(DelicateCoroutinesApi::class)
+fun fetchCustomerDetails(database: AppDatabase, repairId: Int?): Customer? {
+    var customer: Customer? = null
+
+    GlobalScope.launch{
+        customer = database.repairDAO().getCustomerByRepairId(repairId!!)
+    }
+    return customer
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun fetchTechnicianDetails(database: AppDatabase, repairId: Int?): Technician? {
+    var technician: Technician? = null
+    GlobalScope.launch {
+        technician = database.repairDAO().getTechByRepairId(repairId!!)
+    }
+    return technician
+}
+
+@OptIn(DelicateCoroutinesApi::class)
+fun fetchDeviceDetails(database: AppDatabase, repairId: Int?): Device? {
+    var device: Device? = null
+    GlobalScope.launch {
+        device = database.repairDAO().getDeviceByRepairId(repairId!!)
+    }
+    return device
 }

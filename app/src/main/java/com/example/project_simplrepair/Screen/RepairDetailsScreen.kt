@@ -56,8 +56,15 @@ import androidx.wear.compose.material.swipeable
 import com.example.compose.backgroundDark
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Layouts.ScreenTitle
+import com.example.project_simplrepair.Layouts.fetchCustomerDetails
+import com.example.project_simplrepair.Layouts.fetchDeviceDetails
+import com.example.project_simplrepair.Models.Customer
+import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.showRepairID
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalSharedTransitionApi::class, ExperimentalWearMaterialApi::class,
@@ -68,6 +75,7 @@ fun RepairDetailsScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     repairItem: Repair,
+    appDatabase: AppDatabase,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     onItemClick: (Int) -> Unit
@@ -88,6 +96,22 @@ fun RepairDetailsScreen(
     var showDetails by remember {
         mutableStateOf(false)
     }
+
+    var customer by remember {
+        mutableStateOf<Customer?>(null)
+    }
+
+    var device by remember {
+        mutableStateOf<Device?>(null)
+    }
+
+    var technician by remember {
+        mutableStateOf<Technician?>(null)
+    }
+
+    customer = fetchCustomerDetails(appDatabase, repairItem.id)
+
+    device = fetchDeviceDetails(appDatabase, repairItem.id)
 
 
     with(sharedTransitionScope) {
@@ -183,7 +207,7 @@ fun RepairDetailsScreen(
                                                 fontSize = 12.sp
                                             )
                                             Text(
-                                                text = repairItem.costumerName,
+                                                text = customer!!.customerName,
                                                 modifier = Modifier
                                                     .sharedElement(
                                                         sharedTransitionScope.rememberSharedContentState(
@@ -210,7 +234,7 @@ fun RepairDetailsScreen(
                                                 fontSize = 12.sp
                                             )
                                             Text(
-                                                text = repairItem.technicianName,
+                                                text = technician!!.name,
                                                 modifier = Modifier
                                                     .padding(0.dp)
                                                     .sharedElement(
@@ -233,7 +257,7 @@ fun RepairDetailsScreen(
                                             .height(1000.dp)
                                     ) {
                                         Text(
-                                            text = repairItem.costumerName,
+                                            text = customer!!.customerName,
                                             modifier = Modifier
                                                 .sharedElement(
                                                     sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
@@ -265,14 +289,14 @@ fun RepairDetailsScreen(
                 CardSection(title = "Device Details") {
                     Column {
                         Text(
-                            text = "Model: ${repairItem.model}",
+                            text = "Model: ${device!!.phoneModelId}",
                             modifier = Modifier
                                 .sharedElement(
                                     sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
                                     animatedVisibilityScope = animatedContentScope,
                                 )
                         )
-                        Text(text = "Serial: ${repairItem.serial}")
+                        Text(text = "Serial: ${device!!.deviceSerial}")
                     }
                 }
 
@@ -344,7 +368,7 @@ fun SwipeDownList(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = repairItem.costumerName,
+                    text = "FIX!",
                     modifier = Modifier
                         .sharedElement(
                             sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),

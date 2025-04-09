@@ -90,6 +90,7 @@ fun RepairScreen(
                             navController, repair,
                             animatedVisibilityScope = animatedContentScope,
                             sharedTransitionScope = sharedTransitionScope,
+                            database = db,
                             onBackPressed = {  }
                         )
 

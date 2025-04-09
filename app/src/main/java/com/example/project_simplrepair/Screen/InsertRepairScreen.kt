@@ -28,9 +28,12 @@ import kotlinx.coroutines.launch
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.ScreenTitle
+import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.PhoneModels
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.Technician
+import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.RepairType
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -74,6 +77,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
     // Device Selection Bottom Sheet
     val deviceSheetState = rememberModalBottomSheetState()
     var deviceBottomModalSheet by remember { mutableStateOf(false) }
+
 
 
     // DocStrings
@@ -221,7 +225,6 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                         }
                     }
                 }
-
                 // Repair info section
                 item {
                     Card(
@@ -252,6 +255,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                         .fillMaxWidth()
                                         .padding(5.dp)
                                         .menuAnchor()
+                                            //(MenuAnchorType.PrimaryEditable, true)
                                 )
                                 ExposedDropdownMenu(
                                     expanded = expanded,
@@ -268,14 +272,14 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                     }
                                 }
                             }
-                            OutlinedTextField(
-                                value = technicianName,
-                                onValueChange = { technicianName = it },
-                                label = { Text("Technician Name") },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(5.dp)
-                            )
+//                            OutlinedTextField(
+//                                value = technicianName,
+//                                onValueChange = { technicianName = it },
+//                                label = { Text("Technician Name") },
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .padding(5.dp)
+//                            )
                             OutlinedTextField(
                                 value = price,
                                 onValueChange = { price = it },
@@ -368,9 +372,10 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                         modelName = selectedDeviceModel.phoneModelName
 
                                         device = Device(
-                                            deviceId = 0,
+                                            deviceId = null,
                                             phoneModelId = selectedDeviceModel.id,
                                             deviceSerial = serial,
+                                            customerId = null,
                                         )
                                         GlobalScope.launch {
                                             db
@@ -395,6 +400,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                 onDismissRequest = { customerBottomModalSheet = false },
                 sheetState = customerSheetState,
             ) {
+
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -449,18 +455,30 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                     Toast.makeText(context, "Please fill out the form!", Toast.LENGTH_SHORT).show()
                 } else {
                     coroutineScope.launch {
-
-                        val repair = Repair(
-                            id = id.toIntOrNull() ?: 0, // Ideally, use null for auto-generation
-                            model = modelName,
-                            serial = serial,
-                            costumerName = customerName,
-                            technicianName = technicianName,
-                            price = price.toDoubleOrNull() ?: 0.0,
-                            repairType = selectedType,
-                            customerId = customerId, // Ensure this corresponds to an existing customer
-                            deviceId = device?.deviceId ?: 0    // Ensure this corresponds to an existing device
+                        device =  Device(
+                            deviceId = null,
+                            customerId = customerId, // Get from the customer we selected
+                            phoneModelId = phoneModel?.brandId ?: 0,
+                            deviceType = DeviceType.MOBILE,
+                            deviceSerial = serial,
                         )
+
+                         val repair = Repair(
+                             id = null,
+                             customerId = 1,
+                             deviceId = device?.deviceId,
+                             technicianId = 1,
+                             price = price.toDoubleOrNull() ?: 0.0,
+                             notes = "This is a test note",
+                             repairType = selectedType, // Ideally, use null for auto-generation
+//                            technicianName = technicianName,
+
+//                            repairType = selectedType,
+//
+//                            deviceId = TODO(),
+//                            notes = TODO(), // Ensure this corresponds to an existing customer
+//                            //deviceId = device?.deviceId ?: 0    // Ensure this corresponds to an existing device
+                         )
                         db.repairDAO().insert(repair)
                     }
                     navController.navigate(Destination.Main.route)
