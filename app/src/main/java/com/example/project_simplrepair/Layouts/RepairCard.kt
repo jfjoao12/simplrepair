@@ -1,10 +1,11 @@
 package com.example.project_simplrepair.Layouts
 
+import android.annotation.SuppressLint
+import android.provider.ContactsContract.CommonDataKinds.Phone
 import android.provider.Settings.Global
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,19 +16,18 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import androidx.room.util.query
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
@@ -39,19 +39,21 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalSharedTransitionApi::class, DelicateCoroutinesApi::class)
 @Composable
-fun GeneralCard(
+fun RepairCard(
     navController: NavHostController,
     repairItem: Repair,
-    database: AppDatabase,
+    customerItem: Customer,
+    deviceItem: Device,
+    db: AppDatabase,
     animatedVisibilityScope: AnimatedVisibilityScope,
     sharedTransitionScope: SharedTransitionScope,
     onBackPressed: () -> Unit
 ) {
 
-    var customer = fetchCustomerDetails(database, repairItem.id)
-    var technician = fetchTechnicianDetails(database, repairItem.id)
+
 
     with(sharedTransitionScope) {
         ElevatedCard(
@@ -81,7 +83,7 @@ fun GeneralCard(
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = customer!!.customerName,
+                            text = customerItem.customerName,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .sharedElement(
@@ -107,7 +109,7 @@ fun GeneralCard(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = technician!!.name,
+                            text = deviceItem.deviceType.toString(),
                             modifier = Modifier.sharedElement(
                                 sharedTransitionScope.rememberSharedContentState(key = "techName-${repairItem.id}"),
                                 animatedVisibilityScope = animatedVisibilityScope,

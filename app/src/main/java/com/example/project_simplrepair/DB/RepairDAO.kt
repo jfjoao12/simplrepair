@@ -25,19 +25,19 @@ interface RepairDAO {
             INNER JOIN repairs_table ON repairs_table.customer_id = customers_table.id
             WHERE repairs_table.id = :id
             """)
-    fun getCustomerByRepairId(id: Int): Customer
+    suspend fun getCustomerByRepairId(id: Int): Customer
 
     @Query ("""
                 SELECT * FROM technician_table 
                 INNER JOIN repairs_table ON repairs_table.technician_id = technician_table.id
                 WHERE repairs_table.id = :id
             """)
-    fun getTechByRepairId(id: Int): Technician
+    suspend fun getTechByRepairId(id: Int): Technician
 
     @Query ("""
                 SELECT * FROM device_table
                 INNER JOIN repairs_table ON repairs_table.technician_id = device_table.id
                 WHERE repairs_table.id = :id
             """)
-    fun getDeviceByRepairId(id: Int): Device
+    suspend fun getDeviceByRepairId(id: Int): Device
 }

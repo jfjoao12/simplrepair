@@ -51,6 +51,7 @@ import com.example.project_simplrepair.API.PhonesApiManager
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Customer
+import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Navigation.BottomNav
@@ -82,31 +83,31 @@ class MainActivity : ComponentActivity() {
                     val db = AppDatabase.getInstance(applicationContext)
                     val allPhoneBrands = PhonesApiManager(db)
 
-                    allPhoneBrands.getPhoneSpecs("Apple", "iPhone 13 Pro Max", db)
-
-                    GlobalScope.launch {
-                        db.technicianDao().insert(
-                            Technician(
-                                id = null,
-                                name = "Joao Magalhaes"
-                            )
-                        )
-                        db.customerDao().insert(
-                            Customer(
-                                customerId = null,
-                                customerName = "James Bond",
-                                customerEmail = "jbond007@rrc.ca",
-                                customerCity = "Winnipeg",
-                                customerCountry = "Canada",
-                                customerPostalCode = "R0H0H0",
-                                customerProv = "MB",
-                                customerAddress = "123 That Street",
-                                customerAddressTwo = "Unit 007",
-                                customerPhone = "2047000007",
-                                customerPhoneTwo = ""
-                            )
-                        )
-                    }
+//                    allPhoneBrands.getPhoneSpecs("Apple", "iPhone 13 Pro Max", db)
+//
+//                    GlobalScope.launch {
+//                        db.technicianDao().insert(
+//                            Technician(
+//                                id = null,
+//                                name = "Joao Magalhaes"
+//                            )
+//                        )
+//                        db.customerDao().insert(
+//                            Customer(
+//                                customerId = null,
+//                                customerName = "James Bond",
+//                                customerEmail = "jbond007@rrc.ca",
+//                                customerCity = "Winnipeg",
+//                                customerCountry = "Canada",
+//                                customerPostalCode = "R0H0H0",
+//                                customerProv = "MB",
+//                                customerAddress = "123 That Street",
+//                                customerAddressTwo = "Unit 007",
+//                                customerPhone = "2047000007",
+//                                customerPhoneTwo = ""
+//                            )
+//                        )
+//                    }
 
 
 

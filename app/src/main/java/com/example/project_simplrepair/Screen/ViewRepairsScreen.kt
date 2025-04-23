@@ -3,45 +3,33 @@ package com.example.project_simplrepair.Screen
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
-import com.example.project_simplrepair.Layouts.GeneralCard
+import com.example.project_simplrepair.Layouts.RepairCard
 import com.example.project_simplrepair.Layouts.ScreenTitle
+import com.example.project_simplrepair.Models.Customer
+import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.Technician
+
+// Simple data holder to keep Repair + its related entities together
+private data class EnrichedRepair(
+    val repair: Repair,
+    val customer: Customer,
+    val device: Device,
+    val technician: Technician
+)
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -52,48 +40,55 @@ fun RepairScreen(
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
     onItemClick: (Int) -> Unit
-
 ) {
-    val coroutineScope = rememberCoroutineScope()
-
-
-    var repairList by remember { mutableStateOf(emptyList<Repair>()) }
-
+    // 1) Load the raw list of repairs
+    var repairs by remember { mutableStateOf<List<Repair>>(emptyList()) }
     LaunchedEffect(Unit) {
-        repairList = db.repairDAO().getAllRepairs()  // Fetch all repairs from DB
+        repairs = db.repairDAO().getAllRepairs()
+    }
+
+    // 2) Produce a list of EnrichedRepair once `repairs` changes
+    val enrichedRepairs by produceState(initialValue = emptyList<EnrichedRepair>(), repairs) {
+        value = repairs.map { r ->
+            // these suspend calls run in this producer coroutine
+            val cust = db.repairDAO().getCustomerByRepairId(r.id!!)
+            val dev  = db.repairDAO().getDeviceByRepairId(r.id)
+            val tech = db.repairDAO().getTechByRepairId(r.id)
+            EnrichedRepair(r, cust, dev, tech)
+        }
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingValues),
-
+            .padding(paddingValues)
     ) {
         Column(
-            modifier =
-            Modifier.fillMaxSize()
-                    .verticalScroll(rememberScrollState()) ,
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ScreenTitle("Repairs")
+            Spacer(Modifier.height(16.dp))
 
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (repairList.isEmpty()) {
+            if (enrichedRepairs.isEmpty()) {
                 Text(
-                    text = "No repairs found.",
+                    "No repairs found.",
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             } else {
-                repairList.forEach { repair ->
-                        GeneralCard(
-                            navController, repair,
-                            animatedVisibilityScope = animatedContentScope,
-                            sharedTransitionScope = sharedTransitionScope,
-                            database = db,
-                            onBackPressed = {  }
-                        )
-
+                enrichedRepairs.forEach { (repair, customer, device, technician) ->
+                    RepairCard(
+                        navController = navController,
+                        animatedVisibilityScope = animatedContentScope,
+                        sharedTransitionScope = sharedTransitionScope,
+                        db = db,
+                        onBackPressed = { /* no-op */ },
+                        customerItem = customer,
+                        deviceItem = device,
+                        repairItem = repair
+                    )
                 }
             }
         }
@@ -102,18 +97,11 @@ fun RepairScreen(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(20.dp),
-            onClick = {
-                navController.navigate(Destination.NewRepair.route)
-            },
-            containerColor = MaterialTheme.colorScheme.primaryContainer, // Visible color
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer // Icon visible
+            onClick = { navController.navigate(Destination.NewRepair.route) },
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ) {
             Icon(Icons.Filled.Add, contentDescription = "Add new repair")
         }
     }
 }
-
-
-
-
-
