@@ -58,8 +58,6 @@ import androidx.wear.compose.material.swipeable
 import com.example.compose.backgroundDark
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Layouts.ScreenTitle
-import com.example.project_simplrepair.Layouts.fetchCustomerDetails
-import com.example.project_simplrepair.Layouts.fetchDeviceDetails
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
@@ -83,6 +81,7 @@ fun RepairDetailsScreen(
     // state holders for the related entities
     var customer by remember { mutableStateOf<Customer?>(null) }
     var device by remember { mutableStateOf<Device?>(null) }
+    var deviceModel by remember { mutableStateOf<String?>(null) }
     var technician by remember { mutableStateOf<Technician?>(null) }
 
     // Kick off a one-time load when repairItem.id changes
@@ -92,10 +91,12 @@ fun RepairDetailsScreen(
             val c = repairItem.id?.let { appDatabase.repairDAO().getCustomerByRepairId(it) }
             val d = repairItem.id?.let { appDatabase.repairDAO().getDeviceByRepairId(it) }
             val t = repairItem.id?.let { appDatabase.repairDAO().getTechByRepairId(it) }
+            val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
             // now post them back to Compose state
             customer = c
             device = d
             technician = t
+            deviceModel = dm
         }
     }
 
@@ -199,7 +200,7 @@ fun RepairDetailsScreen(
 
                 CardSection("Device Details") {
                     Text(
-                        "Model: ${device!!.deviceId}",
+                        "Model: $deviceModel",
                         modifier = Modifier.sharedElement(
                             sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
                             animatedVisibilityScope = animatedContentScope

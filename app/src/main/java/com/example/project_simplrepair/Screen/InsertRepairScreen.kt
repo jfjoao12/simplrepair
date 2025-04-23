@@ -36,8 +36,10 @@ import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.RepairType
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class)
 @Composable
@@ -102,7 +104,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
 
                 // Create device section
                 item {
-                    Card(
+                    ElevatedCard(
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                         modifier = Modifier
@@ -189,7 +191,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
 
                 // Customer selection section
                 item {
-                    Card(
+                    ElevatedCard(
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                         modifier = Modifier
@@ -227,7 +229,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                 }
                 // Repair info section
                 item {
-                    Card(
+                    ElevatedCard(
                         shape = RoundedCornerShape(16.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
                         modifier = Modifier
@@ -367,23 +369,8 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-
                                         phoneModel = selectedDeviceModel
                                         modelName = selectedDeviceModel.phoneModelName
-
-                                        device = Device(
-                                            deviceId = null,
-                                            phoneModelId = selectedDeviceModel.id,
-                                            deviceSerial = serial,
-                                            customerId = null,
-                                        )
-                                        GlobalScope.launch {
-                                            db
-                                                .deviceDao()
-                                                .insert(device!!)
-
-                                            modelTextFieldLabel = db.phoneModelsDAO().getBrandNameById(selectedDeviceModel.brandId)
-                                        }
                                         deviceBottomModalSheet = false
                                     }
                                     .padding(8.dp)
@@ -427,6 +414,7 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                                             selectedCustomer.customerName // Updates selected customer
                                         customerId = selectedCustomer.customerId!!
                                         customerBottomModalSheet = false // Closes modal
+                                        Log.i("customerId", "CustomerID is $customerId")
                                     },
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
@@ -444,48 +432,47 @@ fun InsertRepairScreen(paddingValues: PaddingValues, db: AppDatabase, navControl
                 }
             }
         }
-
         FloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(20.dp),
             onClick = {
+                if (serial.isBlank() || customerId == 0) {
+                    Toast.makeText(context, "Please fill in serial & select customer", Toast.LENGTH_SHORT).show()
+                    return@FloatingActionButton
+                }
 
-                if (modelName.isEmpty() || serial.isEmpty() || customerName.isEmpty()) {
-                    Toast.makeText(context, "Please fill out the form!", Toast.LENGTH_SHORT).show()
-                } else {
-                    coroutineScope.launch {
-                        device =  Device(
-                            deviceId = null,
-                            customerId = customerId, // Get from the customer we selected
-                            phoneModelId = phoneModel?.brandId ?: 0,
-                            deviceType = DeviceType.MOBILE,
-                            deviceSerial = serial,
+                coroutineScope.launch {
+                    // 1️⃣ Insert Device on IO, grab its new primary key:
+                    val newDeviceId = withContext(Dispatchers.IO) {
+                        val newDevice = Device(
+                            deviceId     = null,
+                            customerId   = customerId,
+                            phoneModelId = phoneModel?.id ?: 0,
+                            deviceType   = DeviceType.MOBILE,
+                            deviceSerial = serial
                         )
+                        db.deviceDao().insert(newDevice)
+                    }.toInt()
 
-                         val repair = Repair(
-                             id = null,
-                             customerId = 1,
-                             deviceId = device?.deviceId,
-                             technicianId = 1,
-                             price = price.toDoubleOrNull() ?: 0.0,
-                             notes = "This is a test note",
-                             repairType = selectedType, // Ideally, use null for auto-generation
-//                            technicianName = technicianName,
-
-//                            repairType = selectedType,
-//
-//                            deviceId = TODO(),
-//                            notes = TODO(), // Ensure this corresponds to an existing customer
-//                            //deviceId = device?.deviceId ?: 0    // Ensure this corresponds to an existing device
-                         )
-                        db.repairDAO().insert(repair)
+                    withContext(Dispatchers.IO) {
+                        val newRepair = Repair(
+                            id           = null,
+                            customerId   = customerId,
+                            deviceId     = newDeviceId,
+                            technicianId = 1,
+                            price        = price.toDoubleOrNull() ?: 0.0,
+                            notes        = "",
+                            repairType   = selectedType
+                        )
+                        db.repairDAO().insert(newRepair)
                     }
+
                     navController.navigate(Destination.Main.route)
                 }
             },
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor   = MaterialTheme.colorScheme.onPrimary
         ) {
             Icon(Icons.Filled.Add, contentDescription = "Save new repair")
         }

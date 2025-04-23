@@ -43,7 +43,10 @@ abstract class AppDatabase: RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "Simpl Database"
-                ).fallbackToDestructiveMigration().build()
+                )
+                    .createFromAsset("import_db.db")
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 return INSTANCE ?: throw IllegalStateException("Database not initialized")
 

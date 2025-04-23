@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,8 +37,10 @@ import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.showRepairID
 import com.example.project_simplrepair.Operations.taxesCalculation
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalSharedTransitionApi::class, DelicateCoroutinesApi::class)
@@ -52,15 +55,43 @@ fun RepairCard(
     sharedTransitionScope: SharedTransitionScope,
     onBackPressed: () -> Unit
 ) {
+    // 1) state for the model name and for the tech name
+    var modelName by remember { mutableStateOf<String?>(null) }
+    var technicianName by remember { mutableStateOf<String?>(null) }
 
+    // 2) once (when either ID changes), load both
+    LaunchedEffect(deviceItem.deviceId, repairItem.technicianId) {
+        withContext(Dispatchers.IO) {
+            // fetch the human-readable phone model
+            modelName = deviceItem.deviceId
+                ?.let { db.deviceDao().getModelNameByDeviceId(it) }
+                ?: "Unknown model"
 
+            // fetch the tech’s name
+            technicianName = repairItem.technicianId
+                ?.let { db.technicianDao().getTechNameById(it) }
+                ?: "Unknown technician"
+        }
+    }
+
+    // 3) spinner until both arrive
+    if (modelName == null || technicianName == null) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
 
     with(sharedTransitionScope) {
         ElevatedCard(
             elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(10.dp),
+                .fillMaxWidth(),
             onClick = {
                 navController.navigate("repair_details/${repairItem.id}")
             }
@@ -91,9 +122,8 @@ fun RepairCard(
                                     animatedVisibilityScope = animatedVisibilityScope
                                 )
                         )
-                        val repairIdName = Text(showRepairID(repairItem.id)).toString()
                         Text(
-                            text = repairIdName,
+                            text = showRepairID(repairItem.id),
                             modifier = Modifier
                                     .sharedElement(
                                     sharedTransitionScope.rememberSharedContentState("repairId-${repairItem.id}"),
@@ -109,7 +139,7 @@ fun RepairCard(
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = deviceItem.deviceType.toString(),
+                            text = technicianName!!,
                             modifier = Modifier.sharedElement(
                                 sharedTransitionScope.rememberSharedContentState(key = "techName-${repairItem.id}"),
                                 animatedVisibilityScope = animatedVisibilityScope,
@@ -134,14 +164,20 @@ fun RepairCard(
                             fontSize = 24.sp,
                             modifier = Modifier
                         )
-                        Text(
-                            text = "FIX THIS", fontSize = 24.sp,
-                            modifier = Modifier
-                                .sharedElement(
-                                    sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
-                                    animatedVisibilityScope = animatedVisibilityScope,
-                                )
-                        )
+                        if (modelName == null) {
+                            CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
+                        } else {
+                            Text(
+                                text = modelName!!,
+                                fontSize = 24.sp,
+                                modifier = Modifier
+                                    .align(Alignment.CenterHorizontally)
+                                    .sharedElement(
+                                        sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
+                                        animatedVisibilityScope = animatedVisibilityScope
+                                    )
+                            )
+                        }
                     }
                 }
 
@@ -162,30 +198,3 @@ fun RepairCard(
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
-fun fetchCustomerDetails(database: AppDatabase, repairId: Int?): Customer? {
-    var customer: Customer? = null
-
-    GlobalScope.launch{
-        customer = database.repairDAO().getCustomerByRepairId(repairId!!)
-    }
-    return customer
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-fun fetchTechnicianDetails(database: AppDatabase, repairId: Int?): Technician? {
-    var technician: Technician? = null
-    GlobalScope.launch {
-        technician = database.repairDAO().getTechByRepairId(repairId!!)
-    }
-    return technician
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-fun fetchDeviceDetails(database: AppDatabase, repairId: Int?): Device? {
-    var device: Device? = null
-    GlobalScope.launch {
-        device = database.repairDAO().getDeviceByRepairId(repairId!!)
-    }
-    return device
-}

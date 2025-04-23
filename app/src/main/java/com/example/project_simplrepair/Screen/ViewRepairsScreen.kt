@@ -43,6 +43,7 @@ fun RepairScreen(
 ) {
     // 1) Load the raw list of repairs
     var repairs by remember { mutableStateOf<List<Repair>>(emptyList()) }
+
     LaunchedEffect(Unit) {
         repairs = db.repairDAO().getAllRepairs()
     }
@@ -66,11 +67,12 @@ fun RepairScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = paddingValues.calculateBottomPadding()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ScreenTitle("Repairs")
-            Spacer(Modifier.height(16.dp))
+//            Spacer(Modifier.height(16.dp))
 
             if (enrichedRepairs.isEmpty()) {
                 Text(
