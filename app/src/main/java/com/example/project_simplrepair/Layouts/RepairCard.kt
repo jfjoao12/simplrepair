@@ -117,8 +117,8 @@ fun RepairCard(
                             text = customerItem.customerName,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
-                                .sharedElement(
-                                    sharedTransitionScope.rememberSharedContentState(key = "customerName-${repairItem.id}"),
+                                .sharedBounds(
+                                    sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
                                     animatedVisibilityScope = animatedVisibilityScope
                                 )
                         )
