@@ -12,6 +12,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.project_simplrepair.DB.AppDatabase
@@ -31,6 +34,18 @@ private data class EnrichedRepair(
     val technician: Technician
 )
 
+/**
+ * Displays a scrollable list of repairs.
+ * Each repair card is clickable to view details.
+ * Provides a FAB to add a new repair.
+ *
+ * @param paddingValues Window insets to apply as padding.
+ * @param navController NavController for navigation actions.
+ * @param db        AppDatabase instance to load repairs.
+ * @param sharedTransitionScope Scope for shared-element transitions.
+ * @param animatedContentScope   Scope for animated content transitions.
+ * @param onItemClick Callback invoked with the repair ID when a card is clicked.
+ */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun RepairScreen(
@@ -43,15 +58,13 @@ fun RepairScreen(
 ) {
     // 1) Load the raw list of repairs
     var repairs by remember { mutableStateOf<List<Repair>>(emptyList()) }
-
     LaunchedEffect(Unit) {
         repairs = db.repairDAO().getAllRepairs()
     }
 
-    // 2) Produce a list of EnrichedRepair once `repairs` changes
+    // 2) Enrich each repair with its related customer, device, and technician
     val enrichedRepairs by produceState(initialValue = emptyList<EnrichedRepair>(), repairs) {
         value = repairs.map { r ->
-            // these suspend calls run in this producer coroutine
             val cust = db.repairDAO().getCustomerByRepairId(r.id!!)
             val dev  = db.repairDAO().getDeviceByRepairId(r.id)
             val tech = db.repairDAO().getTechByRepairId(r.id)
@@ -63,21 +76,27 @@ fun RepairScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
+            .semantics { contentDescription = "Repairs screen" }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = paddingValues.calculateBottomPadding()),
+                .padding(bottom = paddingValues.calculateBottomPadding())
+                .semantics { contentDescription = "List of repairs" },
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            ScreenTitle("Repairs")
-//            Spacer(Modifier.height(16.dp))
+            // Mark the title as a heading for accessibility
+            Box(modifier = Modifier.semantics { heading() }) {
+                ScreenTitle("Repairs")
+            }
 
             if (enrichedRepairs.isEmpty()) {
                 Text(
                     "No repairs found.",
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .semantics { contentDescription = "No repairs found" }
                 )
             } else {
                 enrichedRepairs.forEach { (repair, customer, device, technician) ->

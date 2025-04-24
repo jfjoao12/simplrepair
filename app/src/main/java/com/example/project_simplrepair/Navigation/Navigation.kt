@@ -15,6 +15,14 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.project_simplrepair.Destination.Destination
 
+/**
+ * Bottom navigation bar for the app.
+ *
+ * Displays the main sections of the app (Repairs, Appointments, Search, etc.) and allows users
+ * to navigate between them using icons and labels.
+ *
+ * @param navController The navigation controller that handles the navigation actions.
+ */
 @Composable
 fun BottomNav(navController: NavController) {
     NavigationBar {
@@ -26,52 +34,58 @@ fun BottomNav(navController: NavController) {
             selected = currentDestination?.route == Destination.Main.route,
             onClick = {
                 navController.navigate(Destination.Main.route) {
-                    popUpTo(Destination.Main.route)
+                    popUpTo(Destination.Main.route) // Ensures that multiple copies of the Main screen don't accumulate
                     launchSingleTop = true
                 }
             },
             icon = {
                 Icon(
                     Icons.Rounded.Build,
-                    contentDescription = "Repair"
+                    contentDescription = "Repair" // Descriptive content description for accessibility
                 )
             },
             label = { Text(text = Destination.Main.route) }
         )
-        // Inventory navbar item
-//        NavigationBarItem(
-//            selected = currentDestination?.route == Destination.Inventory.route,
-//            onClick = {
-//                navController.navigate(Destination.Inventory.route) {
-//                    popUpTo(Destination.Main.route)
-//                    launchSingleTop = true
-//                }
-//            },
-//            icon = {
-//                Icon(
-//                    Icons.AutoMirrored.Rounded.List,
-//                    contentDescription = "Inventory"
-//                )
-//            },
-//            label = {Text(text = Destination.Inventory.route)}
-//        )
+
+        // Inventory navbar item (commented out, but here for future reference)
+        /*
         NavigationBarItem(
-            selected = currentDestination?.route == Destination.Appointments.route,
+            selected = currentDestination?.route == Destination.Inventory.route,
             onClick = {
-                navController.navigate(Destination.Appointments.route) {
+                navController.navigate(Destination.Inventory.route) {
                     popUpTo(Destination.Main.route)
                     launchSingleTop = true
                 }
             },
             icon = {
                 Icon(
+                    Icons.AutoMirrored.Rounded.List,
+                    contentDescription = "Inventory"
+                )
+            },
+            label = {Text(text = Destination.Inventory.route)}
+        )
+        */
+
+        // Appointments navbar item
+        NavigationBarItem(
+            selected = currentDestination?.route == Destination.Appointments.route,
+            onClick = {
+                navController.navigate(Destination.Appointments.route) {
+                    popUpTo(Destination.Main.route) // Avoiding stack overflow by popping up to Main route
+                    launchSingleTop = true
+                }
+            },
+            icon = {
+                Icon(
                     Icons.Rounded.DateRange,
-                    contentDescription = "Appointments"
+                    contentDescription = "Appointments" // Descriptive content description for accessibility
                 )
             },
             label = { Text(text = Destination.Appointments.route) }
         )
 
+        // Search navbar item
         NavigationBarItem(
             selected = currentDestination?.route == Destination.Search.route,
             onClick = {
@@ -83,10 +97,10 @@ fun BottomNav(navController: NavController) {
             icon = {
                 Icon(
                     Icons.Rounded.Search,
-                    contentDescription = "Search"
+                    contentDescription = "Search" // Descriptive content description for accessibility
                 )
             },
-            label = {Text(text = Destination.Search.route)}
+            label = { Text(text = Destination.Search.route) }
         )
     }
 }

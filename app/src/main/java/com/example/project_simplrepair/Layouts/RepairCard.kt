@@ -24,20 +24,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.project_simplrepair.DB.AppDatabase
-import com.example.project_simplrepair.Models.Customer
-import com.example.project_simplrepair.Models.Device
-import com.example.project_simplrepair.Models.Repair
-import com.example.project_simplrepair.Models.Technician
+import com.example.project_simplrepair.Models.*
 import com.example.project_simplrepair.Operations.showRepairID
 import com.example.project_simplrepair.Operations.taxesCalculation
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,6 +46,29 @@ import kotlinx.coroutines.withContext
 @SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalSharedTransitionApi::class, DelicateCoroutinesApi::class)
 @Composable
+        /**
+         * Displays a single repair card in the list.
+         *
+         * Fetches and shows:
+         *  1. Customer name
+         *  2. Repair ID
+         *  3. Technician name
+         *  4. Repair type
+         *  5. Device model name
+         *  6. Total price (with taxes)
+         *
+         * While loading the model name and technician name off the IO thread, a spinner
+         * is shown in place of the content.
+         *
+         * @param navController          Nav controller for navigating to details
+         * @param repairItem             The Repair record to display
+         * @param customerItem           The associated Customer record
+         * @param deviceItem             The associated Device record
+         * @param db                     AppDatabase used to look up human-readable names
+         * @param animatedVisibilityScope Scope for shared element animations
+         * @param sharedTransitionScope   Scope for shared element animations
+         * @param onBackPressed           Callback invoked on back press from details
+         */
 fun RepairCard(
     navController: NavHostController,
     repairItem: Repair,
@@ -61,7 +85,7 @@ fun RepairCard(
 
     // 2) once (when either ID changes), load both
     LaunchedEffect(deviceItem.deviceId, repairItem.technicianId) {
-        withContext(Dispatchers.IO) {
+        GlobalScope.launch {
             // fetch the human-readable phone model
             modelName = deviceItem.deviceId
                 ?.let { db.deviceDao().getModelNameByDeviceId(it) }
@@ -79,10 +103,17 @@ fun RepairCard(
         Box(
             Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
+                .padding(20.dp)
+                .semantics {
+                    contentDescription = "Loading repair card details"
+                },
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier.semantics {
+                    contentDescription = "Loading"
+                }
+            )
         }
         return
     }
@@ -91,7 +122,11 @@ fun RepairCard(
         ElevatedCard(
             elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .semantics {
+                    contentDescription = "Repair for ${customerItem.customerName}, ID ${showRepairID(repairItem.id)}"
+                    heading()
+                },
             onClick = {
                 navController.navigate("repair_details/${repairItem.id}")
             }
@@ -100,7 +135,6 @@ fun RepairCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Name and Repair Status
@@ -110,74 +144,78 @@ fun RepairCard(
                 ) {
                     // Customer name and repair number
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics { heading() },
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
                             text = customerItem.customerName,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .sharedBounds(
-                                    sharedTransitionScope.rememberSharedContentState("customerName-${repairItem.id}"),
-                                    animatedVisibilityScope = animatedVisibilityScope
-                                )
+                            modifier = Modifier.semantics {
+                                contentDescription = "Customer: ${customerItem.customerName}"
+                            }
                         )
                         Text(
                             text = showRepairID(repairItem.id),
-                            modifier = Modifier
-                                    .sharedElement(
-                                    sharedTransitionScope.rememberSharedContentState("repairId-${repairItem.id}"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            ),
-                            fontStyle = FontStyle.Italic
+                            fontStyle = FontStyle.Italic,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Repair ID: ${showRepairID(repairItem.id)}"
+                            }
                         )
                     }
 
                     // Technician name and repair status
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .semantics { heading() },
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
                             text = technicianName!!,
-                            modifier = Modifier.sharedElement(
-                                sharedTransitionScope.rememberSharedContentState(key = "techName-${repairItem.id}"),
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            ),
+                            modifier = Modifier.semantics {
+                                contentDescription = "Technician: $technicianName"
+                            }
                         )
-                        Text("In Repair", fontStyle = FontStyle.Italic)
+                        Text(
+                            "In Repair",
+                            fontStyle = FontStyle.Italic,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Status: In Repair"
+                            }
+                        )
                     }
                 }
 
                 // Box with repair type and phone model
                 Box(
                     modifier = Modifier
-                        .padding(top = 20.dp, bottom = 20.dp) // Space from Row
-                        .align(Alignment.CenterHorizontally), // Centered horizontally
+                        .padding(top = 20.dp, bottom = 20.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .semantics { heading() },
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-
-
                         Text(
                             text = repairItem.repairType.displayName,
                             fontSize = 24.sp,
-                            modifier = Modifier
+                            modifier = Modifier.semantics {
+                                contentDescription = "Repair Type: ${repairItem.repairType.displayName}"
+                            }
                         )
-                        if (modelName == null) {
-                            CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
-                        } else {
-                            Text(
-                                text = modelName!!,
-                                fontSize = 24.sp,
-                                modifier = Modifier
-                                    .align(Alignment.CenterHorizontally)
-                                    .sharedElement(
-                                        sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
-                                        animatedVisibilityScope = animatedVisibilityScope
-                                    )
-                            )
-                        }
+                        Text(
+                            text = modelName!!,
+                            fontSize = 24.sp,
+                            modifier = Modifier
+                                .semantics {
+                                    contentDescription = "Device Model: $modelName"
+                                }
+                                .sharedElement(
+                                    sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
+                                    animatedVisibilityScope = animatedVisibilityScope
+                                )
+                        )
                     }
                 }
 
@@ -185,16 +223,15 @@ fun RepairCard(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                        .align(Alignment.CenterHorizontally)
+                        .semantics {
+                            contentDescription = "Total Price: $${taxesCalculation(repairItem.price)}"
+                        },
                     horizontalArrangement = Arrangement.End
                 ) {
-                    Text(
-                        text = "$${taxesCalculation(repairItem.price)}",
-
-                    )
+                    Text(text = "$${taxesCalculation(repairItem.price)}")
                 }
             }
         }
     }
 }
-

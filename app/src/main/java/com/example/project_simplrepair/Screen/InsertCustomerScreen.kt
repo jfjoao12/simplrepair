@@ -25,6 +25,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,9 +39,23 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+/**
+ * A screen that presents a form for entering customer details.
+ *
+ * Once all required fields are filled, tapping the floating action button
+ * saves the new Customer into [db] and navigates to the New Repair flow.
+ *
+ * @param paddingValues Insets from the Scaffold (e.g. status/nav bars).
+ * @param db The [AppDatabase] instance used to insert the new Customer.
+ * @param navController Controls navigation—used here to go to the New Repair screen.
+ */
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
-fun InsertCustomerScreen(paddingValues: PaddingValues, db: AppDatabase, navController: NavController) {
+fun InsertCustomerScreen(
+    paddingValues: PaddingValues,
+    db: AppDatabase,
+    navController: NavController
+) {
     var customerName by remember { mutableStateOf("") }
     var customerEmail by remember { mutableStateOf("") }
     var customerCity by remember { mutableStateOf("Winnipeg") }
@@ -65,12 +82,13 @@ fun InsertCustomerScreen(paddingValues: PaddingValues, db: AppDatabase, navContr
         ) {
             item {
                 Text(
+                    text = "New Customer",
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp),
-                    text = "New Customer"
+                        .padding(10.dp)
+                        .semantics { heading() }
                 )
             }
 
@@ -89,9 +107,6 @@ fun InsertCustomerScreen(paddingValues: PaddingValues, db: AppDatabase, navContr
 
             items(fields) { (label, value) ->
                 OutlinedTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp),
                     value = value,
                     onValueChange = {
                         when (label) {
@@ -107,18 +122,23 @@ fun InsertCustomerScreen(paddingValues: PaddingValues, db: AppDatabase, navContr
                             "Phone 2" -> customerPhoneTwo = it
                         }
                     },
-                    label = { Text(label) }
+                    label = { Text(label) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(5.dp)
+                        .semantics { contentDescription = "$label input field" }
                 )
             }
         }
 
         FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(20.dp),
             onClick = {
-                if (customerName.isEmpty() || customerPhone.isEmpty() || customerPostalCode.isEmpty()) {
-                    Toast.makeText(context, "Please fill out the form!", Toast.LENGTH_SHORT).show()
+                if (customerName.isEmpty() ||
+                    customerPhone.isEmpty() ||
+                    customerPostalCode.isEmpty()
+                ) {
+                    Toast.makeText(context, "Please fill out the form!", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     GlobalScope.launch {
                         val customer = Customer(
@@ -138,13 +158,19 @@ fun InsertCustomerScreen(paddingValues: PaddingValues, db: AppDatabase, navContr
                         db.customerDao().insert(customer)
                     }
                     navController.navigate(Destination.NewRepair.route)
-
                 }
             },
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+                .semantics { contentDescription = "Save new customer" }
         ) {
-            Icon(Icons.Filled.Add, contentDescription = "Save new repair")
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = null
+            )
         }
     }
 }

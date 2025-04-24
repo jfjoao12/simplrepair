@@ -4,11 +4,19 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
-import com.example.project_simplrepair.Operations.RepairType
 import com.squareup.moshi.Json
 
-@Entity // (tableName = "repairs_table")
-    (
+/**
+ * Represents a phone model.
+ *
+ * @property id            Auto-generated primary key.
+ * @property brandId       The ID of the associated phone brand (foreign key to [PhoneBrands]).
+ * @property phoneModelName The name of the phone model (e.g., "Galaxy S21", "iPhone 12").
+ *
+ * Foreign Key:
+ * - [brandId] references the [PhoneBrands] table's primary key.
+ */
+@Entity(
     tableName = "phone_models_table",
     foreignKeys = [
         ForeignKey(

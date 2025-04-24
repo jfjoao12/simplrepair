@@ -17,22 +17,37 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
+/**
+ * Manages interaction with the mobile phone specs API and handles data persistence into Room database.
+ * Automatically fetches and stores brands and models if needed.
+ *
+ * @param database The Room database instance for local data operations.
+ */
 class PhonesApiManager(database: AppDatabase) {
+
     private var _phonesBrandsResponse = mutableStateOf<List<PhoneBrands>>(emptyList())
     private var _phonesModelsResponse = mutableStateOf<List<PhoneModels>>(emptyList())
     private var _phoneSpecsResponse = mutableStateOf<PhoneSpecs?>(null)
+
     val api_key = "0dc1c9bf90msh8536d2155c57902p1798e8jsn2d2878a46a1b"
 
-    // Flag to ensure getPhoneModels only runs once
+    // Flag to prevent repeated fetch of models
     private var isModelsFetched = false
 
+    /**
+     * A composable state holder for phone brands fetched from the API.
+     */
     val phonesBrandsResponse: MutableState<List<PhoneBrands>>
-        @Composable get() = remember {
-            _phonesBrandsResponse
-        }
+        @Composable get() = remember { _phonesBrandsResponse }
+
     init {
         getPhonesBrands(database)
     }
+
+    /**
+     * Fetches the list of phone brands from the API, stores them in the database,
+     * and triggers model fetching if not already done.
+     */
     @OptIn(DelicateCoroutinesApi::class)
     private fun getPhonesBrands(database: AppDatabase) {
         val service = Api.retrofitService.getAllPhoneBrands(api_key)
@@ -43,15 +58,10 @@ class PhonesApiManager(database: AppDatabase) {
             ) {
                 GlobalScope.launch {
                     val brandsFromApi = response.body() ?: emptyList()
-                    // Check if the response has more items than in the local database.
                     if (response.isSuccessful && (brandsFromApi.size > database.phoneBrandsDAO().getAll().size)) {
-                        Log.i("Data", "Data is locked and loaded.")
                         _phonesBrandsResponse.value = brandsFromApi
-                        Log.i("DataStream", _phonesBrandsResponse.value.toString())
-
                         database.phoneBrandsDAO().clearTable()
                         saveBrandsToDatabase(database, _phonesBrandsResponse.value)
-                        // Call getPhoneModels only if not already called.
                         getPhoneModels(database)
                     } else {
                         Log.i("DataInfo", "phone_brands table not updated, already present")
@@ -65,18 +75,19 @@ class PhonesApiManager(database: AppDatabase) {
         })
     }
 
+    /**
+     * Fetches all phone models for each brand from the API and inserts them into the database.
+     */
     @OptIn(DelicateCoroutinesApi::class)
     private fun getPhoneModels(database: AppDatabase) {
-        GlobalScope.launch {  // Run in background thread
-            // Use the flag to prevent repeated calls.
+        GlobalScope.launch {
             if (isModelsFetched) {
                 Log.i("PhoneModels", "getPhoneModels has already been called.")
                 return@launch
             }
             isModelsFetched = true
 
-            val brands: List<PhoneBrands> = database.phoneBrandsDAO().getAll()
-            // Check if there are any records in the phone_models_table.
+            val brands = database.phoneBrandsDAO().getAll()
             if (database.phoneModelsDAO().checkIfExists() < 1) {
                 brands.forEach { brand ->
                     val modelsService = Api.retrofitService.getModelsByBrand(brand.brandValue, api_key)
@@ -88,15 +99,8 @@ class PhonesApiManager(database: AppDatabase) {
                             GlobalScope.launch {
                                 if (response.isSuccessful) {
                                     val models = response.body() ?: emptyList()
-                                    // Update each model with the brandId from the current brand.
-                                    val updatedModels = models.map { model ->
-                                        model.copy(brandId = brand.id)
-                                    }
-                                    // Append new models to the current state.
+                                    val updatedModels = models.map { it.copy(brandId = brand.id) }
                                     _phonesModelsResponse.value += updatedModels
-                                    Log.i("PhoneModels", "Fetched models for brand: ${brand.brandValue}")
-
-                                    // Save the models to the database.
                                     saveModelsToDatabase(database, updatedModels)
                                 }
                             }
@@ -113,6 +117,13 @@ class PhonesApiManager(database: AppDatabase) {
         }
     }
 
+    /**
+     * Fetches detailed specifications for a specific phone and stores it into the database.
+     *
+     * @param brandName The brand name of the phone.
+     * @param modelName The model name of the phone.
+     * @param database The Room database instance.
+     */
     @OptIn(DelicateCoroutinesApi::class)
     fun getPhoneSpecs(brandName: String, modelName: String, database: AppDatabase) {
         val service = Api.retrofitService.getPhoneSpecifications(brandName, modelName, api_key)
@@ -139,12 +150,7 @@ class PhonesApiManager(database: AppDatabase) {
                             mainCameraVideo = specs.gsmMainCameraDetails.mainCameraVideo
                         )
                         _phoneSpecsResponse.value = phoneSpecs
-                        Log.i("PhoneSpecs", "Fetched specs for $brandName $modelName: $phoneSpecs")
-
-                        // Optionally, save to the database.
                         database.phoneSpecsDAO().insert(phoneSpecs)
-                    } else {
-                        Log.i("PhoneSpecs", "No specs found for $brandName $modelName. Response code: ${response.code()}")
                     }
                 }
             }
@@ -155,10 +161,16 @@ class PhonesApiManager(database: AppDatabase) {
         })
     }
 
+    /**
+     * Inserts the provided list of phone brands into the local database.
+     */
     private suspend fun saveBrandsToDatabase(database: AppDatabase, phoneBrands: List<PhoneBrands>) {
         database.phoneBrandsDAO().insertAll(phoneBrands)
     }
 
+    /**
+     * Inserts the provided list of phone models into the local database.
+     */
     private suspend fun saveModelsToDatabase(database: AppDatabase, phoneModels: List<PhoneModels>) {
         database.phoneModelsDAO().insertAll(phoneModels)
     }

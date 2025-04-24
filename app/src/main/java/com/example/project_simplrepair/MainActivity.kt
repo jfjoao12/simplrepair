@@ -1,6 +1,7 @@
 package com.example.project_simplrepair
 
-import RepairDetailsScreen
+import com.example.project_simplrepair.Screen.RepairDetailsScreen
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,10 +51,7 @@ import com.example.compose.ProjectSimplRepairTheme
 import com.example.project_simplrepair.API.PhonesApiManager
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
-import com.example.project_simplrepair.Models.Customer
-import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
-import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
 import com.example.project_simplrepair.Screen.InsertCustomerScreen
@@ -123,6 +121,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class,
     ExperimentalSharedTransitionApi::class)
 @Composable
