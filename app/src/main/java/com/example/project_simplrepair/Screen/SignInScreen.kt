@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -54,20 +55,31 @@ fun SignInScreen(
     var email by remember {mutableStateOf("")}
     var password by remember {mutableStateOf("")}
     var keyboardController = LocalSoftwareKeyboardController.current
-    Image(
-        painter = painterResource(id = R.drawable.logo),
-        contentDescription = "Simpl Repair logo",
+    Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(CircleShape)
-    )
-    Column(
-        modifier = modifier
-            .fillMaxSize(1f)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ){
+            .padding(25.dp)
+    ) {
+
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = "Simpl Repair logo",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(CircleShape),
+                alignment = Alignment.BottomCenter
+            )
+
+
+
+        Column(
+            modifier = modifier
+                .fillMaxSize(1f)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ){
+
+
 
 
             OutlinedTextField(
@@ -110,7 +122,9 @@ fun SignInScreen(
             }
 
 
+        }
     }
+
 }
 private fun performsSignIn(
     email:String,

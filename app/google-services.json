@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "181142093456",
+    "project_id": "simpl-repair",
+    "storage_bucket": "simpl-repair.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181142093456:android:3cb992138956865a862215",
+        "android_client_info": {
+          "package_name": "com.example.project_simplrepair"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDifxNDsej8PxDGPMKUd1PR-gmepw0ka-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
