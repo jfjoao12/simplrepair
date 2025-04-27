@@ -47,5 +47,7 @@ data class Repair(
     @ColumnInfo(name = "technician_id") val technicianId: Int? = null,
     @ColumnInfo(name = "price") val price: Double,
     @ColumnInfo(name = "notes") val notes: String,
-    @ColumnInfo(name = "repair_type") val repairType: RepairType
+    @ColumnInfo(name = "repair_type") val repairType: RepairType,
+    @ColumnInfo(name="image_uri") val imageUri: String? = null
+
 )

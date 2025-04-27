@@ -81,4 +81,5 @@ interface RepairDAO {
         WHERE repairs_table.id = :id
     """)
     suspend fun getDeviceByRepairId(id: Int): Device
+
 }

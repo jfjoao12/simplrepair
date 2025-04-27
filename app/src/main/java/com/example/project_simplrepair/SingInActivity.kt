@@ -1,7 +1,9 @@
 package com.example.project_simplrepair
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import com.example.compose.ProjectSimplRepairTheme
 import com.example.compose.backgroundDark
 import com.example.project_simplrepair.Screen.SignInScreen
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
 
 
 class SingInActivity : ComponentActivity() {
@@ -50,4 +54,6 @@ class SingInActivity : ComponentActivity() {
         }
     }
 }
+
+
 
