@@ -69,6 +69,7 @@ class MainActivity : ComponentActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             ProjectSimplRepairTheme {
@@ -80,7 +81,8 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val db = AppDatabase.getInstance(applicationContext)
                     val allPhoneBrands = PhonesApiManager(db)
-
+//                    val cameraPermissionState: PermissionState =
+//                        rememberPermissionState(android.Manifest.permission.CAMERA)
 //                    allPhoneBrands.getPhoneSpecs("Apple", "iPhone 13 Pro Max", db)
 //
 //                    GlobalScope.launch {

@@ -18,10 +18,11 @@ import com.example.project_simplrepair.Models.*
         PhoneBrands::class,
         PhoneModels::class,
         PhoneSpecs::class,
-        Technician::class
+        Technician::class,
+        DevicePhoto::class
     ],
-    version = 25,
-    exportSchema = false
+    version = 27,
+    exportSchema = true
 )
 // @TypeConverters(Converters::class) // Uncomment if you add custom type converters
 abstract class AppDatabase : RoomDatabase() {
@@ -46,6 +47,9 @@ abstract class AppDatabase : RoomDatabase() {
 
     /** DAO for technician information */
     abstract fun technicianDao(): TechnicianDAO
+
+    /** DAO for device photo */
+    abstract fun devicePhotoDao(): DevicePhotoDAO
 
     companion object {
         @Volatile

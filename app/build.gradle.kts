@@ -1,3 +1,5 @@
+
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -44,6 +46,9 @@ android {
 
 dependencies {
 
+    // Permission
+    implementation(libs.accompanist.permissions)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -66,6 +71,8 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.graphics.shapes.android)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -94,6 +101,18 @@ dependencies {
     implementation(libs.androidx.navigation.compose) // match your setup
     implementation(libs.material3) // for Material3
 
+    // extended icons
+    implementation(libs.androidx.material.icons.extended)
+
+    // 3) CameraX (all at 1.2.3)
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle.v123)
+    implementation(libs.androidx.camera.view.v123)
+
+    // 5) Lifecycle & ViewModel
+    implementation(libs.androidx.lifecycle.runtime.ktx.v281)
+    implementation(libs.lifecycle.viewmodel.ktx)
 
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
