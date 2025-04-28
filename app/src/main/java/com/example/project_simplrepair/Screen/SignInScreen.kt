@@ -56,9 +56,6 @@ fun SignInScreen(
     var password by remember {mutableStateOf("")}
     var keyboardController = LocalSoftwareKeyboardController.current
 
-
-
-
     Box(
         modifier = Modifier
             .padding(25.dp)

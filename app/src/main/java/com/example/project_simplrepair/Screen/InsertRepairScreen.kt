@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory.decodeFile
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,9 +22,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
@@ -36,6 +40,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -100,7 +105,7 @@ fun InsertRepairScreen(
     var deviceBottomModalSheet by remember { mutableStateOf(false) }
 
     // Camera Stuff
-    var showCamera by remember { mutableStateOf(false) }
+    //var showCamera by remember { mutableStateOf(false) }
     //var photoPaths by remember { mutableStateOf<List<String>>(emptyList()) }
     val newPhotoPaths = remember { mutableStateListOf<String>() }
 
@@ -116,92 +121,150 @@ fun InsertRepairScreen(
 //    }
 
     // 2. once we enter Compose, immediately kick off the request
-    LaunchedEffect(Unit) {
-        if (!cameraPermissionState.status.isGranted) {
-            cameraPermissionState.launchPermissionRequest()
-        }
-    }
+//    LaunchedEffect(Unit) {
+//        if (!cameraPermissionState.status.isGranted) {
+//            cameraPermissionState.launchPermissionRequest()
+//        }
+//    }
 
-    if (showCamera) {
-        CameraScreen(
-            onPhotoTaken = { path ->
-                // immediately update the preview list
-                newPhotoPaths += path
-                showCamera = false
-            },
-            onCancel = {
-                showCamera = false
-            }
-        )
-    } else {
+//    if (showCamera) {
+//        CameraScreen(
+//            onPhotoTaken = { path ->
+//                // immediately update the preview list
+//                newPhotoPaths += path
+//                showCamera = false
+//            },
+//            onCancel = {
+//                showCamera = false
+//            }
+//        )
+//    } else {
+//
+//    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+    ) {
+        Column {
+            ScreenTitle(
+                title = "New Repair",
+                modifier = Modifier.semantics { heading() }
+            )
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Column {
-                ScreenTitle(
-                    title = "New Repair",
-                    modifier = Modifier.semantics { heading() }
-                )
-                IconButton(
-                    onClick = { showCamera = true },
-                    modifier =
-                    Modifier
-                        .padding(16.dp)
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Open Camera")
-                }
-
-
-
-
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-
-                    item {
-                        LazyRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        ) {
-                            items(newPhotoPaths) { path ->
-                                val bmp = remember(path) {
-                                    BitmapFactory.decodeFile(path)
-                                }
-                                bmp?.let {
-                                    Image(
-                                        bitmap = it.asImageBitmap(),
-                                        contentDescription = "New photo preview",
-                                        modifier = Modifier
-                                            .size(64.dp)
-                                            .padding(4.dp)
-                                            .rotate(90f)
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    // Device section
-                    item {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
                         ElevatedCard(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             elevation = CardDefaults.cardElevation(4.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = "Device")
+                            IconButton(
+                                onClick = {
+                                    navController.navigate(Destination.Camera.route)
+                                },
+                                modifier =
+                                Modifier
+                                    .padding(16.dp)
+                            ) {
+                                Icon(Icons.Default.Camera, contentDescription = "Open Camera")
+                            }
+                        }
+
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                // align to top start corner of the parent Box
+                                .align(Alignment.TopStart)
+                                // nudge it down a bit and in from the edge
+                                .offset(x = 16.dp, y = (-12).dp)
+                                .zIndex(1f)
+                        ) {
+                            Text(
+                                text = "Device Picture",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        items(newPhotoPaths) { path ->
+                            val bmp = remember(path) {
+                                BitmapFactory.decodeFile(path)
+                            }
+                            bmp?.let {
+                                Image(
+                                    bitmap = it.asImageBitmap(),
+                                    contentDescription = "New photo preview",
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .padding(4.dp)
+                                        .rotate(90f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Device section
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ){
+                        ElevatedCard(
+                            shape = RoundedCornerShape(12.dp),
+                            elevation = CardDefaults.cardElevation(4.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 28.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                            ) {
                                 OutlinedTextField(
                                     value = modelName,
-                                    onValueChange = { modelName = it },
+                                    onValueChange = {modelName = it},
                                     label = { Text("Model") },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                        .semantics { contentDescription = "Device model input" }
+                                    singleLine = true,
+                                    trailingIcon = {
+                                        IconButton(onClick = {
+                                            GlobalScope.launch {
+                                                val models = db.phoneModelsDAO().getModelByName(modelName).first()
+                                                if (models.size == 1) {
+                                                    phoneModel = models.first()
+                                                } else {
+                                                    deviceBottomModalSheet = true
+                                                }
+                                            }
+                                        }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Search,
+                                                contentDescription = "Search models"
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
                                 )
                                 OutlinedTextField(
                                     value = serial,
@@ -213,70 +276,101 @@ fun InsertRepairScreen(
                                         .padding(vertical = 8.dp)
                                         .semantics { contentDescription = "Device serial input" }
                                 )
-                                Button(
-                                    onClick = {
-                                        GlobalScope.launch {
-                                            val models = db.phoneModelsDAO().getModelByName(modelName).first()
-                                            if (models.size == 1) {
-                                                phoneModel = models.first()
-                                            } else {
-                                                deviceBottomModalSheet = true
-                                            }
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .align(Alignment.End)
-                                        .semantics { contentDescription = "Search for device models" }
-                                ) {
-                                    Text("Search Device")
-                                }
                             }
                         }
-                    }
 
-                    // Customer section
-                    item {
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                // align to top start corner of the parent Box
+                                .align(Alignment.TopStart)
+                                // nudge it down a bit and in from the edge
+                                .offset(x = 16.dp, y = (-12).dp)
+                                .zIndex(1f)
+                        ) {
+                            Text(
+                                text = "Phone",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Customer section
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+
                         ElevatedCard(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             elevation = CardDefaults.cardElevation(4.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = "Customer")
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 28.dp, start = 16.dp, end = 8.dp, bottom = 16.dp),
+                            ) {
                                 OutlinedTextField(
                                     value = customerName,
                                     onValueChange = { customerName = it },
                                     label = { Text("Name") },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 8.dp)
-                                        .semantics { contentDescription = "Customer name input" }
+                                    singleLine = true,
+                                    trailingIcon = {
+                                        IconButton(onClick = { customerBottomModalSheet = true }) {
+                                            Icon(Icons.Default.Search, contentDescription = "Search for customer")
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
                                 )
-                                Button(
-                                    onClick = { customerBottomModalSheet = true },
-                                    modifier = Modifier
-                                        .align(Alignment.End)
-                                        .semantics { contentDescription = "Search for customer" }
-                                ) {
-                                    Text("Search Customer")
-                                }
                             }
                         }
-                    }
 
-                    // Repair info section
-                    item {
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                // align to top start corner of the parent Box
+                                .align(Alignment.TopStart)
+                                // nudge it down a bit and in from the edge
+                                .offset(x = 16.dp, y = (-12).dp)
+                                .zIndex(1f)
+                        ) {
+                            Text(
+                                text = "Customer",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Repair info section
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ){
                         ElevatedCard(
-                            shape = RoundedCornerShape(16.dp),
+                            shape = RoundedCornerShape(12.dp),
                             elevation = CardDefaults.cardElevation(4.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(text = "Repair Info")
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 28.dp, start = 16.dp, end = 8.dp, bottom = 16.dp),
+                            ) {
                                 ExposedDropdownMenuBox(
                                     expanded = expanded,
                                     onExpandedChange = { expanded = it },
@@ -318,103 +412,118 @@ fun InsertRepairScreen(
                                 )
                             }
                         }
-                    }
-                }
-            }
-
-            // Device Bottom Sheet
-            if (deviceBottomModalSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { deviceBottomModalSheet = false },
-                    sheetState = deviceSheetState
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Select a Device")
-                        val devices by db.phoneModelsDAO().getModelByName(modelName).collectAsState(initial = emptyList())
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(1),
-                            modifier = Modifier.fillMaxWidth()
+                        Surface(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .offset(x = 16.dp, y = (-12).dp)
+                                .zIndex(1f)
                         ) {
-                            items(devices) { dm ->
-                                Text(
-                                    text = dm.phoneModelName,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            phoneModel = dm
-                                            deviceBottomModalSheet = false
-                                        }
-                                        .padding(8.dp)
-                                        .semantics { contentDescription = "Device option ${dm.phoneModelName}" }
-                                )
-                            }
+                            Text(
+                                text = "Repair Info",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
                         }
                     }
                 }
             }
+        }
 
-            // Customer Bottom Sheet
-            if (customerBottomModalSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = { customerBottomModalSheet = false },
-                    sheetState = customerSheetState
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Select a Customer")
-                        val customerList by db.customerDao().getCustomerByName(customerName).collectAsState(initial = emptyList())
-                        LazyVerticalGrid(columns = GridCells.Fixed(1), modifier = Modifier.fillMaxWidth()) {
-                            items(customerList) { cust ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            customerId = cust.customerId!!
-                                            customerName = cust.customerName
-                                            customerBottomModalSheet = false
-                                        }
-                                        .padding(8.dp)
-                                        .semantics { contentDescription = "Customer option ${cust.customerName}" },
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(cust.customerName)
-                                    Text(cust.customerPhone)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Save button
-            FloatingActionButton(
-                onClick = {
-                    if (serial.isBlank() || customerId == 0) {
-                        Toast.makeText(context, "Please fill in serial & select customer", Toast.LENGTH_SHORT).show()
-                        return@FloatingActionButton
-                    }
-                    coroutineScope.launch {
-                        // Insert Device then Repair
-                        val newDeviceId = withContext(Dispatchers.IO) {
-                            val dev = Device(null, customerId, phoneModel?.id ?: 0, DeviceType.MOBILE, serial)
-                            db.deviceDao().insert(dev)
-                        }.toInt()
-
-                        withContext(Dispatchers.IO) {
-                            val rep = Repair(null, customerId, newDeviceId, 1, price.toDoubleOrNull() ?: 0.0, "", selectedType)
-                            db.repairDAO().insert(rep)
-                        }
-                        navController.navigate(Destination.Main.route)
-                    }
-                },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-                    .semantics { contentDescription = "Save new repair" }
+        // Device Bottom Sheet
+        if (deviceBottomModalSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { deviceBottomModalSheet = false },
+                sheetState = deviceSheetState
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "Select a Device")
+                    val devices by db.phoneModelsDAO().getModelByName(modelName).collectAsState(initial = emptyList())
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(1),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(devices) { dm ->
+                            Text(
+                                text = dm.phoneModelName,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        phoneModel = dm
+                                        deviceBottomModalSheet = false
+                                    }
+                                    .padding(8.dp)
+                                    .semantics { contentDescription = "Device option ${dm.phoneModelName}" }
+                            )
+                        }
+                    }
+                }
             }
+        }
+
+        // Customer Bottom Sheet
+        if (customerBottomModalSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { customerBottomModalSheet = false },
+                sheetState = customerSheetState
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "Select a Customer")
+                    val customerList by db.customerDao().getCustomerByName(customerName).collectAsState(initial = emptyList())
+                    LazyVerticalGrid(columns = GridCells.Fixed(1), modifier = Modifier.fillMaxWidth()) {
+                        items(customerList) { cust ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        customerId = cust.customerId!!
+                                        customerName = cust.customerName
+                                        customerBottomModalSheet = false
+                                    }
+                                    .padding(8.dp)
+                                    .semantics { contentDescription = "Customer option ${cust.customerName}" },
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(cust.customerName)
+                                Text(cust.customerPhone)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Save button
+        FloatingActionButton(
+            onClick = {
+                if (serial.isBlank() || customerId == 0) {
+                    Toast.makeText(context, "Please fill in serial & select customer", Toast.LENGTH_SHORT).show()
+                    return@FloatingActionButton
+                }
+                coroutineScope.launch {
+                    // Insert Device then Repair
+                    val newDeviceId = withContext(Dispatchers.IO) {
+                        val dev = Device(null, customerId, phoneModel?.id ?: 0, DeviceType.MOBILE, serial)
+                        db.deviceDao().insert(dev)
+                    }.toInt()
+
+                    withContext(Dispatchers.IO) {
+                        val rep = Repair(null, customerId, newDeviceId, 1, price.toDoubleOrNull() ?: 0.0, "", selectedType)
+                        db.repairDAO().insert(rep)
+                    }
+                    navController.navigate(Destination.Main.route)
+                }
+            },
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+                .semantics { contentDescription = "Save new repair" }
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = null)
         }
     }
 }

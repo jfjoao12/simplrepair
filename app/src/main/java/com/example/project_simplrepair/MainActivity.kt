@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,6 +47,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.ProjectSimplRepairTheme
 import com.example.project_simplrepair.API.PhonesApiManager
@@ -54,6 +56,7 @@ import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screen.AppointmentsScreen
+import com.example.project_simplrepair.Screen.CameraScreen
 import com.example.project_simplrepair.Screen.InsertCustomerScreen
 import com.example.project_simplrepair.Screen.InsertRepairScreen
 import com.example.project_simplrepair.Screen.InventoryScreen
@@ -134,6 +137,15 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scopeMenu = rememberCoroutineScope()
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val showBars = currentRoute != "Camera"
+
+
+    var showCamera by remember { mutableStateOf(false) }
+    //var photoPaths by remember { mutableStateOf<List<String>>(emptyList()) }
+    val newPhotoPaths = remember { mutableStateListOf<String>() }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -172,63 +184,69 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     ) {
         Scaffold(
             topBar = {
-                CenterAlignedTopAppBar(
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                scopeMenu.launch {
-                                    drawerState.apply {
-                                        if (isClosed) open() else close()
+                if (showBars) {
+                    CenterAlignedTopAppBar(
+                        navigationIcon = {
+                            IconButton(
+                                onClick = {
+                                    scopeMenu.launch {
+                                        drawerState.apply {
+                                            if (isClosed) open() else close()
+                                        }
                                     }
                                 }
-                        }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.Menu,
-                                contentDescription = "Navigation Icon"
-                            )
-                        }
-                    },
-                    title = {
-                        Text(
-                            text = "Simpl Repair",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontStyle = FontStyle.Italic,
-                            fontWeight = FontWeight.Bold
-                        ) },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer, // Your custom background color here
-                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        scrolledContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
-
-
-                    ),
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                navController.navigate(Destination.Settings.route)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Menu,
+                                    contentDescription = "Navigation Icon"
+                                )
                             }
-                        ) {
-                            Icon(
-                                Icons.Rounded.Settings,
-                                contentDescription = "Settings"
-                            )
-                        }
-                    },
-                    modifier = Modifier
-                        .shadow(
-                            elevation = 4.dp, // Adjust the shadow elevation as needed
-                            shape = MaterialTheme.shapes.medium, // or choose another shape if you prefer
-                            clip = false // set to true if you want to clip the content to the shape
-                        )
-                        .background(MaterialTheme.colorScheme.onPrimary)
+                        },
+                        title = {
+                            Text(
+                                text = "Simpl Repair",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontStyle = FontStyle.Italic,
+                                fontWeight = FontWeight.Bold
+                            ) },
+                        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer, // Your custom background color here
+                            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            scrolledContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
 
-                )
+
+                        ),
+                        actions = {
+                            IconButton(
+                                onClick = {
+                                    navController.navigate(Destination.Settings.route)
+                                }
+                            ) {
+                                Icon(
+                                    Icons.Rounded.Settings,
+                                    contentDescription = "Settings"
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .shadow(
+                                elevation = 4.dp, // Adjust the shadow elevation as needed
+                                shape = MaterialTheme.shapes.medium, // or choose another shape if you prefer
+                                clip = false // set to true if you want to clip the content to the shape
+                            )
+                            .background(MaterialTheme.colorScheme.onPrimary)
+
+                    )
+                }
 
             },
-            bottomBar = { BottomNav(navController = navController) }
+            bottomBar = {
+                if (showBars) {
+                    BottomNav(navController = navController)
+                }
+            }
 
         ) {
             paddingValues ->
@@ -259,6 +277,18 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                     }
                     composable(Destination.Inventory.route) {
                         InventoryScreen(modifier, paddingValues)
+                    }
+                    composable(Destination.Camera.route) {
+                        CameraScreen(
+                            onPhotoTaken = { path ->
+                                // immediately update the preview list
+                                newPhotoPaths += path
+                                showCamera = false
+                            },
+                            onCancel = {
+                                showCamera = false
+                            }
+                        )
                     }
                     composable(Destination.RepairDetails.route) { navBackStackEntry ->
                         var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")

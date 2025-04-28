@@ -185,7 +185,7 @@ fun RepairDetailsScreen(
                         }
                             AnimatedContent(
                                 targetState = showDetails,
-                                label = "pica"
+                                label = "Transition"
                             ) { targetState ->
                                 Row(
                                     modifier = Modifier
