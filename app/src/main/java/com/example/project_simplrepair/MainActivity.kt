@@ -43,14 +43,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.ProjectSimplRepairTheme
 import com.example.project_simplrepair.API.PhonesApiManager
+import com.example.project_simplrepair.Camera.PhotoViewModel
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Repair
@@ -145,6 +150,8 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     var showCamera by remember { mutableStateOf(false) }
     //var photoPaths by remember { mutableStateOf<List<String>>(emptyList()) }
     val newPhotoPaths = remember { mutableStateListOf<String>() }
+    val photoVm: PhotoViewModel = viewModel()
+
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -278,18 +285,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                     composable(Destination.Inventory.route) {
                         InventoryScreen(modifier, paddingValues)
                     }
-                    composable(Destination.Camera.route) {
-                        CameraScreen(
-                            onPhotoTaken = { path ->
-                                // immediately update the preview list
-                                newPhotoPaths += path
-                                showCamera = false
-                            },
-                            onCancel = {
-                                showCamera = false
-                            }
-                        )
-                    }
+
                     composable(Destination.RepairDetails.route) { navBackStackEntry ->
                         var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")
                         GlobalScope.launch {
@@ -316,23 +312,57 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                     composable(Destination.Search.route) {
                         SearchScreen(modifier, paddingValues)
                     }
-                    composable(Destination.NewRepair.route) {
-                        InsertRepairScreen(
-                            paddingValues,
-                            AppDatabase.getInstance(context = LocalContext.current),
-                            navController
-                        )
-                    }
-                    composable(Destination.NewCustomer.route) {
-                        InsertCustomerScreen(
-                            paddingValues,
-                            AppDatabase.getInstance(context = LocalContext.current),
-                            navController
-                        )
+                    // Handle navigation between these 2 screens to persist data
+                    navigation(
+                        startDestination = Destination.NewRepair.route,
+                        route = "insertFlow"
+                    ) {
+                        composable(Destination.NewRepair.route) { backStackEntry  ->
+                            // 1) get the *same* navGraph entry for the VM:
+                            val photoVm: PhotoViewModel = backStackEntry.sharedViewModel(navController)
+
+                            InsertRepairScreen(
+                                paddingValues = paddingValues,
+                                db = AppDatabase.getInstance(LocalContext.current),
+                                navController = navController,
+                                photoPaths = photoVm.photoPaths  // pass the list in
+                            )
+                        }
+
+                        composable(Destination.Camera.route) { backStackEntry ->
+                            // again scope to the graph, not this screen
+                            val photoVm: PhotoViewModel = backStackEntry.sharedViewModel(navController)
+
+                            CameraScreen(
+                                onPhotoTaken = { path ->
+                                    photoVm.add(path)
+                                },
+                                onCancel = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        composable(Destination.NewCustomer.route) {
+                            InsertCustomerScreen(
+                                paddingValues,
+                                AppDatabase.getInstance(context = LocalContext.current),
+                                navController
+                            )
+                        }
                     }
                 }
             }
-
         }
     }
+}
+
+@Composable
+inline fun <reified T: ViewModel> NavBackStackEntry.sharedViewModel(
+    navController: NavHostController,
+): T {
+    val navGraphRoute = destination.parent?.route ?: return viewModel()
+    val parentEntry = remember(this) {
+        navController.getBackStackEntry(navGraphRoute)
+    }
+    return viewModel(parentEntry)
 }

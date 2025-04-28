@@ -35,7 +35,6 @@ fun ScreenTitle(
 ) {
     Box(
         modifier = Modifier
-            // Mark this as a heading so screen readers announce it appropriately
             .semantics { heading() }
             .shadow(
                 elevation = 4.dp,

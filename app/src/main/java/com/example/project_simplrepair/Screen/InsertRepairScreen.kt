@@ -3,6 +3,7 @@ package com.example.project_simplrepair.Screen
 import android.Manifest
 import android.graphics.BitmapFactory
 import android.graphics.BitmapFactory.decodeFile
+import android.provider.ContactsContract.Contacts.Photo
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -41,7 +42,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.project_simplrepair.Camera.PhotoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -82,7 +85,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 fun InsertRepairScreen(
     paddingValues: PaddingValues,
     db: AppDatabase,
-    navController: NavController
+    navController: NavController,
+    photoPaths: List<String>,
 ) {
     var modelName by remember { mutableStateOf("") }
     var serial by remember { mutableStateOf("") }
@@ -107,7 +111,7 @@ fun InsertRepairScreen(
     // Camera Stuff
     //var showCamera by remember { mutableStateOf(false) }
     //var photoPaths by remember { mutableStateOf<List<String>>(emptyList()) }
-    val newPhotoPaths = remember { mutableStateListOf<String>() }
+//    val newPhotoPaths = remember { mutableStateListOf<String>() }
 
 
     val cameraPermissionState = rememberPermissionState(
@@ -120,12 +124,11 @@ fun InsertRepairScreen(
 //        photoPaths = db.devicePhotoDao().getPhotosPath()
 //    }
 
-    // 2. once we enter Compose, immediately kick off the request
-//    LaunchedEffect(Unit) {
-//        if (!cameraPermissionState.status.isGranted) {
-//            cameraPermissionState.launchPermissionRequest()
-//        }
-//    }
+    LaunchedEffect(Unit) {
+        if (!cameraPermissionState.status.isGranted) {
+            cameraPermissionState.launchPermissionRequest()
+        }
+    }
 
 //    if (showCamera) {
 //        CameraScreen(
@@ -147,77 +150,78 @@ fun InsertRepairScreen(
             .padding(paddingValues)
     ) {
         Column {
-            ScreenTitle(
-                title = "New Repair",
-                modifier = Modifier.semantics { heading() }
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            ) {
+
+                ScreenTitle(
+                    title = "New Repair",
+                    modifier = Modifier
+                        .semantics { heading() }
+                )
+            }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                item {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        ElevatedCard(
-                            shape = RoundedCornerShape(12.dp),
-                            elevation = CardDefaults.cardElevation(4.dp),
+                // Device photos section
+                if (photoPaths.isNotEmpty()) {
+                    item {
+                        Box(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(16.dp)
                         ) {
-                            IconButton(
-                                onClick = {
-                                    navController.navigate(Destination.Camera.route)
-                                },
-                                modifier =
-                                Modifier
-                                    .padding(16.dp)
+                            ElevatedCard(
+                                shape = RoundedCornerShape(12.dp),
+                                elevation = CardDefaults.cardElevation(4.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
                             ) {
-                                Icon(Icons.Default.Camera, contentDescription = "Open Camera")
-                            }
-                        }
-
-                        Surface(
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier
-                                // align to top start corner of the parent Box
-                                .align(Alignment.TopStart)
-                                // nudge it down a bit and in from the edge
-                                .offset(x = 16.dp, y = (-12).dp)
-                                .zIndex(1f)
-                        ) {
-                            Text(
-                                text = "Device Picture",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                }
-
-                item {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                    ) {
-                        items(newPhotoPaths) { path ->
-                            val bmp = remember(path) {
-                                BitmapFactory.decodeFile(path)
-                            }
-                            bmp?.let {
-                                Image(
-                                    bitmap = it.asImageBitmap(),
-                                    contentDescription = "New photo preview",
+                                LazyRow(
                                     modifier = Modifier
-                                        .size(64.dp)
-                                        .padding(4.dp)
-                                        .rotate(90f)
+                                        .fillMaxWidth()
+                                        .padding(
+                                            start = 16.dp,
+                                            top = 32.dp,
+                                            bottom = 32.dp,
+                                            end = 16.dp
+                                        )
+                                ) {
+                                    items(photoPaths) { path ->
+                                        val bmp = remember(path) {
+                                            decodeFile(path)
+                                        }
+                                        bmp?.let {
+                                            Image(
+                                                bitmap = it.asImageBitmap(),
+                                                contentDescription = "New photo preview",
+                                                modifier = Modifier
+                                                    .size(128.dp)
+                                                    .padding(2.dp)
+                                                    .rotate(90f)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            Surface(
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier
+                                    .align(Alignment.TopCenter)
+                                    .offset(y = (-12).dp)
+                                    .zIndex(1f)
+                            ) {
+                                Text(
+                                    text = "Device Picture",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
                         }
@@ -240,7 +244,12 @@ fun InsertRepairScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(top = 28.dp, start = 16.dp, end = 16.dp, bottom = 16.dp),
+                                    .padding(
+                                        top = 28.dp,
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        bottom = 16.dp
+                                    ),
                             ) {
                                 OutlinedTextField(
                                     value = modelName,
@@ -283,10 +292,8 @@ fun InsertRepairScreen(
                             color = MaterialTheme.colorScheme.secondaryContainer,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
-                                // align to top start corner of the parent Box
-                                .align(Alignment.TopStart)
-                                // nudge it down a bit and in from the edge
-                                .offset(x = 16.dp, y = (-12).dp)
+                                .align(Alignment.TopCenter)
+                                .offset(y = (-12).dp)
                                 .zIndex(1f)
                         ) {
                             Text(
@@ -306,7 +313,6 @@ fun InsertRepairScreen(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-
                         ElevatedCard(
                             shape = RoundedCornerShape(12.dp),
                             elevation = CardDefaults.cardElevation(4.dp),
@@ -337,10 +343,8 @@ fun InsertRepairScreen(
                             color = MaterialTheme.colorScheme.secondaryContainer,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
-                                // align to top start corner of the parent Box
-                                .align(Alignment.TopStart)
-                                // nudge it down a bit and in from the edge
-                                .offset(x = 16.dp, y = (-12).dp)
+                                .align(Alignment.TopCenter)
+                                .offset(y = (-12).dp)
                                 .zIndex(1f)
                         ) {
                             Text(
@@ -416,8 +420,8 @@ fun InsertRepairScreen(
                             color = MaterialTheme.colorScheme.secondaryContainer,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier
-                                .align(Alignment.TopStart)
-                                .offset(x = 16.dp, y = (-12).dp)
+                                .align(Alignment.TopCenter)
+                                .offset(y = (-12).dp)
                                 .zIndex(1f)
                         ) {
                             Text(
@@ -455,7 +459,9 @@ fun InsertRepairScreen(
                                         deviceBottomModalSheet = false
                                     }
                                     .padding(8.dp)
-                                    .semantics { contentDescription = "Device option ${dm.phoneModelName}" }
+                                    .semantics {
+                                        contentDescription = "Device option ${dm.phoneModelName}"
+                                    }
                             )
                         }
                     }
@@ -483,7 +489,9 @@ fun InsertRepairScreen(
                                         customerBottomModalSheet = false
                                     }
                                     .padding(8.dp)
-                                    .semantics { contentDescription = "Customer option ${cust.customerName}" },
+                                    .semantics {
+                                        contentDescription = "Customer option ${cust.customerName}"
+                                    },
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(cust.customerName)
@@ -495,35 +503,56 @@ fun InsertRepairScreen(
             }
         }
 
-        // Save button
-        FloatingActionButton(
-            onClick = {
-                if (serial.isBlank() || customerId == 0) {
-                    Toast.makeText(context, "Please fill in serial & select customer", Toast.LENGTH_SHORT).show()
-                    return@FloatingActionButton
-                }
-                coroutineScope.launch {
-                    // Insert Device then Repair
-                    val newDeviceId = withContext(Dispatchers.IO) {
-                        val dev = Device(null, customerId, phoneModel?.id ?: 0, DeviceType.MOBILE, serial)
-                        db.deviceDao().insert(dev)
-                    }.toInt()
-
-                    withContext(Dispatchers.IO) {
-                        val rep = Repair(null, customerId, newDeviceId, 1, price.toDoubleOrNull() ?: 0.0, "", selectedType)
-                        db.repairDAO().insert(rep)
-                    }
-                    navController.navigate(Destination.Main.route)
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        Column (
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(20.dp)
-                .semantics { contentDescription = "Save new repair" }
-        ) {
-            Icon(Icons.Filled.Add, contentDescription = null)
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ){
+
+            SmallFloatingActionButton(
+                onClick = {
+                    navController.navigate(Destination.Camera.route)
+                },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier
+                    .padding(bottom = 6.dp)
+                    .semantics { contentDescription = "Take Photo of Device" }
+            ) {
+                Icon(Icons.Filled.Camera, contentDescription = "Take Photo Icon")
+            }
+
+            FloatingActionButton(
+                onClick = {
+                    if (serial.isBlank() || customerId == 0) {
+                        Toast.makeText(context, "Please fill in serial & select customer", Toast.LENGTH_SHORT).show()
+                        return@FloatingActionButton
+                    }
+                    coroutineScope.launch {
+                        // Insert Device then Repair
+                        val newDeviceId = withContext(Dispatchers.IO) {
+                            val dev = Device(null, customerId, phoneModel?.id ?: 0, DeviceType.MOBILE, serial)
+                            db.deviceDao().insert(dev)
+                        }.toInt()
+
+                        withContext(Dispatchers.IO) {
+                            val rep = Repair(null, customerId, newDeviceId, 1, price.toDoubleOrNull() ?: 0.0, "", selectedType)
+                            db.repairDAO().insert(rep)
+                        }
+                        navController.navigate(Destination.Main.route)
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier
+                    .semantics { contentDescription = "Save new repair" }
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+            }
         }
+        // Save button
+
     }
 }
