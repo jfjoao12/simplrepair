@@ -3,6 +3,7 @@ package com.example.project_simplrepair.Models
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ForeignKey
 import com.squareup.moshi.Json
 import androidx.room.TypeConverters
 
@@ -21,9 +22,20 @@ import androidx.room.TypeConverters
  * @property mainCameraSpecs    Specifications of the main camera (e.g., "12 MP").
  * @property mainCameraVideo    Video capabilities of the main camera (e.g., "4K@30fps").
  */
-@Entity(tableName = "phone_details")
+@Entity(
+    tableName = "phone_models_table",
+    foreignKeys = [
+        ForeignKey(
+            entity = PhoneBrands::class,
+            parentColumns = arrayOf("brand_id"),
+            childColumns = arrayOf("brand_id"),
+            onUpdate = ForeignKey.CASCADE,
+            onDelete = ForeignKey.SET_NULL
+        )
+    ]
+)
 @TypeConverters(Converters::class)
-data class PhoneDetails(
+data class  Phones(
 
     @PrimaryKey val id: Int,
     val name: String,

@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Models.PhoneBrands
-import com.example.project_simplrepair.Models.PhoneModels
+import com.example.project_simplrepair.Models.Phones
 import com.example.project_simplrepair.Models.PhoneSpecs
 import com.example.project_simplrepair.Models.PhoneSpecsResponse
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -26,10 +26,10 @@ import retrofit2.Response
 class PhonesApiManager(database: AppDatabase) {
 
     private var _phonesBrandsResponse = mutableStateOf<List<PhoneBrands>>(emptyList())
-    private var _phonesModelsResponse = mutableStateOf<List<PhoneModels>>(emptyList())
-    private var _phoneSpecsResponse = mutableStateOf<PhoneSpecs?>(null)
+    private var _phonesModelsResponse = mutableStateOf<List<Phones>>(emptyList())
+    //private var _phoneSpecsResponse = mutableStateOf<PhoneSpecs?>(null)
 
-    val api_key = "0dc1c9bf90msh8536d2155c57902p1798e8jsn2d2878a46a1b"
+    val api_key = "51bc23d70dmsh6429272287e5c73p18d54cjsn834e6269ba89"
 
     // Flag to prevent repeated fetch of models
     private var isModelsFetched = false
@@ -91,10 +91,10 @@ class PhonesApiManager(database: AppDatabase) {
             if (database.phoneModelsDAO().checkIfExists() < 1) {
                 brands.forEach { brand ->
                     val modelsService = Api.retrofitService.getModelsByBrand(brand.brandValue, api_key)
-                    modelsService.enqueue(object : Callback<List<PhoneModels>> {
+                    modelsService.enqueue(object : Callback<List<Phones>> {
                         override fun onResponse(
-                            call: Call<List<PhoneModels>>,
-                            response: Response<List<PhoneModels>>
+                            call: Call<List<Phones>>,
+                            response: Response<List<Phones>>
                         ) {
                             GlobalScope.launch {
                                 if (response.isSuccessful) {
@@ -106,7 +106,7 @@ class PhonesApiManager(database: AppDatabase) {
                             }
                         }
 
-                        override fun onFailure(call: Call<List<PhoneModels>>, t: Throwable) {
+                        override fun onFailure(call: Call<List<Phones>>, t: Throwable) {
                             Log.d("error", "${t.message}")
                         }
                     })
@@ -171,7 +171,7 @@ class PhonesApiManager(database: AppDatabase) {
     /**
      * Inserts the provided list of phone models into the local database.
      */
-    private suspend fun saveModelsToDatabase(database: AppDatabase, phoneModels: List<PhoneModels>) {
+    private suspend fun saveModelsToDatabase(database: AppDatabase, phoneModels: List<Phones>) {
         database.phoneModelsDAO().insertAll(phoneModels)
     }
 }

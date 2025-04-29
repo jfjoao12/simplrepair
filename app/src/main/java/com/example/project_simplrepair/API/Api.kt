@@ -17,7 +17,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 object Api {
 
     // Base URL for the external phone specifications API
-    private const val BASE_URL = "https://mobile-phone-specs-database.p.rapidapi.com/"
+    private const val BASE_URL = "https://mobile-devices-api1.p.rapidapi.com/"
 
     // Moshi instance configured with Kotlin support
     private val moshi = Moshi.Builder()

@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.example.project_simplrepair.Models.PhoneModels
+import com.example.project_simplrepair.Models.Phones
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -14,22 +14,22 @@ import kotlinx.coroutines.flow.Flow
 interface PhoneModelsDAO {
 
     /**
-     * Inserts a list of [PhoneModels] into the database.
+     * Inserts a list of [Phones] into the database.
      * If a conflict occurs, existing entries will be replaced.
      *
      * @param phoneModels The list of models to insert.
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertAll(phoneModels: List<PhoneModels>)
+    fun insertAll(phoneModels: List<Phones>)
 
     /**
      * Retrieves a phone model by its associated brand ID.
      *
      * @param id The brand ID.
-     * @return A [PhoneModels] instance or null if not found.
+     * @return A [Phones] instance or null if not found.
      */
     @Query("SELECT * FROM phone_models_table WHERE brand_id = :id")
-    fun getBrandById(id: Int): PhoneModels?
+    fun getBrandById(id: Int): Phones?
 
     /**
      * Retrieves the brand name associated with a given brand ID.
@@ -59,8 +59,8 @@ interface PhoneModelsDAO {
      * This search is case-insensitive and partial.
      *
      * @param phoneName The name (or partial name) of the phone to search.
-     * @return A [Flow] emitting a list of matching [PhoneModels].
+     * @return A [Flow] emitting a list of matching [Phones].
      */
     @Query("SELECT * FROM phone_models_table WHERE phone_model_name LIKE '%' || :phoneName || '%'")
-    fun getModelByName(phoneName: String): Flow<List<PhoneModels>>
+    fun getModelByName(phoneName: String): Flow<List<Phones>>
 }

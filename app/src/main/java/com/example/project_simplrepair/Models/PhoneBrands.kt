@@ -12,6 +12,12 @@ import com.squareup.moshi.JsonClass
  * @property id          Auto-generated primary key.
  * @property brandValue  The name of the brand (e.g., "Samsung", "Apple", "Google").
  */
+
+@JsonClass(generateAdapter = true)
+data class PhoneListResponseDto(
+    @Json(name = "items") val items: List<PhoneBrands>
+)
+
 @Entity(tableName = "phone_brands")
 @JsonClass(generateAdapter = true)
 data class PhoneBrands(

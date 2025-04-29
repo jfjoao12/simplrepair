@@ -1,8 +1,7 @@
 package com.example.project_simplrepair.API
 
 import com.example.project_simplrepair.Models.PhoneBrands
-import com.example.project_simplrepair.Models.PhoneModels
-import com.example.project_simplrepair.Models.PhoneSpecsResponse
+import com.example.project_simplrepair.Models.Phones
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -20,7 +19,7 @@ interface PhoneApiService {
      * @param apiKey The API key required to authenticate with the RapidAPI service.
      * @return A [Call] object for a list of [PhoneBrands].
      */
-    @GET("gsm/all-brands")
+    @GET("brands?pageSize=totalItems")
     fun getAllPhoneBrands(
         @Header("X-RapidAPI-Key") apiKey: String
     ): Call<List<PhoneBrands>>
@@ -30,26 +29,12 @@ interface PhoneApiService {
      *
      * @param brandName The name of the phone brand.
      * @param apiKey The API key required to authenticate with the RapidAPI service.
-     * @return A [Call] object for a list of [PhoneModels].
+     * @return A [Call] object for a list of [Phones].
      */
-    @GET("gsm/get-models-by-brandname/{brand}")
+    @GET("devices?brandId={brand-id}&pageSize=totalItems")
     fun getModelsByBrand(
-        @Path("brand") brandName: String,
+        @Path("brand-id") brandId: Int,
         @Header("X-RapidAPI-Key") apiKey: String
-    ): Call<List<PhoneModels>>
+    ): Call<List<Phones>>
 
-    /**
-     * Retrieves detailed phone specifications for a specific brand and model.
-     *
-     * @param brandName The name of the phone brand.
-     * @param modelName The model name of the phone.
-     * @param apiKey The API key required to authenticate with the RapidAPI service.
-     * @return A [Call] object for a [PhoneSpecsResponse].
-     */
-    @GET("gsm/get-specifications-by-brandname-modelname/{brand}/{model}")
-    fun getPhoneSpecifications(
-        @Path("brand") brandName: String,
-        @Path("model") modelName: String,
-        @Header("X-RapidAPI-Key") apiKey: String
-    ): Call<PhoneSpecsResponse>
 }

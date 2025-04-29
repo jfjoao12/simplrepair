@@ -1,6 +1,5 @@
 package com.example.project_simplrepair.Screen
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,12 +19,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -36,11 +31,9 @@ import kotlinx.coroutines.withContext
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.ScreenTitle
-import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
-import com.example.project_simplrepair.Models.PhoneModels
+import com.example.project_simplrepair.Models.Phones
 import com.example.project_simplrepair.Models.Repair
-import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.RepairType
 
@@ -66,7 +59,7 @@ fun InsertRepairScreen(
     var serial by remember { mutableStateOf("") }
     var customerName by remember { mutableStateOf("") }
     var customerId by remember { mutableIntStateOf(0) }
-    var phoneModel by remember { mutableStateOf<PhoneModels?>(null) }
+    var phoneModel by remember { mutableStateOf<Phones?>(null) }
     var price by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var selectedType by remember { mutableStateOf(RepairType.BATTERY) }

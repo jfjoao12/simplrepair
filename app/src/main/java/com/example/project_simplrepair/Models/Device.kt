@@ -19,7 +19,7 @@ import com.example.project_simplrepair.Operations.DeviceType
     tableName = "device_table",
     foreignKeys = [
         ForeignKey(
-            entity = PhoneModels::class,
+            entity = Phones::class,
             parentColumns = ["id"],
             childColumns = ["phone_model_id"]
         ),

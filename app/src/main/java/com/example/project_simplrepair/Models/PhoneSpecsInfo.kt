@@ -4,10 +4,6 @@ import com.squareup.moshi.Json
 
 import com.squareup.moshi.JsonClass
 
-@JsonClass(generateAdapter = true)
-data class PhoneListResponseDto(
-    @Json(name = "items") val items: List<PhoneDetails>
-)
 
 @JsonClass(generateAdapter = true)
 data class PhoneDetailsDto(

@@ -16,8 +16,7 @@ import com.example.project_simplrepair.Models.*
         Customer::class,
         Device::class,
         PhoneBrands::class,
-        PhoneModels::class,
-        PhoneSpecs::class,
+        Phones::class,
         Technician::class
     ],
     version = 25,
