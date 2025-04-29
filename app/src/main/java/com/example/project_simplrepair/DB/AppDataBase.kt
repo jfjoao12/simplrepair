@@ -1,9 +1,11 @@
 package com.example.project_simplrepair.DB
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.example.project_simplrepair.Models.*
 
 /**
@@ -16,15 +18,14 @@ import com.example.project_simplrepair.Models.*
         Customer::class,
         Device::class,
         PhoneBrands::class,
-        PhoneModels::class,
         PhoneSpecs::class,
         Technician::class,
         DevicePhoto::class
     ],
-    version = 28,
-    exportSchema = true
+    version = 33,
+    exportSchema = true,
 )
-// @TypeConverters(Converters::class) // Uncomment if you add custom type converters
+@TypeConverters(Converters::class) // Uncomment if you add custom type converters
 abstract class AppDatabase : RoomDatabase() {
 
     /** Data access object for repairs table */

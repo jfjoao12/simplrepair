@@ -1,13 +1,9 @@
 package com.example.project_simplrepair.Screen
 
 import android.Manifest
-import android.graphics.BitmapFactory
 import android.graphics.BitmapFactory.decodeFile
-import android.provider.ContactsContract.Contacts.Photo
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -28,23 +23,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.example.project_simplrepair.Camera.PhotoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -54,12 +41,9 @@ import kotlinx.coroutines.withContext
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.ScreenTitle
-import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
-import com.example.project_simplrepair.Models.DevicePhoto
-import com.example.project_simplrepair.Models.PhoneModels
+import com.example.project_simplrepair.Models.PhoneSpecs
 import com.example.project_simplrepair.Models.Repair
-import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.RepairType
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -92,10 +76,11 @@ fun InsertRepairScreen(
     var serial by remember { mutableStateOf("") }
     var customerName by remember { mutableStateOf("") }
     var customerId by remember { mutableIntStateOf(0) }
-    var phoneModel by remember { mutableStateOf<PhoneModels?>(null) }
+    var phoneModel by remember { mutableStateOf<PhoneSpecs?>(null) }
     var price by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var selectedType by remember { mutableStateOf(RepairType.BATTERY) }
+    var modelBrand by remember { mutableStateOf("Model") }
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -254,7 +239,7 @@ fun InsertRepairScreen(
                                 OutlinedTextField(
                                     value = modelName,
                                     onValueChange = {modelName = it},
-                                    label = { Text("Model") },
+                                    label = { Text(modelBrand) },
                                     singleLine = true,
                                     trailingIcon = {
                                         IconButton(onClick = {
@@ -449,18 +434,20 @@ fun InsertRepairScreen(
                         columns = GridCells.Fixed(1),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        items(devices) { dm ->
+                        items(devices) { model ->
                             Text(
-                                text = dm.phoneModelName,
+                                text = model.name,
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        phoneModel = dm
+                                        phoneModel = model
+                                        modelName = model.name
+                                        modelBrand = model.brand?.name.toString()
                                         deviceBottomModalSheet = false
                                     }
                                     .padding(8.dp)
                                     .semantics {
-                                        contentDescription = "Device option ${dm.phoneModelName}"
+                                        contentDescription = "Device option ${model.name}"
                                     }
                             )
                         }

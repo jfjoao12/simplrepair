@@ -1,5 +1,4 @@
 
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,6 +8,7 @@ plugins {
 }
 
 android {
+
     namespace = "com.example.project_simplrepair"
     compileSdk = 35
 
@@ -34,14 +34,22 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+
     }
+
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
         viewBinding = true
     }
+}
+
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -59,7 +67,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.room.common)
     implementation(libs.androidx.ui.text.google.fonts)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.constraintlayout.compose.android)

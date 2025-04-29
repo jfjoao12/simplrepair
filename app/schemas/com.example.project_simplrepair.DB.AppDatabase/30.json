@@ -1,0 +1,631 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 30,
+    "identityHash": "634345e5520fdc58cc33aa5702eb24eb",
+    "entities": [
+      {
+        "tableName": "repairs_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `customer_id` INTEGER, `device_id` INTEGER, `technician_id` INTEGER, `price` REAL NOT NULL, `notes` TEXT NOT NULL, `repair_type` TEXT NOT NULL, `image_uri` TEXT, FOREIGN KEY(`customer_id`) REFERENCES `customers_table`(`id`) ON UPDATE CASCADE ON DELETE SET NULL , FOREIGN KEY(`device_id`) REFERENCES `device_table`(`id`) ON UPDATE CASCADE ON DELETE NO ACTION , FOREIGN KEY(`technician_id`) REFERENCES `technician_table`(`id`) ON UPDATE CASCADE ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "deviceId",
+            "columnName": "device_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "technicianId",
+            "columnName": "technician_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "repairType",
+            "columnName": "repair_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "imageUri",
+            "columnName": "image_uri",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "customers_table",
+            "onDelete": "SET NULL",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "customer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "device_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "device_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "technician_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "technician_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "customers_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `customer_name` TEXT NOT NULL, `customer_email` TEXT, `customer_city` TEXT NOT NULL, `customer_country` TEXT NOT NULL, `customer_postal_code` TEXT NOT NULL, `customer_prov` TEXT NOT NULL, `customer_address` TEXT, `customer_address_two` TEXT, `customer_phone` TEXT NOT NULL, `customer_phone_two` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "customerId",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerName",
+            "columnName": "customer_name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerEmail",
+            "columnName": "customer_email",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerCity",
+            "columnName": "customer_city",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerCountry",
+            "columnName": "customer_country",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerPostalCode",
+            "columnName": "customer_postal_code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerProv",
+            "columnName": "customer_prov",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerAddress",
+            "columnName": "customer_address",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerAddressTwo",
+            "columnName": "customer_address_two",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerPhone",
+            "columnName": "customer_phone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerPhoneTwo",
+            "columnName": "customer_phone_two",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "device_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `customer_id` INTEGER, `phone_model_id` INTEGER NOT NULL, `device_type` TEXT NOT NULL, `device_serial` TEXT NOT NULL, FOREIGN KEY(`phone_model_id`) REFERENCES `phone_specs_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`customer_id`) REFERENCES `customers_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "deviceId",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "phoneModelId",
+            "columnName": "phone_model_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceType",
+            "columnName": "device_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "deviceSerial",
+            "columnName": "device_serial",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "phone_specs_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "phone_model_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "customers_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "customer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "phone_brands",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `brand_name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brandValue",
+            "columnName": "brand_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "phone_specs_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name` TEXT NOT NULL, `colors` TEXT NOT NULL, `models` TEXT NOT NULL, `brand_id` INTEGER NOT NULL, `brand_name` TEXT, `battery_type` TEXT, `battery_charging` TEXT, `platform_os` TEXT, `platform_chipset` TEXT, `platform_cpu` TEXT, `platform_gpu` TEXT, `network_technology` TEXT NOT NULL, `network_speed` TEXT NOT NULL, `network_twoG` TEXT, `network_threeG` TEXT, `network_fourG` TEXT, `network_fiveG` TEXT, `display_type` TEXT, `display_size` TEXT, `display_resolution` TEXT, `display_protection` TEXT, `launch_released` TEXT, `launch_status` TEXT, `memory_cardSlot` TEXT, `memory_internal` TEXT, `comms_wlan` TEXT, `comms_bluetooth` TEXT, `comms_positioning` TEXT, `comms_nfc` TEXT, `comms_radio` TEXT, `comms_usb` TEXT, `features_sensors` TEXT, `mainCam_type` TEXT, `mainCam_cameraSpecs` TEXT, `mainCam_features` TEXT, `mainCam_video` TEXT, `selfieCam_type` TEXT, `selfieCam_cameraSpecs` TEXT, `selfieCam_features` TEXT, `selfieCam_video` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`brand_id`) REFERENCES `phone_brands`(`id`) ON UPDATE CASCADE ON DELETE SET NULL )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "colors",
+            "columnName": "colors",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "models",
+            "columnName": "models",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brand.id",
+            "columnName": "brand_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "brand.name",
+            "columnName": "brand_name",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "battery.type",
+            "columnName": "battery_type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "battery.charging",
+            "columnName": "battery_charging",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "platform.os",
+            "columnName": "platform_os",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "platform.chipset",
+            "columnName": "platform_chipset",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "platform.cpu",
+            "columnName": "platform_cpu",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "platform.gpu",
+            "columnName": "platform_gpu",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "network.technology",
+            "columnName": "network_technology",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "network.speed",
+            "columnName": "network_speed",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "network.twoG",
+            "columnName": "network_twoG",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "network.threeG",
+            "columnName": "network_threeG",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "network.fourG",
+            "columnName": "network_fourG",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "network.fiveG",
+            "columnName": "network_fiveG",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "display.type",
+            "columnName": "display_type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "display.size",
+            "columnName": "display_size",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "display.resolution",
+            "columnName": "display_resolution",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "display.protection",
+            "columnName": "display_protection",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "launch.released",
+            "columnName": "launch_released",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "launch.status",
+            "columnName": "launch_status",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "memory.cardSlot",
+            "columnName": "memory_cardSlot",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "memory.internal",
+            "columnName": "memory_internal",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "comms.wlan",
+            "columnName": "comms_wlan",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "comms.bluetooth",
+            "columnName": "comms_bluetooth",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "comms.positioning",
+            "columnName": "comms_positioning",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "comms.nfc",
+            "columnName": "comms_nfc",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "comms.radio",
+            "columnName": "comms_radio",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "comms.usb",
+            "columnName": "comms_usb",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "features.sensors",
+            "columnName": "features_sensors",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "mainCamera.type",
+            "columnName": "mainCam_type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "mainCamera.cameraSpecs",
+            "columnName": "mainCam_cameraSpecs",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "mainCamera.features",
+            "columnName": "mainCam_features",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "mainCamera.video",
+            "columnName": "mainCam_video",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "selfieCamera.type",
+            "columnName": "selfieCam_type",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "selfieCamera.cameraSpecs",
+            "columnName": "selfieCam_cameraSpecs",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "selfieCamera.features",
+            "columnName": "selfieCam_features",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "selfieCamera.video",
+            "columnName": "selfieCam_video",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "phone_brands",
+            "onDelete": "SET NULL",
+            "onUpdate": "CASCADE",
+            "columns": [
+              "brand_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "technician_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `technician_name` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "technician_name",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "device_photos",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `repair_id` INTEGER, `path` TEXT NOT NULL, `timestamp` INTEGER NOT NULL, FOREIGN KEY(`repair_id`) REFERENCES `repairs_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "photoId",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "deviceId",
+            "columnName": "repair_id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "filePath",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "repairs_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "repair_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '634345e5520fdc58cc33aa5702eb24eb')"
+    ]
+  }
+}

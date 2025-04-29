@@ -1,44 +1,80 @@
 package com.example.project_simplrepair.Models
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ForeignKey
+import androidx.room.TypeConverters
 import com.squareup.moshi.Json
 
 /**
- * Represents the specifications of a phone.
+ * Represents a phone model.
  *
- * @property id                 Auto-generated primary key.
- * @property year               The release year of the phone model.
- * @property brand              The brand of the phone (e.g., "Samsung", "Apple").
- * @property modelName          The name of the phone model (e.g., "Galaxy S21").
- * @property launchDate         The launch date of the phone model.
- * @property chipset            The chipset used in the phone.
- * @property cpu                The CPU model of the phone.
- * @property gpu                The GPU used in the phone.
- * @property mainCameraFeatures Features of the main camera (e.g., "Quad camera").
- * @property mainCameraSpecs    Specifications of the main camera (e.g., "12 MP").
- * @property mainCameraVideo    Video capabilities of the main camera (e.g., "4K@30fps").
+ * @property id            Auto-generated primary key.
+ * @property brandId       The ID of the associated phone brand (foreign key to [PhoneBrands]).
+ * @property phoneModelName The name of the phone model (e.g., "Galaxy S21", "iPhone 12").
+ *
+ * Foreign Key:
+ * - [brandId] references the [PhoneBrands] table's primary key.
  */
-@Entity(tableName = "phone_specifications")
+@Entity(
+    tableName = "phone_specs_table",
+    foreignKeys = [
+        ForeignKey(
+            entity = PhoneBrands::class,
+            parentColumns = arrayOf("id"),
+            childColumns = arrayOf("brand_id"),
+            onUpdate = ForeignKey.CASCADE,
+            onDelete = ForeignKey.CASCADE
+        )
+    ]
+)
+@TypeConverters(Converters::class)
 data class PhoneSpecs(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
 
-    // phoneDetails
-    @ColumnInfo(name = "year") val year: String?,
-    @ColumnInfo(name = "brand") val brand: String?,
-    @ColumnInfo(name = "model_name") val modelName: String?,
+    @PrimaryKey
+    @ColumnInfo(name = "id")
+    val id: Int,
 
-    // gsmLaunchDetails
-    @ColumnInfo(name = "launch_date") val launchDate: String?,
+    val name: String,
 
-    // ssmPlatformDetails
-    @ColumnInfo(name = "chipset") val chipset: String?,
-    @ColumnInfo(name = "cpu") val cpu: String?,
-    @ColumnInfo(name = "gpu") val gpu: String?,
+    @Embedded(prefix = "brand_")
+    val brand: BrandInfo?,
 
-    // gsmMainCameraDetails
-    @ColumnInfo(name = "main_camera_features") val mainCameraFeatures: String?,
-    @ColumnInfo(name = "main_camera_specs") val mainCameraSpecs: String?,
-    @ColumnInfo(name = "main_camera_video") val mainCameraVideo: String?
+    @Embedded(prefix = "battery_")
+    val battery: BatteryInfo?,
+
+    @Embedded(prefix = "platform_")
+    val platform: PlatformInfo?,
+
+    @Embedded(prefix = "network_")
+    val network: NetworkInfo?,
+
+    @Embedded(prefix = "display_")
+    val display: DisplayInfo?,
+
+    @Embedded(prefix = "launch_")
+    val launch: LaunchInfo?,
+
+    @Embedded(prefix = "memory_")
+    val memory: MemoryInfo?,
+
+    @Embedded(prefix = "comms_")
+    val comms: CommsInfo?,
+
+    @Embedded(prefix = "features_")
+    val features: FeaturesInfo?,
+
+    // these two use your converter to store as JSON text
+    val colors: List<String>?,
+    val models: List<String>?,
+
+    // camera info is nested twice—flatten both into columns
+    @Embedded(prefix = "mainCam_")
+    val mainCamera: SubCamera?,
+
+    @Embedded(prefix = "selfieCam_")
+    val selfieCamera: SubCamera?,
+
 )

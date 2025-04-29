@@ -8,9 +8,9 @@ import androidx.compose.runtime.remember
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Models.PhoneBrands
 import com.example.project_simplrepair.Models.PhoneBrandsItem
-import com.example.project_simplrepair.Models.PhoneModels
+import com.example.project_simplrepair.Models.PhoneListResponseDTO
 import com.example.project_simplrepair.Models.PhoneSpecs
-import com.example.project_simplrepair.Models.PhoneSpecsResponse
+import com.example.project_simplrepair.Models.PhoneSpecsItems
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,8 +27,8 @@ import retrofit2.Response
 class PhonesApiManager(database: AppDatabase) {
 
     private var _phonesBrandsResponse = mutableStateOf<List<PhoneBrands>>(emptyList())
-    private var _phonesModelsResponse = mutableStateOf<List<PhoneModels>>(emptyList())
-    private var _phoneSpecsResponse = mutableStateOf<PhoneSpecs?>(null)
+    private var _phonesModelsResponse = mutableStateOf<List<PhoneSpecs>>(emptyList())
+    private var _phoneSpecsResponse = mutableStateOf<List<PhoneSpecs>>(emptyList())
 
     private val apiKey = "51bc23d70dmsh6429272287e5c73p18d54cjsn834e6269ba89"
 
@@ -64,7 +64,10 @@ class PhonesApiManager(database: AppDatabase) {
                         _phonesBrandsResponse.value = brandsFromApi
                         database.phoneBrandsDAO().clearTable()
                         saveBrandsToDatabase(database, _phonesBrandsResponse.value)
-                        getPhoneModels(database)
+                        if (!isModelsFetched) {
+                            brandsFromApi.forEach { getPhoneSpecs(it.id, database) }
+                            isModelsFetched = true
+                        }
                     } else {
                         Log.i("DataInfo", "phone_brands table not updated, already present")
                     }
@@ -78,48 +81,6 @@ class PhonesApiManager(database: AppDatabase) {
     }
 
     /**
-     * Fetches all phone models for each brand from the API and inserts them into the database.
-     */
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun getPhoneModels(database: AppDatabase) {
-        GlobalScope.launch {
-            if (isModelsFetched) {
-                Log.i("PhoneModels", "getPhoneModels has already been called.")
-                return@launch
-            }
-            isModelsFetched = true
-
-            val brands = database.phoneBrandsDAO().getAll()
-            if (database.phoneModelsDAO().checkIfExists() < 1) {
-                brands.forEach { brand ->
-                    val modelsService = Api.retrofitService.getModelsByBrand(brand.brandValue, apiKey)
-                    modelsService.enqueue(object : Callback<List<PhoneModels>> {
-                        override fun onResponse(
-                            call: Call<List<PhoneModels>>,
-                            response: Response<List<PhoneModels>>
-                        ) {
-                            GlobalScope.launch {
-                                if (response.isSuccessful) {
-                                    val models = response.body() ?: emptyList()
-                                    val updatedModels = models.map { it.copy(brandId = brand.id) }
-                                    _phonesModelsResponse.value += updatedModels
-                                    saveModelsToDatabase(database, updatedModels)
-                                }
-                            }
-                        }
-
-                        override fun onFailure(call: Call<List<PhoneModels>>, t: Throwable) {
-                            Log.d("error", "${t.message}")
-                        }
-                    })
-                }
-            } else {
-                Log.i("PhoneModels", "phone_models_table not updated, already present")
-            }
-        }
-    }
-
-    /**
      * Fetches detailed specifications for a specific phone and stores it into the database.
      *
      * @param brandName The brand name of the phone.
@@ -127,37 +88,48 @@ class PhonesApiManager(database: AppDatabase) {
      * @param database The Room database instance.
      */
     @OptIn(DelicateCoroutinesApi::class)
-    fun getPhoneSpecs(brandName: String, modelName: String, database: AppDatabase) {
-        val service = Api.retrofitService.getPhoneSpecifications(brandName, modelName, apiKey)
-        service.enqueue(object : Callback<PhoneSpecsResponse> {
+    fun getPhoneSpecs(brandId: Int, database: AppDatabase) {
+        val service = Api.retrofitService.getPhoneSpecifications(
+            brandId = brandId,
+            apiKey = apiKey
+        )
+        service.enqueue(object : Callback<PhoneListResponseDTO> {
             override fun onResponse(
-                call: Call<PhoneSpecsResponse>,
-                response: Response<PhoneSpecsResponse>
+                call: Call<PhoneListResponseDTO>,
+                response: Response<PhoneListResponseDTO>
             ) {
                 GlobalScope.launch {
                     if (response.isSuccessful && response.body() != null) {
-                        val specs = response.body()!!
-                        val phoneSpecs = PhoneSpecs(
-                            year = specs.phoneDetails.year,
-                            brand = specs.phoneDetails.brand,
-                            modelName = specs.phoneDetails.modelName,
-                            launchDate = specs.launchDetails.launchDate,
-                            chipset = specs.gsmPlatformDetails.chipset,
-                            cpu = specs.gsmPlatformDetails.cpu,
-                            gpu = specs.gsmPlatformDetails.gpu,
-                            mainCameraFeatures = specs.gsmMainCameraDetails.mainCamFeatures,
-                            mainCameraSpecs = specs.gsmMainCameraDetails.mainCameraQuad
-                                ?: specs.gsmMainCameraDetails.mainCameraTriple
-                                ?: "N/A",
-                            mainCameraVideo = specs.gsmMainCameraDetails.mainCameraVideo
-                        )
-                        _phoneSpecsResponse.value = phoneSpecs
-                        database.phoneSpecsDAO().insert(phoneSpecs)
+                        val specsResponse = response.body()!!.items
+                        specsResponse.forEach {specs ->
+                            val phoneSpecs = PhoneSpecs(
+                                id = specs.id,
+                                name = specs.name,
+                                brand = specs.brand,
+                                battery = specs.battery,
+                                platform = specs.platform,
+                                network = specs.network,
+                                display = specs.display,
+                                launch = specs.launch,
+                                memory = specs.memory,
+                                comms = specs.comms,
+                                features = specs.features,
+                                colors = specs.colors,
+                                models = specs.models,
+                                mainCamera = specs.cameras?.mainCamera,
+                                selfieCamera = specs.cameras?.selfieCamera,
+                            )
+                            Log.i("PhoneSpecs", specs.toString())
+                            _phoneSpecsResponse.value = listOf(phoneSpecs)
+                            database.phoneSpecsDAO().insert(phoneSpecs)
+                        }
+
                     }
                 }
             }
 
-            override fun onFailure(call: Call<PhoneSpecsResponse>, t: Throwable) {
+            override fun onFailure(call: Call<PhoneListResponseDTO>, t: Throwable) {
+
                 Log.d("error", "Failed to fetch phone specs: ${t.message}")
             }
         })
@@ -173,7 +145,7 @@ class PhonesApiManager(database: AppDatabase) {
     /**
      * Inserts the provided list of phone models into the local database.
      */
-    private suspend fun saveModelsToDatabase(database: AppDatabase, phoneModels: List<PhoneModels>) {
+    private suspend fun saveModelsToDatabase(database: AppDatabase, phoneModels: List<PhoneSpecs>) {
         database.phoneModelsDAO().insertAll(phoneModels)
     }
 }

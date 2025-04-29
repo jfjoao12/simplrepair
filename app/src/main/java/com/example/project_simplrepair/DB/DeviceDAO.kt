@@ -29,8 +29,8 @@ interface DeviceDAO {
      * @return The name of the associated phone model, or null if not found.
      */
     @Query("""
-        SELECT phone_model_name FROM phone_models_table
-        JOIN device_table ON device_table.phone_model_id = phone_models_table.id
+        SELECT name FROM phone_specs_table
+        JOIN device_table ON device_table.phone_model_id = phone_specs_table.id
         WHERE device_table.id = :id
     """)
     fun getModelNameByDeviceId(id: Int): String?
