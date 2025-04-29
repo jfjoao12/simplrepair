@@ -10,7 +10,7 @@ import com.squareup.moshi.JsonClass
  * Represents a phone brand.
  *
  * @property id          Auto-generated primary key.
- * @property brandValue  The name of the brand (e.g., "Samsung", "Apple").
+ * @property brandValue  The name of the brand (e.g., "Samsung", "Apple", "Google").
  */
 @Entity(tableName = "phone_brands")
 @JsonClass(generateAdapter = true)
@@ -19,7 +19,7 @@ data class PhoneBrands(
     @ColumnInfo(name = "brand_id")
     val id: Int = 0,
 
-    @Json(name = "brandValue")
+    @Json(name = "name")
     @ColumnInfo(name = "brand_name")
     val brandValue: String
 )
