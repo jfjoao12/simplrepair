@@ -1,6 +1,6 @@
 package com.example.project_simplrepair
 
-import com.example.project_simplrepair.Screen.RepairDetailsScreen
+import com.example.project_simplrepair.Screens.RepairDetailsScreen
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -55,22 +55,23 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.ProjectSimplRepairTheme
 import com.example.project_simplrepair.API.PhonesApiManager
-import com.example.project_simplrepair.Camera.PhotoViewModel
+import com.example.project_simplrepair.ViewModels.PhotoViewModel
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Navigation.BottomNav
-import com.example.project_simplrepair.Screen.AppointmentsScreen
-import com.example.project_simplrepair.Screen.CameraScreen
-import com.example.project_simplrepair.Screen.InsertCustomerScreen
-import com.example.project_simplrepair.Screen.InsertRepairScreen
-import com.example.project_simplrepair.Screen.InventoryScreen
+import com.example.project_simplrepair.Screens.AppointmentsScreen
+import com.example.project_simplrepair.Screens.InsertRepair.CameraScreen
+import com.example.project_simplrepair.Screens.InsertCustomerScreen
+import com.example.project_simplrepair.Screens.InsertRepair.InsertRepairScreen
+import com.example.project_simplrepair.Screens.Inventory.InventoryScreen
 
-import com.example.project_simplrepair.Screen.RepairScreen
-import com.example.project_simplrepair.Screen.SearchScreen
-import com.example.project_simplrepair.Screen.SettingsScreen
+import com.example.project_simplrepair.Screens.RepairScreen
+import com.example.project_simplrepair.Screens.SearchScreen
+import com.example.project_simplrepair.Screens.SettingsScreen
+import com.example.project_simplrepair.ViewModels.InsertRepairViewModel
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -287,7 +288,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         SettingsScreen(modifier, paddingValues)
                     }
                     composable(Destination.Inventory.route) {
-                        InventoryScreen(modifier, paddingValues)
+                        InventoryScreen(modifier, paddingValues, navController, db)
                     }
 
                     composable(Destination.RepairDetails.route) { navBackStackEntry ->
@@ -324,12 +325,15 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         composable(Destination.NewRepair.route) { backStackEntry  ->
                             // 1) get the *same* navGraph entry for the VM:
                             val photoVm: PhotoViewModel = backStackEntry.sharedViewModel(navController)
+                            val insertVm: InsertRepairViewModel =
+                                viewModel(backStackEntry)
 
                             InsertRepairScreen(
                                 paddingValues = paddingValues,
                                 db = AppDatabase.getInstance(LocalContext.current),
                                 navController = navController,
-                                photoPaths = photoVm.photoPaths  // pass the list in
+                                photoPaths = photoVm.photoPaths,
+                                insertVm = insertVm
                             )
                         }
 
@@ -343,7 +347,8 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 },
                                 onCancel = {
                                     navController.popBackStack()
-                                }
+                                },
+                                db = db
                             )
                         }
                         composable(Destination.NewCustomer.route) {
@@ -352,6 +357,10 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 AppDatabase.getInstance(context = LocalContext.current),
                                 navController
                             )
+                        }
+
+                        composable(Destination.NewInventoryItem.route) {
+
                         }
                     }
                 }

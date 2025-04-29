@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screen
+package com.example.project_simplrepair.Screens
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
@@ -347,4 +347,6 @@ fun CardSection(title: String, content: @Composable () -> Unit) {
         }
     }
 }
+
+
 

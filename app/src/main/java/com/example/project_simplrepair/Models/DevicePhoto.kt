@@ -21,7 +21,7 @@ data class DevicePhoto (
     val photoId: Int?,
 
     @ColumnInfo(name = "repair_id")
-    val deviceId: Int?,
+    val repairId: Int?,
 
     @ColumnInfo(name = "path")
     val filePath: String,

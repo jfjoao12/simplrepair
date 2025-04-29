@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screen
+package com.example.project_simplrepair.Screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues

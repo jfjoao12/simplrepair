@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DevicePhotoDAO {
+
     @Insert
     suspend fun insert(devicePhoto: DevicePhoto): Long
 
@@ -17,6 +18,13 @@ interface DevicePhotoDAO {
         """
     )
     suspend fun getPhotosPath(): List<String>
+
+    @Query("""
+        UPDATE device_photos
+        SET repair_id = :id
+            """)
+    fun updatePhotoRepairId(id: Int)
+
 //    @Query("SELECT * FROM device_photos ORDER BY timestamp DESC")
 //    fun getAllPhotos(): Flow<List<DevicePhoto>>
 }

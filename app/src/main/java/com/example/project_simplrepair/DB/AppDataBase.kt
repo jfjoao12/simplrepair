@@ -22,8 +22,11 @@ import com.example.project_simplrepair.Models.*
         Technician::class,
         DevicePhoto::class
     ],
-    version = 33,
+    version = 34,
     exportSchema = true,
+    autoMigrations = [
+        AutoMigration(33, 34)
+    ]
 )
 @TypeConverters(Converters::class) // Uncomment if you add custom type converters
 abstract class AppDatabase : RoomDatabase() {

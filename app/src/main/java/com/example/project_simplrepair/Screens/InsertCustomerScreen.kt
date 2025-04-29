@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screen
+package com.example.project_simplrepair.Screens
 
 import android.util.Log
 import android.widget.Toast

@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screen
+package com.example.project_simplrepair.Screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,13 +15,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 
 /**
- * A placeholder screen for app settings.
+ * A placeholder screen for search functionality.
  *
  * @param modifier Optional [Modifier] for styling.
  * @param paddingValues Window insets to apply as padding.
  */
 @Composable
-fun SettingsScreen(
+fun SearchScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues
 ) {
@@ -29,16 +29,16 @@ fun SettingsScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            // Provide an accessible label for the entire screen
-            .semantics { contentDescription = "Settings Screen" }
+            // Announce the screen to accessibility services
+            .semantics { contentDescription = "Search Screen" }
     ) {
         Text(
-            text = "Settings Screen",
+            text = "Search Screen",
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = modifier
                 .align(Alignment.Center)
-                // Mark this text as a heading for assistive technologies
+                // Mark the title as a heading for screen readers
                 .semantics { heading() }
         )
     }

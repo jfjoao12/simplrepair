@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Camera
+package com.example.project_simplrepair.ViewModels
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel

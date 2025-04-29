@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screen
+package com.example.project_simplrepair.Screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,13 +15,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 
 /**
- * A placeholder screen for showing the inventory.
+ * A placeholder screen for app settings.
  *
- * @param modifier Optional [Modifier] for layout adjustments.
- * @param paddingValues Insets to apply for status/navigation bars.
+ * @param modifier Optional [Modifier] for styling.
+ * @param paddingValues Window insets to apply as padding.
  */
 @Composable
-fun InventoryScreen(
+fun SettingsScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues
 ) {
@@ -29,16 +29,16 @@ fun InventoryScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            // Announce this whole region as the Inventory screen
-            .semantics { contentDescription = "Inventory Screen" }
+            // Provide an accessible label for the entire screen
+            .semantics { contentDescription = "Settings Screen" }
     ) {
         Text(
-            text = "Inventory Screen",
+            text = "Settings Screen",
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
             modifier = modifier
                 .align(Alignment.Center)
-                // Mark this text as a heading for screen readers
+                // Mark this text as a heading for assistive technologies
                 .semantics { heading() }
         )
     }

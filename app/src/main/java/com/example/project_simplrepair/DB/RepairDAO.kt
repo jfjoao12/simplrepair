@@ -24,7 +24,7 @@ interface RepairDAO {
      * @param repair The repair record to insert.
      */
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insert(repair: Repair)
+    suspend fun insert(repair: Repair): Long
 
     /**
      * Retrieves a repair by its ID.

@@ -12,4 +12,5 @@ sealed class Destination (val route: String) {
     object NewRepair : Destination("insertRepair")
     object NewCustomer: Destination("Add new customer")
     object Camera: Destination("Camera")
+    object NewInventoryItem: Destination("New Inventory Item")
 }
