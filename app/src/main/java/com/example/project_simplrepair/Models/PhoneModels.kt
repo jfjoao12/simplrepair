@@ -21,7 +21,7 @@ import com.squareup.moshi.Json
     foreignKeys = [
         ForeignKey(
             entity = PhoneBrands::class,
-            parentColumns = arrayOf("brand_id"),
+            parentColumns = arrayOf("id"),
             childColumns = arrayOf("brand_id"),
             onUpdate = ForeignKey.CASCADE,
             onDelete = ForeignKey.SET_NULL

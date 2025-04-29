@@ -43,7 +43,7 @@ interface PhoneBrandsDAO {
      *
      * @return A list of brand IDs.
      */
-    @Query("SELECT brand_id FROM phone_brands")
+    @Query("SELECT id FROM phone_brands")
     fun getAllIds(): List<Int>
 
     /**
@@ -52,7 +52,7 @@ interface PhoneBrandsDAO {
      * @param id The ID of the brand to retrieve.
      * @return The matching [PhoneBrands], or null if not found.
      */
-    @Query("SELECT * FROM phone_brands WHERE brand_id = :id")
+    @Query("SELECT * FROM phone_brands WHERE id = :id")
     fun getBrandById(id: Int): PhoneBrands?
 
     /**

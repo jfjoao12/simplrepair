@@ -1,6 +1,7 @@
 package com.example.project_simplrepair.API
 
 import com.example.project_simplrepair.Models.PhoneBrands
+import com.example.project_simplrepair.Models.PhoneBrandsItem
 import com.example.project_simplrepair.Models.PhoneModels
 import com.example.project_simplrepair.Models.PhoneSpecsResponse
 import retrofit2.Call
@@ -20,10 +21,10 @@ interface PhoneApiService {
      * @param apiKey The API key required to authenticate with the RapidAPI service.
      * @return A [Call] object for a list of [PhoneBrands].
      */
-    @GET("gsm/all-brands")
+    @GET("brands?pageSize=totalItems")
     fun getAllPhoneBrands(
         @Header("X-RapidAPI-Key") apiKey: String
-    ): Call<List<PhoneBrands>>
+    ): Call<PhoneBrandsItem>
 
     /**
      * Retrieves a list of phone models for a specific brand.

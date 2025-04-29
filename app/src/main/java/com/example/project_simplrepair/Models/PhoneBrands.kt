@@ -16,10 +16,17 @@ import com.squareup.moshi.JsonClass
 @JsonClass(generateAdapter = true)
 data class PhoneBrands(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "brand_id")
+    @Json(name = "id")
+    @ColumnInfo(name = "id")
     val id: Int = 0,
 
-    @Json(name = "brandValue")
+    @Json(name = "name")
     @ColumnInfo(name = "brand_name")
     val brandValue: String
+)
+
+@JsonClass(generateAdapter = true)
+data class PhoneBrandsItem(
+    @Json(name = "items")
+    var item: List<PhoneBrands>
 )

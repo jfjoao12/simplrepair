@@ -41,8 +41,8 @@ interface PhoneModelsDAO {
         SELECT phone_brands.brand_name 
         FROM phone_brands
         INNER JOIN phone_models_table
-        ON phone_brands.brand_id = phone_models_table.brand_id
-        WHERE phone_brands.brand_id = :id
+        ON phone_brands.id = phone_models_table.brand_id
+        WHERE phone_brands.id = :id
     """)
     fun getBrandNameById(id: Int): String
 

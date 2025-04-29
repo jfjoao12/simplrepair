@@ -21,7 +21,7 @@ import com.example.project_simplrepair.Models.*
         Technician::class,
         DevicePhoto::class
     ],
-    version = 27,
+    version = 28,
     exportSchema = true
 )
 // @TypeConverters(Converters::class) // Uncomment if you add custom type converters
@@ -68,7 +68,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "Simpl Database"
                 )
-                    .createFromAsset("import_db.db") // Pre-populates from asset if available
+                    //.createFromAsset("import_db.db") // Pre-populates from asset if available
                     .fallbackToDestructiveMigration() // Drops and recreates DB on version mismatch
                     .build()
                 INSTANCE = instance

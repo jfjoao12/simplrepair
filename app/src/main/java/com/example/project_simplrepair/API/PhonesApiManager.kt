@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Models.PhoneBrands
+import com.example.project_simplrepair.Models.PhoneBrandsItem
 import com.example.project_simplrepair.Models.PhoneModels
 import com.example.project_simplrepair.Models.PhoneSpecs
 import com.example.project_simplrepair.Models.PhoneSpecsResponse
@@ -29,10 +30,11 @@ class PhonesApiManager(database: AppDatabase) {
     private var _phonesModelsResponse = mutableStateOf<List<PhoneModels>>(emptyList())
     private var _phoneSpecsResponse = mutableStateOf<PhoneSpecs?>(null)
 
-    val api_key = "0dc1c9bf90msh8536d2155c57902p1798e8jsn2d2878a46a1b"
+    private val apiKey = "51bc23d70dmsh6429272287e5c73p18d54cjsn834e6269ba89"
 
     // Flag to prevent repeated fetch of models
     private var isModelsFetched = false
+    private val db = database
 
     /**
      * A composable state holder for phone brands fetched from the API.
@@ -40,24 +42,24 @@ class PhonesApiManager(database: AppDatabase) {
     val phonesBrandsResponse: MutableState<List<PhoneBrands>>
         @Composable get() = remember { _phonesBrandsResponse }
 
-    init {
-        getPhonesBrands(database)
-    }
 
     /**
      * Fetches the list of phone brands from the API, stores them in the database,
      * and triggers model fetching if not already done.
      */
+    init {
+        getPhonesBrands(db)
+    }
     @OptIn(DelicateCoroutinesApi::class)
     private fun getPhonesBrands(database: AppDatabase) {
-        val service = Api.retrofitService.getAllPhoneBrands(api_key)
-        service.enqueue(object : Callback<List<PhoneBrands>> {
+        val service = Api.retrofitService.getAllPhoneBrands(apiKey)
+        service.enqueue(object : Callback<PhoneBrandsItem> {
             override fun onResponse(
-                call: Call<List<PhoneBrands>>,
-                response: Response<List<PhoneBrands>>
+                call: Call<PhoneBrandsItem>,
+                response: Response<PhoneBrandsItem>
             ) {
                 GlobalScope.launch {
-                    val brandsFromApi = response.body() ?: emptyList()
+                    val brandsFromApi = response.body()?.item ?: emptyList()
                     if (response.isSuccessful && (brandsFromApi.size > database.phoneBrandsDAO().getAll().size)) {
                         _phonesBrandsResponse.value = brandsFromApi
                         database.phoneBrandsDAO().clearTable()
@@ -69,7 +71,7 @@ class PhonesApiManager(database: AppDatabase) {
                 }
             }
 
-            override fun onFailure(call: Call<List<PhoneBrands>>, t: Throwable) {
+            override fun onFailure(call: Call<PhoneBrandsItem>, t: Throwable) {
                 Log.d("error", "${t.message}")
             }
         })
@@ -90,7 +92,7 @@ class PhonesApiManager(database: AppDatabase) {
             val brands = database.phoneBrandsDAO().getAll()
             if (database.phoneModelsDAO().checkIfExists() < 1) {
                 brands.forEach { brand ->
-                    val modelsService = Api.retrofitService.getModelsByBrand(brand.brandValue, api_key)
+                    val modelsService = Api.retrofitService.getModelsByBrand(brand.brandValue, apiKey)
                     modelsService.enqueue(object : Callback<List<PhoneModels>> {
                         override fun onResponse(
                             call: Call<List<PhoneModels>>,
@@ -126,7 +128,7 @@ class PhonesApiManager(database: AppDatabase) {
      */
     @OptIn(DelicateCoroutinesApi::class)
     fun getPhoneSpecs(brandName: String, modelName: String, database: AppDatabase) {
-        val service = Api.retrofitService.getPhoneSpecifications(brandName, modelName, api_key)
+        val service = Api.retrofitService.getPhoneSpecifications(brandName, modelName, apiKey)
         service.enqueue(object : Callback<PhoneSpecsResponse> {
             override fun onResponse(
                 call: Call<PhoneSpecsResponse>,
