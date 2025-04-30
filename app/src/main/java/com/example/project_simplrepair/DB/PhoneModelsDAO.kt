@@ -29,7 +29,7 @@ interface PhoneModelsDAO {
      * @return A [PhoneSpecs] instance or null if not found.
      */
     @Query("SELECT * FROM phone_specs_table WHERE brand_id = :id")
-    fun getBrandById(id: Int): PhoneSpecs?
+    fun getSpecsByBrandId(id: Int): PhoneSpecs?
 
     /**
      * Retrieves the brand name associated with a given brand ID.

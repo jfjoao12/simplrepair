@@ -7,6 +7,7 @@ import androidx.room.Query
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.RepairStatus
 import com.example.project_simplrepair.Models.Technician
 
 /**
@@ -82,4 +83,19 @@ interface RepairDAO {
     """)
     suspend fun getDeviceByRepairId(id: Int): Device
 
+    @Query ("""
+        UPDATE repairs_table
+        SET repair_status = :newStatus
+        WHERE id = :id
+    """)
+    suspend fun closeRepairByid(id: Int, newStatus: RepairStatus)
+
+    @Query (
+        """
+            SELECT * 
+            FROM repairs_table
+            WHERE id LIKE '%' || :searchParam || '%'
+        """
+    )
+    suspend fun searchRepairById(searchParam: Int): List<Repair>
 }

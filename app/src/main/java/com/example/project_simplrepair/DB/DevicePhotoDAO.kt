@@ -26,6 +26,20 @@ interface DevicePhotoDAO {
             """)
     fun updatePhotoRepairId(id: Int, path: String)
 
+
+        /**
+         * Return all file‐paths for the photos attached to a given repair.
+         */
+        @Query("""
+            SELECT dp.path
+              FROM device_photos AS dp
+              INNER JOIN repairs_table AS r
+                ON dp.repair_id = r.id
+             WHERE r.id = :repairId
+          """)
+        suspend fun getPhotoPathsForRepair(repairId: Int): List<String>
+
+
 //    @Query("SELECT * FROM device_photos ORDER BY timestamp DESC")
 //    fun getAllPhotos(): Flow<List<DevicePhoto>>
 }

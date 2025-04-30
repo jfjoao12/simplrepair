@@ -34,29 +34,29 @@ interface RemovePhoneModelsTable : AutoMigrationSpec
     ],
     version = 40,
     exportSchema = true,
-    autoMigrations = [
-        AutoMigration(39, 40, spec = SimplDatabase.Migration38To39::class
-        )
-    ]
+//    autoMigrations = [
+//        AutoMigration(39, 40, spec = SimplDatabase.Migration38To39::class
+//        )
+//    ]
 )
-abstract class SimplDatabase : RoomDatabase() {
-    // your DAOs here…
-
-    /**
-     * This empty class just carries the DDL annotations for Room's
-     * auto-migration from 38→39.
-     */
-    @DeleteColumn(
-        tableName  = "invoice_table",
-        columnName = "amount_paid"
-    )
-    @RenameColumn(
-        tableName       = "invoice_table",
-        fromColumnName  = "amount_paid",
-        toColumnName    = "total"
-    )
-    class Migration38To39 : AutoMigrationSpec
-}
+//abstract class SimplDatabase : RoomDatabase() {
+//    // your DAOs here…
+//
+//    /**
+//     * This empty class just carries the DDL annotations for Room's
+//     * auto-migration from 38→39.
+//     */
+//    @DeleteColumn(
+//        tableName  = "invoice_table",
+//        columnName = "amount_paid"
+//    )
+//    @RenameColumn(
+//        tableName       = "invoice_table",
+//        fromColumnName  = "amount_paid",
+//        toColumnName    = "total"
+//    )
+//    class Migration38To39 : AutoMigrationSpec
+//}
 @TypeConverters(Converters::class) // Uncomment if you add custom type converters
 abstract class AppDatabase : RoomDatabase() {
 
@@ -100,20 +100,20 @@ abstract class AppDatabase : RoomDatabase() {
          * @return Instance of [AppDatabase]
          */
         fun getInstance(context: Context): AppDatabase {
-            val MIGRATION = object : Migration(38, 39) {
-                override fun migrate(db: SupportSQLiteDatabase) {
-                    // because you need the FK, we have to rebuild the table.
-                    // 1. create your new table with the repair_id column + FK
-                    db.execSQL("""
-                      ALTER TABLE invoice_table
-                      ADD COLUMN payment_method TEXT NOT NULL DEFAULT '';
-                    """.trimIndent())
-                                    db.execSQL("""
-                      ALTER TABLE invoice_table
-                      ADD COLUMN reference TEXT NOT NULL DEFAULT '';
-                    """.trimIndent())
-                }
-            }
+//            val MIGRATION = object : Migration(38, 39) {
+//                override fun migrate(db: SupportSQLiteDatabase) {
+//                    // because you need the FK, we have to rebuild the table.
+//                    // 1. create your new table with the repair_id column + FK
+//                    db.execSQL("""
+//                      ALTER TABLE invoice_table
+//                      ADD COLUMN payment_method TEXT NOT NULL DEFAULT '';
+//                    """.trimIndent())
+//                                    db.execSQL("""
+//                      ALTER TABLE invoice_table
+//                      ADD COLUMN reference TEXT NOT NULL DEFAULT '';
+//                    """.trimIndent())
+//                }
+//            }
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,

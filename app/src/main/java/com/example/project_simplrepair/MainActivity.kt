@@ -1,6 +1,6 @@
 package com.example.project_simplrepair
 
-import com.example.project_simplrepair.Screens.RepairDetailsScreen
+import com.example.project_simplrepair.Screens.Repair.RepairDetailsScreen
 import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,22 +11,20 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -38,7 +36,6 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -72,19 +69,18 @@ import com.example.project_simplrepair.ViewModels.PhotoViewModel
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Customer
-import com.example.project_simplrepair.Models.Invoice
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Navigation.BottomNav
 import com.example.project_simplrepair.Screens.AppointmentsScreen
-import com.example.project_simplrepair.Screens.InsertRepair.CameraScreen
+import com.example.project_simplrepair.Screens.Repair.CameraScreen
 import com.example.project_simplrepair.Screens.InsertCustomerScreen
-import com.example.project_simplrepair.Screens.InsertRepair.InsertRepairScreen
+import com.example.project_simplrepair.Screens.Repair.InsertRepairScreen
 import com.example.project_simplrepair.Screens.Inventory.InventoryScreen
 import com.example.project_simplrepair.Screens.Inventory.NewInventoryItemScreen
 import com.example.project_simplrepair.Screens.InvoiceScreen
 
-import com.example.project_simplrepair.Screens.RepairScreen
+import com.example.project_simplrepair.Screens.Repair.RepairScreen
 import com.example.project_simplrepair.Screens.SearchScreen
 import com.example.project_simplrepair.Screens.SettingsScreen
 import com.example.project_simplrepair.ViewModels.InsertRepairViewModel
@@ -177,7 +173,10 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                modifier = Modifier
+                    .fillMaxWidth(0.6f)
+            ){
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -195,25 +194,17 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
 
                 //––– Inventory Link –––
                 NavigationDrawerItem(
-                    label = { Text("Inventory") },
                     selected = false,
                     onClick = {
-                        scopeMenu.launch {
-                            drawerState.apply {
-                                close()
-                            }
-                        }
-                        navController.navigate(Destination.Inventory.route)
+                        navController.navigate(Destination.Appointments.route)
                     },
                     icon = {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.List,
-                            contentDescription = "Inventory"
+                            Icons.Rounded.DateRange,
+                            contentDescription = "Appointments" // Descriptive content description for accessibility
                         )
                     },
-                    modifier = Modifier
-                        .padding(NavigationDrawerItemDefaults.ItemPadding)
-                        .align(Alignment.CenterHorizontally)
+                    label = { Text("Appointments") }
                 )
 
                 //––– New Customer Link –––
@@ -338,6 +329,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
 
                         }
                     }
+
                     composable(Destination.Main.route) {
                         RepairScreen(
                             paddingValues = paddingValues,
@@ -373,13 +365,40 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         AppointmentsScreen(modifier, paddingValues)
                     }
                     composable(Destination.Search.route) {
-                        SearchScreen(modifier, paddingValues)
+                        SearchScreen(
+                            modifier,
+                            paddingValues,
+                            navController,
+                            db,
+                        )
+                    }
+                    composable(Destination.EditRepair.route){ navBackStackEntry ->
+                        var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")
+                        GlobalScope.launch {
+                            if(repairId != null){
+                                repair = db.repairDAO().getRepairById(repairId.toInt())
+                            }
+                        }
+                        repair?.let{
+                            val photoVm: PhotoViewModel = navBackStackEntry.sharedViewModel(navController)
+                            val insertVm: InsertRepairViewModel =
+                                viewModel(navBackStackEntry)
+                            InsertRepairScreen(
+                                paddingValues = paddingValues,
+                                appDatabase = AppDatabase.getInstance(LocalContext.current),
+                                navController = navController,
+                                photoPaths = photoVm.photoPaths,
+                                insertVm = insertVm,
+                                repairItem = repair!!
+                            )
+                        }
                     }
                     // Handle navigation between these 2 screens to persist data
                     navigation(
                         startDestination = Destination.NewRepair.route,
                         route = "insertFlow"
                     ) {
+
                         composable(Destination.NewRepair.route) { backStackEntry  ->
                             // 1) get the *same* navGraph entry for the VM:
                             val photoVm: PhotoViewModel = backStackEntry.sharedViewModel(navController)
@@ -388,10 +407,10 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
 
                             InsertRepairScreen(
                                 paddingValues = paddingValues,
-                                db = AppDatabase.getInstance(LocalContext.current),
+                                appDatabase = AppDatabase.getInstance(LocalContext.current),
                                 navController = navController,
                                 photoPaths = photoVm.photoPaths,
-                                insertVm = insertVm
+                                insertVm = insertVm,
                             )
                         }
 

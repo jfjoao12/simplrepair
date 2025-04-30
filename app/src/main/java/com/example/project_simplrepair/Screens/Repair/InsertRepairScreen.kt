@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screens.InsertRepair
+package com.example.project_simplrepair.Screens.Repair
 
 import android.Manifest
 import android.graphics.BitmapFactory.decodeFile
@@ -40,7 +40,9 @@ import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.CustomCardLayout
 import com.example.project_simplrepair.Layouts.ScreenTitle
+import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
+import com.example.project_simplrepair.Models.DevicePhoto
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.RepairType
@@ -58,7 +60,7 @@ import com.google.accompanist.permissions.rememberPermissionState
  * records in the database and returns to the main view.
  *
  * @param paddingValues insets from the Scaffold (status & nav bars).
- * @param db            the [AppDatabase] used to insert both Device and Repair.
+ * @param appDatabase            the [AppDatabase] used to insert both Device and Repair.
  * @param navController used to navigate back to the main Repairs list.
  */
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class,
@@ -67,12 +69,38 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun InsertRepairScreen(
     paddingValues: PaddingValues,
-    db: AppDatabase,
+    appDatabase: AppDatabase,
     navController: NavController,
     photoPaths: List<String>,
-    insertVm: InsertRepairViewModel
+    insertVm: InsertRepairViewModel,
+    repairItem: Repair? = null
 ) {
+    var customer by remember { mutableStateOf<Customer?>(null) }
+    var device by remember { mutableStateOf<Device?>(null) }
+    var deviceModel by remember { mutableStateOf<String?>(null) }
+    val devices by appDatabase.phoneModelsDAO().getModelByName(insertVm.modelName).collectAsState(initial = emptyList())
 
+    if (repairItem != null){
+        LaunchedEffect(repairItem.id) {
+            GlobalScope.launch {
+                // these DAO calls run off the main thread
+                val c = repairItem.id?.let { appDatabase.repairDAO().getCustomerByRepairId(it) }
+                val d = repairItem.id?.let { appDatabase.repairDAO().getDeviceByRepairId(it) }
+                val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
+                // now post them back to Compose state
+                customer = c
+                device = d
+                deviceModel = dm
+            }
+        }
+        insertVm.serial = device!!.deviceSerial
+        insertVm.modelName = deviceModel.toString()
+        insertVm.customerName = customer!!.customerName
+        insertVm.customerId = customer!!.customerId!!
+        insertVm.price = repairItem.price.toString()
+        insertVm.selectedType = repairItem.repairType
+        insertVm.notes = repairItem.notes
+    }
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -179,9 +207,9 @@ fun InsertRepairScreen(
                             trailingIcon = {
                                 IconButton(onClick = {
                                     GlobalScope.launch {
-                                        val models = db.phoneModelsDAO().getModelByName(insertVm.modelName).first()
+                                        val models = appDatabase.phoneModelsDAO().getModelByName(insertVm.modelName).first()
                                         if (models.size == 1) {
-                                            insertVm.phoneModel = models.first()
+                                            insertVm.phoneSpecs = models.first()
                                         } else {
                                             deviceBottomModalSheet = true
                                         }
@@ -195,6 +223,7 @@ fun InsertRepairScreen(
                         OutlinedTextField(
                             value = insertVm.serial,
                             onValueChange = { insertVm.serial = it },
+                            singleLine = true,
                             label = { Text("Serial Number / IMEI") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                             modifier = Modifier
@@ -223,14 +252,26 @@ fun InsertRepairScreen(
                     }
                 }
 
-                // Repair type & price
+                // Repair type, price and notes
                 item {
                     CustomCardLayout("Repair Info") {
+                        OutlinedTextField(
+                            value = insertVm.notes,
+                            onValueChange = { insertVm.notes = it },
+                            label = { Text("Notes") },
+                            minLines = 2,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .semantics { contentDescription = "Repair Notes Input" }
+                        )
                         // Repair Type dropdown
                         ExposedDropdownMenuBox(
                             expanded = expanded,
                             onExpandedChange = { expanded = !expanded }
                         ) {
+
+
                             OutlinedTextField(
                                 value = insertVm.selectedType.displayName,
                                 onValueChange = {},
@@ -265,6 +306,7 @@ fun InsertRepairScreen(
                             value = insertVm.price,
                             onValueChange = { insertVm.price = it },
                             label = { Text("Price") },
+                            singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -285,7 +327,6 @@ fun InsertRepairScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(text = "Select a Device")
-                    val devices by db.phoneModelsDAO().getModelByName(insertVm.modelName).collectAsState(initial = emptyList())
                     LazyVerticalGrid(
                         columns = GridCells.Fixed(1),
                         modifier = Modifier.fillMaxWidth()
@@ -296,7 +337,7 @@ fun InsertRepairScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clickable {
-                                        insertVm.phoneModel = model
+                                        insertVm.phoneSpecs = model
                                         insertVm.modelName = model.name
                                         insertVm.modelBrand = model.brand?.name.toString()
                                         deviceBottomModalSheet = false
@@ -320,7 +361,7 @@ fun InsertRepairScreen(
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(text = "Select a Customer")
-                    val customerList by db.customerDao().getCustomerByName(insertVm.customerName).collectAsState(initial = emptyList())
+                    val customerList by appDatabase.customerDao().getCustomerByName(insertVm.customerName).collectAsState(initial = emptyList())
                     LazyVerticalGrid(columns = GridCells.Fixed(1), modifier = Modifier.fillMaxWidth()) {
                         items(customerList) { cust ->
                             Row(
@@ -375,19 +416,38 @@ fun InsertRepairScreen(
                     coroutineScope.launch {
                         // Insert Device then Repair, then update photo with repairId
                         val newDeviceId = withContext(Dispatchers.IO) {
-                            val dev = Device(null, insertVm.customerId, insertVm.phoneModel?.id ?: 0, DeviceType.MOBILE, insertVm.serial)
-                            db.deviceDao().insert(dev)
+                            val dev = Device(
+                                null,
+                                insertVm.customerId,
+                                insertVm.phoneSpecs?.id ?: 0,
+                                DeviceType.MOBILE,
+                                insertVm.serial
+                            )
+                            appDatabase.deviceDao().insert(dev)
                         }.toInt()
 
 
                         val newRepair = withContext(Dispatchers.IO) {
-                            val rep = Repair(null, insertVm.customerId, newDeviceId, 1, insertVm.price.toDoubleOrNull() ?: 0.0, "", insertVm.selectedType)
-                            db.repairDAO().insert(rep)
+                            val rep = Repair(
+                                null,
+                                insertVm.customerId,
+                                newDeviceId, 1,
+                                insertVm.price.toDoubleOrNull() ?: 0.0,
+                                insertVm.notes,
+                                repairType = insertVm.selectedType
+                            )
+                            appDatabase.repairDAO().insert(rep)
                         }
 
                       withContext(Dispatchers.IO) {
                             photoPaths.forEach{ path ->
-                                db.devicePhotoDao().updatePhotoRepairId(newRepair.toInt(), path)
+                                var devicePhoto =
+                                    DevicePhoto(
+                                        photoId = null,
+                                        repairId = newRepair.toInt(),
+                                        filePath = path,
+                                    )
+                                appDatabase.devicePhotoDao().updatePhotoRepairId(newRepair.toInt(), path)
                             }
                         }
 

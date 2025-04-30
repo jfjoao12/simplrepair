@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -73,8 +75,10 @@ import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Inventory
+import com.example.project_simplrepair.Models.Invoice
 import com.example.project_simplrepair.Models.PaymentMethods
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.RepairStatus
 import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.RepairType
 import com.example.project_simplrepair.Operations.taxesCalculation
@@ -143,13 +147,17 @@ fun InvoiceScreen(
             .padding(paddingValues)
             .semantics { contentDescription = "Invoice Screen" }
     ) {
-        Column (
+        LazyColumn(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            item {
 
-            ScreenTitle("Invoice")
+                ScreenTitle("Invoice")
+            }
+
+            item {
 
                 Box(
                     modifier = Modifier
@@ -173,8 +181,6 @@ fun InvoiceScreen(
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
-
-
                         },
                         expanded = {
                             Row (
@@ -222,163 +228,171 @@ fun InvoiceScreen(
                         }
                     )
                 }
+            }
+
+            item {
+                CustomCardLayout ("Amount Due") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Subtotal: ")
+                        Text(
+                            text = "$subTotal",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Total: ")
+                        Text(
+                            text = "$total",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
 
 
-
-
+            item {
                 CustomCardLayout("Repair Items") {
-                OutlinedTextField(
-                    value = partQuery,
-                    onValueChange = { partQuery = it },
-                    label = { Text("Search Parts") },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {
-                                coroutineScope.launch {
-                                    partsModal = true
-                                }                                    }
-                        ) {
-                            Icon(Icons.Default.Search, contentDescription = "Search for Part")
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                LazyColumn {
-                    if(selectedParts.isNotEmpty()){
-                        items(selectedParts) { part ->
-                            var expanded by remember(part) { mutableStateOf(false) }
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                                    .clickable { expanded = !expanded  },
+                    OutlinedTextField(
+                        value = partQuery,
+                        onValueChange = { partQuery = it },
+                        label = { Text("Search Parts") },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = {
+                                    coroutineScope.launch {
+                                        partsModal = true
+                                    }                                    }
                             ) {
-                                Column {
-                                    Row(
-                                        modifier =
-                                        Modifier
-                                            .fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
+                                Icon(Icons.Default.Search, contentDescription = "Search for Part")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-                                    Text(
-                                        text = part.name,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        textAlign = TextAlign.Start
-                                    )
+                    Column {
+                        if (selectedParts.isNotEmpty()) {
+                            selectedParts.forEach { part ->
+                                var expanded by remember(part) { mutableStateOf(false) }
+                                Box(
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                        .clickable { expanded = !expanded },
+                                ) {
+                                    Column {
                                         Row(
-                                            horizontalArrangement = Arrangement.SpaceAround,
+                                            modifier =
+                                            Modifier
+                                                .fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Text(
-                                                text = part.price.toString(),
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                textAlign = TextAlign.End
-                                            )
 
-                                            AnimatedVisibility(visible = expanded) {
-                                                IconButton(
-                                                    modifier = Modifier
-                                                        .size(32.dp)
-                                                        .padding(start = 6.dp),
-                                                    onClick = {
-                                                        selectedParts -= part
-                                                        subTotal -= part.price
-                                                        total = taxesCalculation(subTotal)
+                                            Text(
+                                                text = part.name,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                textAlign = TextAlign.Start
+                                            )
+                                            Row(
+                                                horizontalArrangement = Arrangement.SpaceAround,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = part.price.toString(),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    textAlign = TextAlign.End
+                                                )
+
+                                                AnimatedVisibility(visible = expanded) {
+                                                    IconButton(
+                                                        modifier = Modifier
+                                                            .size(32.dp)
+                                                            .padding(start = 6.dp),
+                                                        onClick = {
+                                                            selectedParts -= part
+                                                            subTotal -= part.price
+                                                            total = taxesCalculation(subTotal)
+                                                        }
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.Filled.Delete,
+                                                            contentDescription = "Delete Icon"
+                                                        )
                                                     }
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.Filled.Delete,
-                                                        contentDescription = "Delete Icon"
-                                                    )
                                                 }
                                             }
                                         }
                                     }
                                 }
+                                HorizontalDivider()
                             }
-                            HorizontalDivider()
                         }
                     }
                 }
             }
 
-            CustomCardLayout ("Amount Due") {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Subtotal: ")
-                    Text(
-                        text = "$subTotal",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text("Total: ")
-                    Text(
-                        text = "$total",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
 
-            CustomCardLayout("Payment") {
-                var paymentExpanded by remember { mutableStateOf(false) }
+            item {
 
-                Column {
+                CustomCardLayout("Payment") {
+                    var paymentExpanded by remember { mutableStateOf(false) }
 
-                    ExposedDropdownMenuBox(
-                        expanded = paymentExpanded,
-                        onExpandedChange = { paymentExpanded = !paymentExpanded }
-                    ) {
+                    Column {
+
+                        ExposedDropdownMenuBox(
+                            expanded = paymentExpanded,
+                            onExpandedChange = { paymentExpanded = !paymentExpanded }
+                        ) {
+                            OutlinedTextField(
+                                value = selectedPaymentType.displayName,
+                                onValueChange = {},
+                                label = { Text("Payment Type") },
+                                readOnly = true,
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(paymentExpanded)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp)
+                                    .menuAnchor(MenuAnchorType.PrimaryEditable)
+
+                            )
+                            ExposedDropdownMenu(
+                                expanded = paymentExpanded,
+                                onDismissRequest = { paymentExpanded = false }
+                            ) {
+                                PaymentMethods.entries.forEach { type ->
+                                    DropdownMenuItem(
+                                        text = { Text(type.displayName) },
+                                        onClick = {
+                                            selectedPaymentType = type
+                                            paymentExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
+
                         OutlinedTextField(
-                            value = selectedPaymentType.displayName,
-                            onValueChange = {},
-                            label = { Text("Payment Type") },
-                            readOnly = true,
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(paymentExpanded)
-                            },
+                            value = paymentReference,
+                            onValueChange = { paymentReference = it },
+                            label = { Text("Payment Reference") },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
-                                .menuAnchor(MenuAnchorType.PrimaryEditable)
-
+                                .semantics { contentDescription = "Payment Reference" }
                         )
-                        ExposedDropdownMenu(
-                            expanded = paymentExpanded,
-                            onDismissRequest = { paymentExpanded = false }
-                        ) {
-                            PaymentMethods.entries.forEach { type ->
-                                DropdownMenuItem(
-                                    text = { Text(type.displayName) },
-                                    onClick = {
-                                        selectedPaymentType = type
-                                        paymentExpanded = false
-                                    }
-                                )
-                            }
-                        }
                     }
-
-                    OutlinedTextField(
-                        value = paymentReference,
-                        onValueChange = { paymentReference = it },
-                        label = { Text("Payment Reference") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .semantics { contentDescription = "Payment Reference" }
-                    )
                 }
             }
 
@@ -453,7 +467,26 @@ fun InvoiceScreen(
 
         // Floating action to create/save invoice
         FloatingActionButton(
-            onClick = { /* TODO: save invoice */ },
+            onClick = {
+                coroutineScope.launch {
+
+                    val newInvoice = Invoice(
+                        id           = null,
+                        repairId     = repairItem.id ?: 0,
+                        customerId   = repairItem.customerId ?: 0,
+                        paymentMethod= selectedPaymentType,      // your PaymentMethods enum
+                        string       = paymentReference,         // the reference string you collected
+                        subTotal     = subTotal,
+                        total        = total
+                    )
+
+                    db.invoiceDao().insert(newInvoice)
+
+                    db.repairDAO().closeRepairByid(repairItem.id ?: 0, RepairStatus.COMPLETED)
+
+                    navController.popBackStack()
+                }
+            },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(20.dp)
@@ -463,6 +496,7 @@ fun InvoiceScreen(
         ) {
             Icon(Icons.Filled.Check, contentDescription = "Add")
         }
+
     }
 
 }

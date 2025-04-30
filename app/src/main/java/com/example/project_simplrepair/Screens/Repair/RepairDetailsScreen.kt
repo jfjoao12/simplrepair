@@ -1,13 +1,14 @@
-package com.example.project_simplrepair.Screens
+package com.example.project_simplrepair.Screens.Repair
 
-import android.widget.Toast
-import androidx.compose.animation.AnimatedContent
+import android.graphics.BitmapFactory.decodeFile
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
@@ -17,15 +18,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -37,20 +38,23 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
@@ -58,19 +62,16 @@ import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import com.example.project_simplrepair.DB.AppDatabase
-import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.CustomCardLayout
 import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.RepairStatus
 import com.example.project_simplrepair.Models.Technician
-import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.showRepairID
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Displays detailed information for a specific repair, including:
@@ -109,6 +110,7 @@ fun RepairDetailsScreen(
     var device by remember { mutableStateOf<Device?>(null) }
     var deviceModel by remember { mutableStateOf<String?>(null) }
     var technician by remember { mutableStateOf<Technician?>(null) }
+    var filePaths = remember { mutableStateListOf<String?>() }
 
     // Kick off a one-time load when repairItem.id changes
     LaunchedEffect(repairItem.id) {
@@ -118,11 +120,15 @@ fun RepairDetailsScreen(
             val d = repairItem.id?.let { appDatabase.repairDAO().getDeviceByRepairId(it) }
             val t = repairItem.id?.let { appDatabase.repairDAO().getTechByRepairId(it) }
             val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
+            val fp = appDatabase.devicePhotoDao().getPhotoPathsForRepair(repairItem.id)
             // now post them back to Compose state
             customer = c
             device = d
             technician = t
             deviceModel = dm
+            fp.forEach() { path ->
+                filePaths += path
+            }
         }
     }
 
@@ -231,7 +237,6 @@ fun RepairDetailsScreen(
                                         },
                                     fontWeight = MaterialTheme.typography.titleMedium.fontWeight
                                 )
-
                             }
 
                             AnimatedVisibility(expanded) {
@@ -303,11 +308,132 @@ fun RepairDetailsScreen(
                     )
                 }
 
+                // Device Photos Section
+                CustomCardLayout("Device Photos") {
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        items(filePaths) { path ->
+                            val bmp = remember(path) { decodeFile(path) }
+                            bmp?.let {
+                                Image(
+                                    bitmap = it.asImageBitmap(),
+                                    contentDescription = "New photo preview",
+                                    modifier = Modifier
+                                        .size(128.dp)
+                                        .padding(2.dp)
+                                        .rotate(90f)
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Repair Info Section
+                CustomCardLayout("Repair Info") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Status:  ",
+                            modifier = Modifier
+                                .semantics { contentDescription = "Repair Status" }
+                        )
+                        Text(
+                            text = repairItem.repairStatus.displayName,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Repair Status"
+                            }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Repair Type: ",
+                            modifier = Modifier.semantics {
+                                contentDescription = "Repair type ${repairItem.repairType}"
+                            }
+                        )
+
+                        Text(
+                            text = repairItem.repairType.displayName,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Repair type ${repairItem.repairType}"
+                            }
+                        )
+
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Quote: ",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .semantics { contentDescription = "Repair price quotation" }
+                        )
+
+                        Text(
+                            text = repairItem.price.toString(),
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .semantics { contentDescription = "Repair price value" }
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .padding(top = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .padding(bottom = 8.dp),
+                            text = "Notes",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .border(
+                                    width   = 1.dp,
+                                    color   = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                    shape   = RoundedCornerShape(8.dp)
+                                )
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text  = repairItem.notes,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+
+
+                }
+
                 // Device Details Section
                 CustomCardLayout("Device Details") {
-                    Column {
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text(
-                            text = "Model: $deviceModel",
+                            text = "Model: ",
                             modifier = Modifier
                                 .semantics { contentDescription = "Model $deviceModel" }
                                 .sharedElement(
@@ -316,72 +442,68 @@ fun RepairDetailsScreen(
                                 )
                         )
                         Text(
-                            text = "Serial: ${device!!.deviceSerial}",
+                            text = deviceModel!!,
                             modifier = Modifier.semantics {
-                                contentDescription = "Serial number ${device!!.deviceSerial}"
+                                contentDescription = "Device Model"
+                            }
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "Serial: ",
+                            modifier = Modifier
+                                .semantics { contentDescription = "Model " }
+                        )
+                        Text(
+                            text = device!!.deviceSerial,
+                            modifier = Modifier.semantics {
+                                contentDescription = "Device Model"
                             }
                         )
                     }
                 }
-
-                CustomCardLayout("Repair Info") {
-                    Text(
-                        text = "Repair Type: ${repairItem.repairType}",
-                        modifier = Modifier.semantics {
-                            contentDescription = "Repair type ${repairItem.repairType}"
-                        }
-                    )
-                }
-
-                CustomCardLayout("Price") {
-                    Text(
-                        text = "$${repairItem.price}",
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .semantics { contentDescription = "Repair price ${repairItem.price} dollars" }
-                            .sharedElement(
-                                sharedTransitionScope.rememberSharedContentState("price-${repairItem.id}"),
-                                animatedVisibilityScope = animatedContentScope
-                            )
-                    )
-                }
-
-
             }
 
-            Column (
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                SmallFloatingActionButton(
-                    onClick = {
-
-                    },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            // If repair is completed, it won't show the FABs
+            if (repairItem.repairStatus != RepairStatus.COMPLETED) {
+                Column (
                     modifier = Modifier
-                        .padding(bottom = 6.dp)
-                        .semantics { contentDescription = "Take Photo of Device" }
+                        .align(Alignment.BottomEnd)
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(Icons.Filled.Edit, contentDescription = "Take Photo Icon")
+                    SmallFloatingActionButton(
+                        onClick = {
+
+                        },
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier
+                            .padding(bottom = 6.dp)
+                            .semantics { contentDescription = "Take Photo of Device" }
+                    ) {
+                        Icon(Icons.Filled.Edit, contentDescription = "Take Photo Icon")
+                    }
+
+                    FloatingActionButton(
+                        onClick = {
+                            navController.navigate("invoice/${repairItem.id}")
+
+                        },
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier
+                            .semantics { contentDescription = "Save new repair" }
+                    ) {
+                        Icon(Icons.Filled.AttachMoney, contentDescription = null)
+                    }
                 }
 
-                FloatingActionButton(
-                    onClick = {
-                        navController.navigate("invoice/${repairItem.id}")
-
-                    },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier
-                        .semantics { contentDescription = "Save new repair" }
-                ) {
-                    Icon(Icons.Filled.AttachMoney, contentDescription = null)
-                }
             }
         }
     }

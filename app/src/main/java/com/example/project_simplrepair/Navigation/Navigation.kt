@@ -68,22 +68,22 @@ fun BottomNav(navController: NavController) {
         */
 
         // Appointments navbar item
-        NavigationBarItem(
-            selected = currentDestination?.route == Destination.Appointments.route,
-            onClick = {
-                navController.navigate(Destination.Appointments.route) {
-                    popUpTo(Destination.Main.route) // Avoiding stack overflow by popping up to Main route
-                    launchSingleTop = true
-                }
-            },
-            icon = {
-                Icon(
-                    Icons.Rounded.DateRange,
-                    contentDescription = "Appointments" // Descriptive content description for accessibility
-                )
-            },
-            label = { Text(text = Destination.Appointments.route) }
-        )
+//        NavigationBarItem(
+//            selected = currentDestination?.route == Destination.Appointments.route,
+//            onClick = {
+//                navController.navigate(Destination.Appointments.route) {
+//                    popUpTo(Destination.Main.route) // Avoiding stack overflow by popping up to Main route
+//                    launchSingleTop = true
+//                }
+//            },
+//            icon = {
+//                Icon(
+//                    Icons.Rounded.DateRange,
+//                    contentDescription = "Appointments" // Descriptive content description for accessibility
+//                )
+//            },
+//            label = { Text(text = Destination.Appointments.route) }
+//        )
         // Inventory navbar item
         NavigationBarItem(
             selected = currentDestination?.route == Destination.Inventory.route,

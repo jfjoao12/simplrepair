@@ -47,7 +47,14 @@ data class Repair(
     @ColumnInfo(name = "technician_id") val technicianId: Int? = null,
     @ColumnInfo(name = "price") val price: Double,
     @ColumnInfo(name = "notes") val notes: String,
+    @ColumnInfo(name = "repair_status") val repairStatus: RepairStatus = RepairStatus.IN_REPAIR,
     @ColumnInfo(name = "repair_type") val repairType: RepairType,
     @ColumnInfo(name="image_uri") val imageUri: String? = null
 
 )
+
+enum class RepairStatus (val displayName: String) {
+    IN_REPAIR("In Repair"),
+    PARTS_ORDERED("Parts ordered"),
+    COMPLETED("Completed")
+}

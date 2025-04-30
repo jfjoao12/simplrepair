@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screens.InsertRepair
+package com.example.project_simplrepair.Screens.Repair
 
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
@@ -125,7 +125,8 @@ fun CameraScreen(
                 Icon(
 
                     imageVector = Icons.Default.Menu,
-                    contentDescription = "Close Camera"
+                    contentDescription = "Close Camera",
+                    tint = Color.White
                 )
             }
 
@@ -155,7 +156,8 @@ fun CameraScreen(
                     modifier = Modifier
                         .size(64.dp),
                     imageVector = Icons.Default.Camera,
-                    contentDescription = "Take Photo"
+                    contentDescription = "Take Photo",
+                    tint = Color.White
                 )
             }
 
@@ -164,9 +166,9 @@ fun CameraScreen(
 
                 ) {
                 Icon(
-
                     imageVector = Icons.Default.Check,
-                    contentDescription = "Close Camera"
+                    contentDescription = "Close Camera",
+                    tint = Color.White
                 )
             }
         }

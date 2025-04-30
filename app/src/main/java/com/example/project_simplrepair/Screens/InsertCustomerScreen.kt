@@ -3,6 +3,7 @@ package com.example.project_simplrepair.Screens
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
+import com.example.project_simplrepair.Layouts.CustomCardLayout
+import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Customer
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -67,67 +70,74 @@ fun InsertCustomerScreen(
     var customerPhone by remember { mutableStateOf("") }
     var customerPhoneTwo by remember { mutableStateOf("") }
 
-    val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val fields = listOf(
+        "Name" to customerName,
+        "Email" to customerEmail,
+        "City" to customerCity,
+        "Country" to customerCountry,
+        "Postal Code" to customerPostalCode,
+        "Province" to customerProv,
+        "Address" to customerAddress,
+        "Address 2" to customerAddressTwo,
+        "Phone" to customerPhone,
+        "Phone 2" to customerPhoneTwo
+    )
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues)
-        ) {
-            item {
-                Text(
-                    text = "New Customer",
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)
-                        .semantics { heading() }
-                )
+        Column {
+
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .semantics { heading() }
+            ) {
+                ScreenTitle("New customer")
             }
 
-            val fields = listOf(
-                "Name" to customerName,
-                "Email" to customerEmail,
-                "City" to customerCity,
-                "Country" to customerCountry,
-                "Postal Code" to customerPostalCode,
-                "Province" to customerProv,
-                "Address" to customerAddress,
-                "Address 2" to customerAddressTwo,
-                "Phone" to customerPhone,
-                "Phone 2" to customerPhoneTwo
-            )
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
 
-            items(fields) { (label, value) ->
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = {
-                        when (label) {
-                            "Name" -> customerName = it
-                            "Email" -> customerEmail = it
-                            "City" -> customerCity = it
-                            "Country" -> customerCountry = it
-                            "Postal Code" -> customerPostalCode = it
-                            "Province" -> customerProv = it
-                            "Address" -> customerAddress = it
-                            "Address 2" -> customerAddressTwo = it
-                            "Phone" -> customerPhone = it
-                            "Phone 2" -> customerPhoneTwo = it
+            ) {
+
+
+                CustomCardLayout("Customer Info") {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        items(fields) { (label, value) ->
+                            OutlinedTextField(
+                                value = value,
+                                onValueChange = {
+                                    when (label) {
+                                        "Name" -> customerName = it
+                                        "Email" -> customerEmail = it
+                                        "City" -> customerCity = it
+                                        "Country" -> customerCountry = it
+                                        "Postal Code" -> customerPostalCode = it
+                                        "Province" -> customerProv = it
+                                        "Address" -> customerAddress = it
+                                        "Address 2" -> customerAddressTwo = it
+                                        "Phone" -> customerPhone = it
+                                        "Phone 2" -> customerPhoneTwo = it
+                                    }
+                                },
+                                label = { Text(label) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(5.dp)
+                                    .semantics { contentDescription = "$label input field" }
+                            )
                         }
-                    },
-                    label = { Text(label) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(5.dp)
-                        .semantics { contentDescription = "$label input field" }
-                )
+
+                    }
+                }
             }
         }
 

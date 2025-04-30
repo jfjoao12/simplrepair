@@ -1,4 +1,4 @@
-package com.example.project_simplrepair.Screens
+package com.example.project_simplrepair.Screens.Repair
 
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -12,6 +12,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -24,6 +25,7 @@ import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.Models.RepairStatus
 import com.example.project_simplrepair.Models.Technician
 
 // Simple data holder to keep Repair + its related entities together
@@ -93,23 +95,31 @@ fun RepairScreen(
 
             if (enrichedRepairs.isEmpty()) {
                 Text(
-                    "No repairs found.",
+                    "All repairs cleared, good job!",
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .semantics { contentDescription = "No repairs found" }
                 )
             } else {
-                enrichedRepairs.forEach { (repair, customer, device, technician) ->
-                    RepairCard(
-                        navController = navController,
-                        animatedVisibilityScope = animatedContentScope,
-                        sharedTransitionScope = sharedTransitionScope,
-                        db = db,
-                        onBackPressed = { /* no-op */ },
-                        customerItem = customer,
-                        deviceItem = device,
-                        repairItem = repair
-                    )
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                ) {
+
+                    enrichedRepairs.forEach { (repair, customer, device, technician) ->
+                        if (repair.repairStatus == RepairStatus.IN_REPAIR) {
+                            RepairCard(
+                                navController = navController,
+                                animatedVisibilityScope = animatedContentScope,
+                                sharedTransitionScope = sharedTransitionScope,
+                                db = db,
+                                onBackPressed = { /* no-op */ },
+                                customerItem = customer,
+                                deviceItem = device,
+                                repairItem = repair
+                            )
+                        }
+                    }
                 }
             }
         }

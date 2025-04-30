@@ -8,6 +8,6 @@ import com.example.project_simplrepair.Models.Invoice
 interface InvoiceDAO {
 
     @Insert
-    fun insert(invoice: Invoice)
+    suspend fun insert(invoice: Invoice)
 
 }
