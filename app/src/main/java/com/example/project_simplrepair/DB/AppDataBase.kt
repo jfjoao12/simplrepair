@@ -33,11 +33,6 @@ interface RemovePhoneModelsTable : AutoMigrationSpec
         Invoice::class,
     ],
     version = 40,
-    exportSchema = true,
-//    autoMigrations = [
-//        AutoMigration(39, 40, spec = SimplDatabase.Migration38To39::class
-//        )
-//    ]
 )
 //abstract class SimplDatabase : RoomDatabase() {
 //    // your DAOs here…

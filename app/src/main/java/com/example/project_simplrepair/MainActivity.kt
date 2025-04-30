@@ -175,7 +175,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier
-                    .fillMaxWidth(0.6f)
+                    .fillMaxWidth(0.8f)
             ){
                 Box(
                     modifier = Modifier
@@ -186,26 +186,13 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                     Image(
                         painter = painterResource(id = R.drawable.logo),
                         contentDescription = "App Logo",
-                        modifier = Modifier.size(240.dp)
+                        modifier = Modifier.size(220.dp)
                     )
                 }
 
                 HorizontalDivider()
 
                 //––– Inventory Link –––
-                NavigationDrawerItem(
-                    selected = false,
-                    onClick = {
-                        navController.navigate(Destination.Appointments.route)
-                    },
-                    icon = {
-                        Icon(
-                            Icons.Rounded.DateRange,
-                            contentDescription = "Appointments" // Descriptive content description for accessibility
-                        )
-                    },
-                    label = { Text("Appointments") }
-                )
 
                 //––– New Customer Link –––
                 NavigationDrawerItem(

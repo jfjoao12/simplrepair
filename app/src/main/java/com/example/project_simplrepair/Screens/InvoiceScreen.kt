@@ -445,16 +445,8 @@ fun InvoiceScreen(
                                     .padding(8.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
-                                Row(
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(part.quantity.toString())
-                                    Text(
-                                        selectedParts.count().toString(),
-                                        style = TextStyle(fontWeight = FontWeight.Thin)
-                                    )
-                                }
+
+                                Text(part.quantity.toString())
                                 Text(part.name)
                                 Text("$${part.price}", textAlign = TextAlign.End)
                             }

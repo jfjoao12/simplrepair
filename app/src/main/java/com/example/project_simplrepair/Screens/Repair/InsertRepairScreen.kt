@@ -62,6 +62,9 @@ import com.google.accompanist.permissions.rememberPermissionState
  * @param paddingValues insets from the Scaffold (status & nav bars).
  * @param appDatabase            the [AppDatabase] used to insert both Device and Repair.
  * @param navController used to navigate back to the main Repairs list.
+ * @param photoPaths    lit of the paths of the photos taken.
+ * @param insertVm      used to persist data in the form when screen is changed to camera back and forth.
+ * @param repairItem    the Repair object fetched from the database.
  */
 @OptIn(ExperimentalMaterial3Api::class, DelicateCoroutinesApi::class,
     ExperimentalPermissionsApi::class

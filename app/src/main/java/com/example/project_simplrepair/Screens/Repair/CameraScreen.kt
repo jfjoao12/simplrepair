@@ -40,7 +40,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
 
-
+/***
+ *
+ */
 @Composable
 fun CameraScreen(
     db: AppDatabase,
@@ -54,21 +56,6 @@ fun CameraScreen(
     val controller = remember { CameraCaptureController(context, executor) }
     var previewUseCase by remember { mutableStateOf<Preview?>(null) }
 
-
-//    val sysUi = rememberSystemUiController()
-//    // remember to import: import com.google.accompanist.systemuicontroller.rememberSystemUiController
-//
-//    // once when this screen enters composition, hide bars:
-//    SideEffect {
-//        sysUi.isSystemBarsVisible = false
-//    }
-//
-//    // Optionally restore when you leave (could also be in a DisposableEffect):
-//    DisposableEffect(Unit) {
-//        onDispose {
-//            sysUi.isSystemBarsVisible = true
-//        }
-//    }
     LaunchedEffect(Unit) {
         controller.cameraPreview(lifecycleOwner) { preview ->
             previewUseCase = preview
@@ -91,15 +78,14 @@ fun CameraScreen(
                 .aspectRatio(9f / 16f)
                 .drawWithCache {
                     val strokeWidth = 2.dp.toPx()
-                    val corner = 16.dp.toPx()               // tweak corner radius
-                    // dash pattern: 26px on, 8px off
+                    val corner = 16.dp.toPx()
                     val dashEffect = PathEffect.dashPathEffect(floatArrayOf(26f, 12f), 0f)
 
                     onDrawBehind {
                         drawRoundRect(
                             color = Color.White.copy(alpha = 0.8f),
                             topLeft = Offset.Zero,
-                            size = size,                       // fill the full box
+                            size = size,
                             cornerRadius = CornerRadius(corner, corner),
                             style = Stroke(width = strokeWidth, pathEffect = dashEffect)
                         )
@@ -109,9 +95,6 @@ fun CameraScreen(
 
         )
 
-
-
-        // 2) cancel/back button
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -134,16 +117,14 @@ fun CameraScreen(
                 onClick = {
                     controller.takePhoto(
                         onPhotoTaken = { path ->
-                            // 1) persist immediately
                             GlobalScope.launch() {
                                 val photo = DevicePhoto(
                                     photoId   = null,
-                                    repairId  = null,    // supply the repair's ID here
+                                    repairId  = null,
                                     filePath  = path
                                 )
                                 db.devicePhotoDao().insert(photo)
                             }
-                            // 2) bubble up to UI if you still want an instant preview
                             onPhotoTaken(path)
                         },
                         onError = { /*…*/ }

@@ -6,6 +6,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,16 +32,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,10 +57,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
@@ -111,6 +120,8 @@ fun RepairDetailsScreen(
     var deviceModel by remember { mutableStateOf<String?>(null) }
     var technician by remember { mutableStateOf<Technician?>(null) }
     var filePaths = remember { mutableStateListOf<String?>() }
+    var boxExpanded by remember { mutableStateOf(false) }
+    var boxHeight by remember { mutableIntStateOf(0) }
 
     // Kick off a one-time load when repairItem.id changes
     LaunchedEffect(repairItem.id) {
@@ -158,7 +169,8 @@ fun RepairDetailsScreen(
     with(sharedTransitionScope) {
         Box(
             modifier = Modifier
-                .fillMaxSize()
+
+
                 .padding(paddingValues)
         ) {
             Column(
@@ -309,27 +321,12 @@ fun RepairDetailsScreen(
                 }
 
                 // Device Photos Section
-                CustomCardLayout("Device Photos") {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        items(filePaths) { path ->
-                            val bmp = remember(path) { decodeFile(path) }
-                            bmp?.let {
-                                Image(
-                                    bitmap = it.asImageBitmap(),
-                                    contentDescription = "New photo preview",
-                                    modifier = Modifier
-                                        .size(128.dp)
-                                        .padding(2.dp)
-                                        .rotate(90f)
-                                )
-                            }
-                        }
-                    }
-                }
+                    ExpandablePhotoSection(
+                        title = "Gallery",
+                        filePaths = filePaths
+                    )
+
+
 
                 // Repair Info Section
                 CustomCardLayout("Repair Info") {
@@ -535,6 +532,113 @@ fun CardSection(title: String, content: @Composable () -> Unit) {
         }
     }
 }
+
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun ExpandablePhotoSection(
+    title: String,
+    filePaths: List<String?>,
+    collapsedThumbSize: Dp = 128.dp,
+    expandedImageSize: Dp = 256.dp
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    CustomCardLayout (
+        "Device Photos"
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header row: title + expand/collapse icon
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium
+                        .copy(fontWeight = FontWeight.Bold)
+                )
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = Icons.Rounded.ExpandMore,
+                        contentDescription = if (expanded) "Collapse photos" else "Expand photos",
+                        modifier = Modifier.rotate(if (expanded) 180f else 0f)
+                    )
+                }
+            }
+
+            // Animated switch between collapsed thumbnails and expanded images
+            AnimatedVisibility(
+                visible = expanded,
+                enter = fadeIn() + expandVertically(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
+                // Expanded: one big column of larger images
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    filePaths.forEach { path ->
+                        val bmp = remember(path) { decodeFile(path) }
+                        if (bmp != null) {
+                            Image(
+                                bitmap = bmp.asImageBitmap(),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .rotate(90f)
+                                    .size(expandedImageSize)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                            )
+                        }
+                    }
+                }
+            }
+
+            AnimatedVisibility(
+                visible = !expanded,
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                // Collapsed: horizontal row of thumbnails
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(filePaths) { path ->
+                        val bmp = remember(path) { decodeFile(path) }
+                        if (bmp != null) {
+                            Image(
+                                bitmap = bmp.asImageBitmap(),
+                                contentDescription = "Device photo thumbnail",
+                                modifier = Modifier
+                                    .rotate(90f)
+                                    .size(collapsedThumbSize)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 
 
