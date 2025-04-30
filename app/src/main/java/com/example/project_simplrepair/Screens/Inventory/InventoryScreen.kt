@@ -44,6 +44,7 @@ import androidx.navigation.NavController
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Layouts.CustomCardLayout
+import com.example.project_simplrepair.Layouts.InfoCard
 import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Inventory
 import kotlinx.coroutines.GlobalScope
@@ -66,7 +67,6 @@ fun InventoryScreen(
     var searchParam by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<Inventory>>(emptyList()) }
     var expandItemCard by remember { mutableStateOf(false) }
-
 
     Box(
         modifier = Modifier
@@ -110,34 +110,11 @@ fun InventoryScreen(
                     )
                 }
 
-                items(items = searchResults, key = { it.id!! }) { item ->
-                    var expanded by remember(item.id) { mutableStateOf(false) }
-
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { expanded = !expanded },
-                        elevation = CardDefaults.elevatedCardElevation(4.dp),
-                        shape = RoundedCornerShape(12.dp),
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(text = item.name, style = MaterialTheme.typography.titleMedium)
-                                Icon(
-                                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                    contentDescription = if (expanded) "Collapse" else "Expand"
-                                )
-                            }
-
+                items(items = searchResults) { item ->
+                    InfoCard(
+                        item.name,
+                        item,
+                        visible = {
                             // Always visible summary
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -151,41 +128,35 @@ fun InventoryScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text("Price:", style = MaterialTheme.typography.bodySmall)
-                                Text("$${item.price}", textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
+                                Text("${item.price}", textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
+                            }
+                        },
+                        expanded = {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("SKU:", style = MaterialTheme.typography.bodySmall)
+                                Text(item.sku, textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
                             }
 
-                            // Expanded details
-                            AnimatedVisibility(visible = expanded) {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    HorizontalDivider()
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text("SKU:", style = MaterialTheme.typography.bodySmall)
-                                        Text(item.sku, textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
-                                    }
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text("Type:", style = MaterialTheme.typography.bodySmall)
-                                        Text(item.type.displayName, textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
-                                    }
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        Text("Subtype:", style = MaterialTheme.typography.bodySmall)
-                                        Text(item.subType.displayName, textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
-                                    }
-                                }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Type:", style = MaterialTheme.typography.bodySmall)
+                                Text(item.type.displayName, textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
                             }
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text("Subtype:", style = MaterialTheme.typography.bodySmall)
+                                Text(item.subType.displayName, textAlign = TextAlign.End, style = MaterialTheme.typography.bodySmall)
+                            }
+
                         }
-                    }
+                    )
                 }
             }
         }

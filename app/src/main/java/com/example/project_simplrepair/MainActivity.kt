@@ -8,16 +8,25 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.rounded.Menu
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -25,6 +34,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,9 +48,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -59,6 +72,7 @@ import com.example.project_simplrepair.ViewModels.PhotoViewModel
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
 import com.example.project_simplrepair.Models.Customer
+import com.example.project_simplrepair.Models.Invoice
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Navigation.BottomNav
@@ -68,6 +82,7 @@ import com.example.project_simplrepair.Screens.InsertCustomerScreen
 import com.example.project_simplrepair.Screens.InsertRepair.InsertRepairScreen
 import com.example.project_simplrepair.Screens.Inventory.InventoryScreen
 import com.example.project_simplrepair.Screens.Inventory.NewInventoryItemScreen
+import com.example.project_simplrepair.Screens.InvoiceScreen
 
 import com.example.project_simplrepair.Screens.RepairScreen
 import com.example.project_simplrepair.Screens.SearchScreen
@@ -163,8 +178,25 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.logo),
+                        contentDescription = "App Logo",
+                        modifier = Modifier.size(240.dp)
+                    )
+                }
+
                 HorizontalDivider()
-                TextButton(
+
+                //––– Inventory Link –––
+                NavigationDrawerItem(
+                    label = { Text("Inventory") },
+                    selected = false,
                     onClick = {
                         scopeMenu.launch {
                             drawerState.apply {
@@ -173,12 +205,21 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         }
                         navController.navigate(Destination.Inventory.route)
                     },
-                    content = {
-                        Text("Inventory")
-                    }
+                    icon = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.List,
+                            contentDescription = "Inventory"
+                        )
+                    },
+                    modifier = Modifier
+                        .padding(NavigationDrawerItemDefaults.ItemPadding)
+                        .align(Alignment.CenterHorizontally)
                 )
 
-                TextButton(
+                //––– New Customer Link –––
+                NavigationDrawerItem(
+                    label = { Text("New Customer") },
+                    selected = false,
                     onClick = {
                         scopeMenu.launch {
                             drawerState.apply {
@@ -187,11 +228,16 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         }
                         navController.navigate(Destination.NewCustomer.route)
                     },
-                    content = {
-                        Text("New Customer")
-                    }
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.PersonAdd,
+                            contentDescription = "New Customer"
+                        )
+                    },
+                    modifier = Modifier
+                        .padding(NavigationDrawerItemDefaults.ItemPadding)
+                        .align(Alignment.CenterHorizontally)
                 )
-                // Add more items here for navigation if needed
             }
         },
     ) {
@@ -273,6 +319,25 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                     navController = navController as NavHostController,
                     startDestination = Destination.Main.route,
                 ) {
+
+                    composable(Destination.Settings.route) {
+                        SettingsScreen(modifier, paddingValues)
+                    }
+                    composable(Destination.Inventory.route) {
+                        InventoryScreen(modifier, paddingValues, navController, db)
+                    }
+                    composable(Destination.Invoice.route){ navBackStackEntry ->
+                        var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")
+                        GlobalScope.launch {
+                            if(repairId != null){
+                                repair = db.repairDAO().getRepairById(repairId.toInt())
+                            }
+                        }
+                        repair?.let{
+                            InvoiceScreen(modifier, it, paddingValues, navController, db)
+
+                        }
+                    }
                     composable(Destination.Main.route) {
                         RepairScreen(
                             paddingValues = paddingValues,
@@ -283,13 +348,6 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                             onItemClick = { repairId -> navController.navigate("repair_details/$repairId") }
                         )
                     }
-                    composable(Destination.Settings.route) {
-                        SettingsScreen(modifier, paddingValues)
-                    }
-                    composable(Destination.Inventory.route) {
-                        InventoryScreen(modifier, paddingValues, navController, db)
-                    }
-
                     composable(Destination.RepairDetails.route) { navBackStackEntry ->
                         var repairId: String? = navBackStackEntry.arguments?.getString("repair_id")
                         GlobalScope.launch {
@@ -302,6 +360,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 modifier = Modifier.padding(paddingValues),
                                 repairItem = it,
                                 paddingValues = paddingValues,
+                                navController = navController,
                                 sharedTransitionScope = this@SharedTransitionLayout,
                                 animatedContentScope = this,
                                 appDatabase = db,

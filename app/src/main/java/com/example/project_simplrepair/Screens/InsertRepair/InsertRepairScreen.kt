@@ -132,7 +132,8 @@ fun InsertRepairScreen(
             Box(
                 modifier = Modifier
                     .padding(bottom = 16.dp)
-                    .semantics { heading() }) {
+                    .semantics { heading() }
+            ) {
                 ScreenTitle("New repair")
             }
 
@@ -372,16 +373,25 @@ fun InsertRepairScreen(
                         return@FloatingActionButton
                     }
                     coroutineScope.launch {
-                        // Insert Device then Repair
+                        // Insert Device then Repair, then update photo with repairId
                         val newDeviceId = withContext(Dispatchers.IO) {
                             val dev = Device(null, insertVm.customerId, insertVm.phoneModel?.id ?: 0, DeviceType.MOBILE, insertVm.serial)
                             db.deviceDao().insert(dev)
                         }.toInt()
 
-                        withContext(Dispatchers.IO) {
+
+                        val newRepair = withContext(Dispatchers.IO) {
                             val rep = Repair(null, insertVm.customerId, newDeviceId, 1, insertVm.price.toDoubleOrNull() ?: 0.0, "", insertVm.selectedType)
                             db.repairDAO().insert(rep)
                         }
+
+                      withContext(Dispatchers.IO) {
+                            photoPaths.forEach{ path ->
+                                db.devicePhotoDao().updatePhotoRepairId(newRepair.toInt(), path)
+                            }
+                        }
+
+
                         navController.navigate(Destination.Main.route)
                     }
                 },

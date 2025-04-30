@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 35,
-    "identityHash": "cd81d2a4ee70c2348431ee34d8a24889",
+    "version": 39,
+    "identityHash": "c15551460f00da56ea5fe5fb62fd86fa",
     "entities": [
       {
         "tableName": "repairs_table",
@@ -694,12 +694,91 @@
             ]
           }
         ]
+      },
+      {
+        "tableName": "invoice_table",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `repair_id` INTEGER NOT NULL, `customer_id` INTEGER NOT NULL, `payment_method` TEXT NOT NULL, `reference` TEXT NOT NULL, `Subtotal` REAL NOT NULL, `total` REAL NOT NULL, FOREIGN KEY(`repair_id`) REFERENCES `repairs_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`customer_id`) REFERENCES `customers_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "repairId",
+            "columnName": "repair_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "customerId",
+            "columnName": "customer_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentMethod",
+            "columnName": "payment_method",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "string",
+            "columnName": "reference",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subTotal",
+            "columnName": "Subtotal",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "total",
+            "columnName": "total",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": [
+          {
+            "table": "repairs_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "repair_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "customers_table",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "customer_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cd81d2a4ee70c2348431ee34d8a24889')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c15551460f00da56ea5fe5fb62fd86fa')"
     ]
   }
 }

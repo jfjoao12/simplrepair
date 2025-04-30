@@ -1,11 +1,14 @@
 package com.example.project_simplrepair.Screens
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,9 +22,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Camera
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,19 +52,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
 import androidx.wear.compose.material.rememberSwipeableState
 import androidx.wear.compose.material.swipeable
 import com.example.project_simplrepair.DB.AppDatabase
+import com.example.project_simplrepair.Destination.Destination
+import com.example.project_simplrepair.Layouts.CustomCardLayout
 import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.Technician
+import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.showRepairID
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Displays detailed information for a specific repair, including:
@@ -80,6 +97,7 @@ fun RepairDetailsScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
     repairItem: Repair,
+    navController: NavController,
     appDatabase: AppDatabase,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
@@ -127,15 +145,8 @@ fun RepairDetailsScreen(
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1) // Maps anchor points (in px) to
 
-    // To swipe the content down
-    val offsetDp = with(LocalDensity.current) { swipeableState.offset.value.toDp() }
-
-    val baseHeight = 160.dp
-    val thresholdPx = sizePx / 2
-
-    var showDetails by remember {
-        mutableStateOf(false)
-    }
+    // To expand the content down
+    var expanded by remember { mutableStateOf(false) }
 
 
     with(sharedTransitionScope) {
@@ -178,86 +189,105 @@ fun RepairDetailsScreen(
                             )
                             .background(
                                 color = MaterialTheme.colorScheme.surfaceVariant,
-                            ),
+                            )
+                            .clickable {expanded = !expanded}
+                            .padding(bottom = 10.dp),
                     ) {
-                        LaunchedEffect(swipeableState.offset.value) {
-                            showDetails = swipeableState.offset.value > thresholdPx
-                        }
-                            AnimatedContent(
-                                targetState = showDetails,
-                                label = "Transition"
-                            ) { targetState ->
-                                Row(
+                        Column {
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(
+                                        top = 72.dp,
+                                        bottom = 6.dp,
+                                        start = 20.dp,
+                                        end = 20.dp
+                                    ),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = customer!!.customerName,
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            top = 72.dp,
-                                            bottom = 32.dp,
-                                            start = 20.dp,
-                                            end = 20.dp
-                                        ),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {                                Column {
-                                    Text(
-                                        text = "customer",
-                                        fontWeight = FontWeight.Thin,
-                                        fontStyle = FontStyle.Italic,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 12.sp
-                                    )
-                                    Text(
-                                        text = customer!!.customerName,
-                                        modifier = Modifier
-                                            .semantics { contentDescription = "Customer ${customer!!.customerName}" }
-                                            .sharedBounds(
-                                                sharedTransitionScope.rememberSharedContentState(
-                                                    "customerName-${repairItem.id}"
-                                                ),
-                                                animatedVisibilityScope = animatedContentScope
+                                        .semantics {
+                                            contentDescription =
+                                                "Customer ${customer!!.customerName}"
+                                        }
+                                        .sharedBounds(
+                                            sharedTransitionScope.rememberSharedContentState(
+                                                "customerName-${repairItem.id}"
                                             ),
-                                        fontWeight = MaterialTheme.typography.titleMedium.fontWeight
-                                    )
-                                }
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        Text(
-                                            text = "technician",
-                                            fontWeight = FontWeight.Thin,
-                                            fontStyle = FontStyle.Italic,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 12.sp
-                                        )
-                                        Text(
-                                            text = technician!!.name,
-                                            modifier = Modifier
-                                                .semantics { contentDescription = "Technician ${technician!!.name}" }
-                                                .sharedElement(
-                                                    sharedTransitionScope.rememberSharedContentState(
-                                                        "techName-${repairItem.id}"
-                                                    ),
-                                                    animatedVisibilityScope = animatedContentScope
-                                                ),
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-                                }
-                                if (targetState) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(16.dp)
-                                            .height(baseHeight + offsetDp)
-                                    ) {
-                                        Text(
-                                            text = "Implement",
-                                            modifier = Modifier
-                                                .align(Alignment.BottomCenter)
-                                        )
-                                    }
-                                }
+                                            animatedVisibilityScope = animatedContentScope
+                                        ),
+                                    fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                                )
+                                Text(
+                                    text = customer!!.customerPhone,
+                                    modifier = Modifier
+                                        .semantics {
+                                            contentDescription =
+                                                "Customer ${customer!!.customerPhone}"
+                                        },
+                                    fontWeight = MaterialTheme.typography.titleMedium.fontWeight
+                                )
 
                             }
 
+                            AnimatedVisibility(expanded) {
+                                Column(
+                                    modifier = Modifier
+                                        .padding(
+                                            start = 20.dp,
+                                            end = 20.dp
+                                        )
+                                ) {
+                                    Row (
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        customer!!.customerEmail?.let { email ->
+                                            Text(
+                                                text = "Email: ",
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                            Text(
+                                                text = email,
+                                                style = MaterialTheme.typography.bodySmall
+                                            )
+                                        }
+                                    }
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "Address: ",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                        Text(
+                                            text = customer!!.customerAddress.toString(),
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text("")
+                                        Text(
+                                            text = "${customer!!.customerCity}, ${customer!!.customerProv} ${customer!!.customerPostalCode}",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                     // ScreenTitle placed at the top and overlapping the card
                     ScreenTitle(
@@ -274,7 +304,7 @@ fun RepairDetailsScreen(
                 }
 
                 // Device Details Section
-                CardSection("Device Details") {
+                CustomCardLayout("Device Details") {
                     Column {
                         Text(
                             text = "Model: $deviceModel",
@@ -294,7 +324,7 @@ fun RepairDetailsScreen(
                     }
                 }
 
-                CardSection("Repair Info") {
+                CustomCardLayout("Repair Info") {
                     Text(
                         text = "Repair Type: ${repairItem.repairType}",
                         modifier = Modifier.semantics {
@@ -303,7 +333,7 @@ fun RepairDetailsScreen(
                     )
                 }
 
-                CardSection("Price") {
+                CustomCardLayout("Price") {
                     Text(
                         text = "$${repairItem.price}",
                         fontWeight = FontWeight.Bold,
@@ -315,6 +345,42 @@ fun RepairDetailsScreen(
                                 animatedVisibilityScope = animatedContentScope
                             )
                     )
+                }
+
+
+            }
+
+            Column (
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                SmallFloatingActionButton(
+                    onClick = {
+
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier
+                        .padding(bottom = 6.dp)
+                        .semantics { contentDescription = "Take Photo of Device" }
+                ) {
+                    Icon(Icons.Filled.Edit, contentDescription = "Take Photo Icon")
+                }
+
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate("invoice/${repairItem.id}")
+
+                    },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier
+                        .semantics { contentDescription = "Save new repair" }
+                ) {
+                    Icon(Icons.Filled.AttachMoney, contentDescription = null)
                 }
             }
         }

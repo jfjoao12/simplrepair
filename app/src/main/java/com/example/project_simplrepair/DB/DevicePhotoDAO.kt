@@ -22,8 +22,9 @@ interface DevicePhotoDAO {
     @Query("""
         UPDATE device_photos
         SET repair_id = :id
+        WHERE path = :path
             """)
-    fun updatePhotoRepairId(id: Int)
+    fun updatePhotoRepairId(id: Int, path: String)
 
 //    @Query("SELECT * FROM device_photos ORDER BY timestamp DESC")
 //    fun getAllPhotos(): Flow<List<DevicePhoto>>

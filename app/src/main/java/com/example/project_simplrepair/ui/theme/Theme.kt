@@ -16,10 +16,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.ui.theme.AppTypography
 
 private val lightScheme = lightColorScheme(
-    primary = primaryDark,
-    onPrimary = onPrimaryDark,
-    primaryContainer = primaryContainerLight,
-    onPrimaryContainer = onPrimaryContainerLight,
+    primary = primaryLight,
+    onPrimary = onPrimaryLight,
+    primaryContainer = primaryContainerDark,
+    onPrimaryContainer = onPrimaryContainerDark,
     secondary = secondaryLight,
     onSecondary = onSecondaryLight,
     secondaryContainer = secondaryContainerLight,
@@ -257,7 +257,7 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun ProjectSimplRepairTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit

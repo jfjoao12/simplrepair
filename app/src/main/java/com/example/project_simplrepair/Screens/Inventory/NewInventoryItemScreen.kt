@@ -223,6 +223,7 @@ fun NewInventoryItemScreen(
                                 name = name,
                                 sku = sku,
                                 price = price.toDouble(),
+                                repairId = null,
                                 quantity = quantity.toInt()
                             )
                         db.inventoryDao().insert(newInventoryItem)
