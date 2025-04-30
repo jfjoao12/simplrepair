@@ -67,6 +67,7 @@ import com.example.project_simplrepair.Screens.InsertRepair.CameraScreen
 import com.example.project_simplrepair.Screens.InsertCustomerScreen
 import com.example.project_simplrepair.Screens.InsertRepair.InsertRepairScreen
 import com.example.project_simplrepair.Screens.Inventory.InventoryScreen
+import com.example.project_simplrepair.Screens.Inventory.NewInventoryItemScreen
 
 import com.example.project_simplrepair.Screens.RepairScreen
 import com.example.project_simplrepair.Screens.SearchScreen
@@ -222,13 +223,11 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 fontWeight = FontWeight.Bold
                             ) },
                         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer, // Your custom background color here
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
                             titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                             scrolledContainerColor = MaterialTheme.colorScheme.onPrimaryContainer
-
-
                         ),
                         actions = {
                             IconButton(
@@ -360,7 +359,11 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         }
 
                         composable(Destination.NewInventoryItem.route) {
-
+                            NewInventoryItemScreen(
+                                paddingValues,
+                                navController,
+                                AppDatabase.getInstance(context = LocalContext.current)
+                            )
                         }
                     }
                 }

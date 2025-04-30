@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,7 +29,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -40,7 +38,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Destination.Destination
-import com.example.project_simplrepair.Layouts.InsertFormCard
+import com.example.project_simplrepair.Layouts.CustomCardLayout
 import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
@@ -130,41 +128,29 @@ fun InsertRepairScreen(
             .padding(paddingValues)
     ) {
         Column {
+
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(bottom = 16.dp)
-            ) {
-
-                ScreenTitle(
-                    title = "New Repair",
-                    modifier = Modifier
-                        .semantics { heading() }
-                )
+                    .semantics { heading() }) {
+                ScreenTitle("New repair")
             }
 
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxSize(),
             ) {
-                // Device photos section
+                // Photo previews
                 if (photoPaths.isNotEmpty()) {
                     item {
-                        InsertFormCard("Device Photo") {
+                        CustomCardLayout("Device Photo") {
                             LazyRow(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(
-                                        start = 16.dp,
-                                        top = 32.dp,
-                                        bottom = 32.dp,
-                                        end = 16.dp
-                                    )
+                                    .padding(16.dp)
                             ) {
                                 items(photoPaths) { path ->
-                                    val bmp = remember(path) {
-                                        decodeFile(path)
-                                    }
+                                    val bmp = remember(path) { decodeFile(path) }
                                     bmp?.let {
                                         Image(
                                             bitmap = it.asImageBitmap(),
@@ -181,49 +167,46 @@ fun InsertRepairScreen(
                     }
                 }
 
-                // Device section
+                // Device fields
                 item {
-                    InsertFormCard("Device") {
-                            OutlinedTextField(
-                                value = insertVm.modelName,
-                                onValueChange = {insertVm.modelName = it},
-                                label = { Text(insertVm.modelBrand) },
-                                singleLine = true,
-                                trailingIcon = {
-                                    IconButton(onClick = {
-                                        GlobalScope.launch {
-                                            val models = db.phoneModelsDAO().getModelByName(insertVm.modelName).first()
-                                            if (models.size == 1) {
-                                                insertVm.phoneModel = models.first()
-                                            } else {
-                                                deviceBottomModalSheet = true
-                                            }
+                    CustomCardLayout("Device") {
+                        OutlinedTextField(
+                            value = insertVm.modelName,
+                            onValueChange = { insertVm.modelName = it },
+                            label = { Text(insertVm.modelBrand) },
+                            singleLine = true,
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    GlobalScope.launch {
+                                        val models = db.phoneModelsDAO().getModelByName(insertVm.modelName).first()
+                                        if (models.size == 1) {
+                                            insertVm.phoneModel = models.first()
+                                        } else {
+                                            deviceBottomModalSheet = true
                                         }
-                                    }) {
-                                        Icon(
-                                            imageVector = Icons.Default.Search,
-                                            contentDescription = "Search models"
-                                        )
                                     }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                            OutlinedTextField(
-                                value = insertVm.serial,
-                                onValueChange = { insertVm.serial = it },
-                                label = { Text("Serial Number / IMEI") },
-                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .semantics { contentDescription = "Device serial input" }
-                            )
+                                }) {
+                                    Icon(Icons.Default.Search, contentDescription = "Search models")
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        OutlinedTextField(
+                            value = insertVm.serial,
+                            onValueChange = { insertVm.serial = it },
+                            label = { Text("Serial Number / IMEI") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .semantics { contentDescription = "Device serial input" }
+                        )
                     }
                 }
 
-                // Customer section
+                // Customer fields
                 item {
-                    InsertFormCard("Customer") {
+                    CustomCardLayout("Customer") {
                         OutlinedTextField(
                             value = insertVm.customerName,
                             onValueChange = { insertVm.customerName = it },
@@ -239,22 +222,27 @@ fun InsertRepairScreen(
                     }
                 }
 
-                // Repair info section
+                // Repair type & price
                 item {
-                    InsertFormCard("Repair Info") {
+                    CustomCardLayout("Repair Info") {
+                        // Repair Type dropdown
                         ExposedDropdownMenuBox(
                             expanded = expanded,
-                            onExpandedChange = { expanded = true },
-                            modifier = Modifier.semantics { contentDescription = "Repair type dropdown" }
+                            onExpandedChange = { expanded = !expanded }
                         ) {
                             OutlinedTextField(
                                 value = insertVm.selectedType.displayName,
                                 onValueChange = {},
                                 label = { Text("Repair Type") },
                                 readOnly = true,
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp)
+                                    .menuAnchor(MenuAnchorType.PrimaryEditable)
+
                             )
                             ExposedDropdownMenu(
                                 expanded = expanded,
@@ -271,6 +259,7 @@ fun InsertRepairScreen(
                                 }
                             }
                         }
+
                         OutlinedTextField(
                             value = insertVm.price,
                             onValueChange = { insertVm.price = it },
@@ -285,6 +274,7 @@ fun InsertRepairScreen(
                 }
             }
         }
+
 
         // Device Bottom Sheet
         if (deviceBottomModalSheet) {
@@ -362,7 +352,6 @@ fun InsertRepairScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ){
-
             SmallFloatingActionButton(
                 onClick = {
                     navController.navigate(Destination.Camera.route)

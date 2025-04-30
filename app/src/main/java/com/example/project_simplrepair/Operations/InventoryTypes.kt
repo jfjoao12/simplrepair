@@ -1,6 +1,6 @@
 package com.example.project_simplrepair.Operations
 
-enum class InventoryTypes(val displayName: String) {
+enum class InventoryTypes(var displayName: String) {
     PART("Part"),
     ACCESSORY("Accessory"),
     REFURB("Refurb"),
@@ -10,7 +10,7 @@ enum class InventoryTypes(val displayName: String) {
 
 enum class InventorySubType(
     val parent: InventoryTypes,
-    val displayName: String
+    var displayName: String
 ) {
     // PART subtypes
     DISPLAY   (InventoryTypes.PART, "Display"),

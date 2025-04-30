@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 
 @Composable
-fun InsertFormCard(title: String, content: @Composable () -> Unit) {
+fun CustomCardLayout(title: String = "", content: @Composable () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -39,20 +39,24 @@ fun InsertFormCard(title: String, content: @Composable () -> Unit) {
                 content()
             }
         }
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = (-12).dp)
-                .zIndex(1f)
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-            )
+
+        if(title != ""){
+            Surface(
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .offset(y = (-12).dp)
+                    .zIndex(1f)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
         }
+
     }
 }

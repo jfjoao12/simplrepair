@@ -22,6 +22,9 @@ data class Inventory (
     @ColumnInfo(name = "name")
     val name: String,
 
+    @ColumnInfo(name = "sku")
+    val sku: String,
+
     @ColumnInfo(name = "price")
     val price: Double,
 
