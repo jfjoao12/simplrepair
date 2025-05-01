@@ -35,12 +35,7 @@ interface RemovePhoneModelsTable : AutoMigrationSpec
     version = 40,
 )
 //abstract class SimplDatabase : RoomDatabase() {
-//    // your DAOs here…
 //
-//    /**
-//     * This empty class just carries the DDL annotations for Room's
-//     * auto-migration from 38→39.
-//     */
 //    @DeleteColumn(
 //        tableName  = "invoice_table",
 //        columnName = "amount_paid"
