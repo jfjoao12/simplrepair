@@ -254,70 +254,13 @@ fun InsertRepairScreen(
                         )
                     }
                 }
+                item {
+                    RepairInfoSection(
+                        insertVm
+                    )
+                }
 
                 // Repair type, price and notes
-                item {
-                    CustomCardLayout("Repair Info") {
-                        OutlinedTextField(
-                            value = insertVm.notes,
-                            onValueChange = { insertVm.notes = it },
-                            label = { Text("Notes") },
-                            minLines = 2,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                                .semantics { contentDescription = "Repair Notes Input" }
-                        )
-                        // Repair Type dropdown
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded }
-                        ) {
-
-
-                            OutlinedTextField(
-                                value = insertVm.selectedType.displayName,
-                                onValueChange = {},
-                                label = { Text("Repair Type") },
-                                readOnly = true,
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-                                },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .menuAnchor(MenuAnchorType.PrimaryEditable)
-
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                RepairType.entries.forEach { type ->
-                                    DropdownMenuItem(
-                                        text = { Text(type.displayName) },
-                                        onClick = {
-                                            insertVm.selectedType = type
-                                            expanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        OutlinedTextField(
-                            value = insertVm.price,
-                            onValueChange = { insertVm.price = it },
-                            label = { Text("Price") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                                .semantics { contentDescription = "Repair price input" }
-                        )
-                    }
-                }
             }
         }
 
@@ -466,6 +409,74 @@ fun InsertRepairScreen(
                 Icon(Icons.Filled.Add, contentDescription = null)
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RepairInfoSection (
+    insertVm: InsertRepairViewModel,
+    modifier: Modifier? = null
+) {
+
+    var expanded by remember { mutableStateOf(false) }
+    CustomCardLayout("Repair Info") {
+        OutlinedTextField(
+            value = insertVm.notes,
+            onValueChange = { insertVm.notes = it },
+            label = { Text("Notes") },
+            minLines = 2,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .semantics { contentDescription = "Repair Notes Input" }
+        )
+        // Repair Type dropdown
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
+            OutlinedTextField(
+                value = insertVm.selectedType.displayName,
+                onValueChange = {},
+                label = { Text("Repair Type") },
+                readOnly = true,
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .menuAnchor(MenuAnchorType.PrimaryEditable)
+
+            )
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                RepairType.entries.forEach { type ->
+                    DropdownMenuItem(
+                        text = { Text(type.displayName) },
+                        onClick = {
+                            insertVm.selectedType = type
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        OutlinedTextField(
+            value = insertVm.price,
+            onValueChange = { insertVm.price = it },
+            label = { Text("Price") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .semantics { contentDescription = "Repair price input" }
+        )
     }
 }
 

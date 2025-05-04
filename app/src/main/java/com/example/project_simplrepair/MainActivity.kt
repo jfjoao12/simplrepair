@@ -345,6 +345,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 appDatabase = db,
                                 onItemClick = {
                                 },
+
                             )
                         }
                     }

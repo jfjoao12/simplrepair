@@ -1,15 +1,22 @@
 package com.example.project_simplrepair.Screens.Repair
 
 import android.graphics.BitmapFactory.decodeFile
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -25,12 +32,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
+
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.rounded.ExpandMore
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,6 +49,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -56,12 +67,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -122,6 +135,9 @@ fun RepairDetailsScreen(
     var filePaths = remember { mutableStateListOf<String?>() }
     var boxExpanded by remember { mutableStateOf(false) }
     var boxHeight by remember { mutableIntStateOf(0) }
+    var editCard by remember { mutableStateOf(false) }
+
+
 
     // Kick off a one-time load when repairItem.id changes
     LaunchedEffect(repairItem.id) {
@@ -166,11 +182,12 @@ fun RepairDetailsScreen(
     var expanded by remember { mutableStateOf(false) }
 
 
-    with(sharedTransitionScope) {
+    SharedTransitionLayout (
+        modifier = Modifier
+            .fillMaxSize()
+    ){
         Box(
             modifier = Modifier
-
-
                 .padding(paddingValues)
         ) {
             Column(
@@ -320,187 +337,258 @@ fun RepairDetailsScreen(
                     )
                 }
 
-                // Device Photos Section
-                    ExpandablePhotoSection(
-                        title = "Gallery",
-                        filePaths = filePaths
-                    )
-
-
-
-                // Repair Info Section
-                CustomCardLayout("Repair Info") {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    AnimatedVisibility(
+                        visible = !editCard,
+                        enter = fadeIn() + scaleIn(),
+                        exit = fadeOut() + scaleOut(),
                     ) {
-                        Text(
-                            text = "Status:  ",
-                            modifier = Modifier
-                                .semantics { contentDescription = "Repair Status" }
-                        )
-                        Text(
-                            text = repairItem.repairStatus.displayName,
-                            modifier = Modifier.semantics {
-                                contentDescription = "Repair Status"
-                            }
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Repair Type: ",
-                            modifier = Modifier.semantics {
-                                contentDescription = "Repair type ${repairItem.repairType}"
-                            }
-                        )
-
-                        Text(
-                            text = repairItem.repairType.displayName,
-                            modifier = Modifier.semantics {
-                                contentDescription = "Repair type ${repairItem.repairType}"
-                            }
-                        )
-
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Quote: ",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .semantics { contentDescription = "Repair price quotation" }
-                        )
-
-                        Text(
-                            text = repairItem.price.toString(),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .semantics { contentDescription = "Repair price value" }
-                        )
-                    }
-
                     Column(
                         modifier = Modifier
-                            .padding(top = 16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .padding(bottom = 8.dp),
-                            text = "Notes",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .border(
-                                    width   = 1.dp,
-                                    color   = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
-                                    shape   = RoundedCornerShape(8.dp)
-                                )
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text  = repairItem.notes,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                            .sharedBounds(
+                                sharedContentState = rememberSharedContentState(key = "RepairDetails-bounds"),
+                                // Using the scope provided by AnimatedVisibility
+                                animatedVisibilityScope = this,
+                                clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp))
                             )
+                    ) {
+                        ExpandablePhotoSection(
+                            title = "Gallery",
+                            filePaths = filePaths,
+                            modifier = Modifier
+                                .sharedBounds(
+                                    sharedContentState = rememberSharedContentState(key = "repairInfo-bounds"),
+                                    // Using the scope provided by AnimatedVisibility
+                                    animatedVisibilityScope = this@AnimatedVisibility
+                                ),
+                        )
+
+                        CustomCardLayout(
+                            title = "Repair Info",
+                            editable = true,
+                            onEditClick = {
+                                editCard = true
+                            },
+                            modifier = Modifier
+                                .sharedBounds(
+                                    sharedContentState = rememberSharedContentState(key = "repairInfo-bounds"),
+                                    // Using the scope provided by AnimatedVisibility
+                                    animatedVisibilityScope = this@AnimatedVisibility,
+                                )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Status:  ",
+                                    modifier = Modifier
+                                        .semantics { contentDescription = "Repair Status" }
+                                )
+                                Text(
+                                    text = repairItem.repairStatus.displayName,
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "Repair Status"
+                                    }
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Repair Type: ",
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "Repair type ${repairItem.repairType}"
+                                    }
+                                )
+
+                                Text(
+                                    text = repairItem.repairType.displayName,
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "Repair type ${repairItem.repairType}"
+                                    }
+                                )
+
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Quote: ",
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .semantics { contentDescription = "Repair price quotation" }
+                                )
+
+                                Text(
+                                    text = repairItem.price.toString(),
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier
+                                        .semantics { contentDescription = "Repair price value" }
+                                )
+                            }
+
+                            Column(
+                                modifier = Modifier
+                                    .padding(top = 16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    modifier = Modifier
+                                        .padding(bottom = 8.dp),
+                                    text = "Notes",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .border(
+                                            width = 1.dp,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                            shape = RoundedCornerShape(8.dp)
+                                        )
+                                        .padding(16.dp)
+                                ) {
+                                    Text(
+                                        text = repairItem.notes,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                            }
+                        }
+                        CustomCardLayout("Device Details") {
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Model: ",
+                                    modifier = Modifier
+                                        .semantics { contentDescription = "Model $deviceModel" }
+                                        .sharedElement(
+                                            sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
+                                            animatedVisibilityScope = animatedContentScope
+                                        )
+                                )
+                                Text(
+                                    text = deviceModel!!,
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "Device Model"
+                                    }
+                                )
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Serial: ",
+                                    modifier = Modifier
+                                        .semantics { contentDescription = "Model " }
+                                )
+                                Text(
+                                    text = device!!.deviceSerial,
+                                    modifier = Modifier.semantics {
+                                        contentDescription = "Device Model"
+                                    }
+                                )
+                            }
                         }
                     }
-
-
                 }
 
-                // Device Details Section
-                CustomCardLayout("Device Details") {
+                    AnimatedVisibility(
+                        visible = editCard,
+                        enter = fadeIn() + scaleIn(),
+                        exit = fadeOut() + scaleOut(),
+                    ){
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Model: ",
-                            modifier = Modifier
-                                .semantics { contentDescription = "Model $deviceModel" }
-                                .sharedElement(
-                                    sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
-                                    animatedVisibilityScope = animatedContentScope
-                                )
-                        )
-                        Text(
-                            text = deviceModel!!,
-                            modifier = Modifier.semantics {
-                                contentDescription = "Device Model"
-                            }
-                        )
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Serial: ",
-                            modifier = Modifier
-                                .semantics { contentDescription = "Model " }
-                        )
-                        Text(
-                            text = device!!.deviceSerial,
-                            modifier = Modifier.semantics {
-                                contentDescription = "Device Model"
-                            }
-                        )
-                    }
-                }
             }
 
             // If repair is completed, it won't show the FABs
             if (repairItem.repairStatus != RepairStatus.COMPLETED) {
+                val rotation by animateFloatAsState(
+                    targetValue   = if (editCard) 360f else 0f,
+                    animationSpec = tween(durationMillis = 300)
+                )
                 Column (
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
+
                 ) {
-                    SmallFloatingActionButton(
-                        onClick = {
+                        AnimatedVisibility(
+                            visible = !editCard,
+                            enter = fadeIn() + scaleIn(),
+                            exit = fadeOut() + scaleOut(),
+                        ) {
+                            FloatingActionButton(
+                                onClick = {
+                                    navController.navigate("invoice/${repairItem.id}")
 
-                        },
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier
-                            .padding(bottom = 6.dp)
-                            .semantics { contentDescription = "Take Photo of Device" }
-                    ) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Take Photo Icon")
-                    }
+                                },
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(key = "repairInfo-FAB"),
+                                        animatedVisibilityScope = this,
+                                        clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp))
+                                    )
+                                    .semantics { contentDescription = "Save new repair" }
 
-                    FloatingActionButton(
-                        onClick = {
-                            navController.navigate("invoice/${repairItem.id}")
+                            ) {
+                                Icon(
+                                    Icons.Filled.AttachMoney,
+                                    contentDescription = null,
+                                    modifier = Modifier
 
-                        },
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier
-                            .semantics { contentDescription = "Save new repair" }
-                    ) {
-                        Icon(Icons.Filled.AttachMoney, contentDescription = null)
-                    }
+                                        .graphicsLayer { rotationZ = rotation } // ← apply your spin
+
+                                )
+                            }
+                        }
+
+                        AnimatedVisibility(
+                            visible = editCard,
+                            enter = fadeIn() + scaleIn(),
+                            exit = fadeOut() + scaleOut(),
+                        ) {
+                            FloatingActionButton(
+                                onClick = {
+                                    editCard = false
+                                },
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier
+                                    .sharedBounds(
+                                        sharedContentState = rememberSharedContentState(key = "repairInfo-FAB"),
+                                        animatedVisibilityScope = this,
+                                        clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp))
+                                    )
+                                    .semantics { contentDescription = "Save Changes" }
+
+                            ) {
+                                Icon(
+                                    Icons.Filled.Check,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .graphicsLayer { rotationZ = rotation } // ← apply your spin
+                                )
+                            }
+                        }
                 }
-
             }
         }
     }
@@ -539,7 +627,8 @@ fun ExpandablePhotoSection(
     title: String,
     filePaths: List<String?>,
     collapsedThumbSize: Dp = 128.dp,
-    expandedImageSize: Dp = 256.dp
+    expandedImageSize: Dp = 256.dp,
+    modifier: Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
 

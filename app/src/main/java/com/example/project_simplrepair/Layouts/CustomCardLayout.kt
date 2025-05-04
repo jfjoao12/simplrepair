@@ -5,20 +5,37 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 
 @Composable
-fun CustomCardLayout(title: String = "", content: @Composable () -> Unit) {
+fun CustomCardLayout(
+    title: String = "",
+    editable: Boolean = false,
+    onEditClick: () -> Unit = {},
+    modifier: Modifier? = null,
+    content: @Composable () -> Unit,
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -42,8 +59,8 @@ fun CustomCardLayout(title: String = "", content: @Composable () -> Unit) {
 
         if(title != ""){
             Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
                 shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .offset(y = (-12).dp)
@@ -57,6 +74,28 @@ fun CustomCardLayout(title: String = "", content: @Composable () -> Unit) {
                 )
             }
         }
+        if (editable) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(y = (-12).dp, x = (-12).dp)
+                    .zIndex(1f)
+            ) {
+                IconButton(
+                    onClick = onEditClick,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .size(20.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Edit,
+                        contentDescription = "Edit card",
 
+                    )
+                }
+            }
+        }
     }
 }
