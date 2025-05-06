@@ -123,7 +123,7 @@ fun RepairScreen(
                             db = db,
                             onBackPressed = { /* no-op */ },
                             customerItem = ticket.customer,
-                            deviceItem = ticket.device,
+                            deviceItem = ticket.deviceWithSpecs.device,
                             repairItem = ticket.repair
                         )
                     }

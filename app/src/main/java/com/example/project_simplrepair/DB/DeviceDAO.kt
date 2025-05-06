@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.project_simplrepair.Models.Device
 
 /**
@@ -21,6 +22,10 @@ interface DeviceDAO {
      */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insert(device: Device): Long
+
+
+    @Update
+    suspend fun updateDevice(device: Device): Int
 
     /**
      * Retrieves the phone model name associated with a given device ID.

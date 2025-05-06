@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 41,
-    "identityHash": "86b062708eb8de6e89e702ad4b750338",
+    "identityHash": "9ab939c6d107b66615a7ec48ad8734ee",
     "entities": [
       {
         "tableName": "repairs_table",
@@ -188,7 +188,7 @@
       },
       {
         "tableName": "device_table",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `specs_id` INTEGER, `customer_id` INTEGER, `phone_model_id` INTEGER NOT NULL, `device_type` TEXT NOT NULL, `device_serial` TEXT NOT NULL, `device_name` TEXT NOT NULL, FOREIGN KEY(`phone_model_id`) REFERENCES `phone_specs_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`customer_id`) REFERENCES `customers_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`specs_id`) REFERENCES `phone_specs_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `specs_id` INTEGER, `customer_id` INTEGER, `phone_model_id` INTEGER NOT NULL, `device_type` TEXT NOT NULL, `device_serial` TEXT NOT NULL, `color` TEXT, FOREIGN KEY(`phone_model_id`) REFERENCES `phone_specs_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`customer_id`) REFERENCES `customers_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`specs_id`) REFERENCES `phone_specs_table`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "deviceId",
@@ -227,10 +227,10 @@
             "notNull": true
           },
           {
-            "fieldPath": "deviceName",
-            "columnName": "device_name",
+            "fieldPath": "color",
+            "columnName": "color",
             "affinity": "TEXT",
-            "notNull": true
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -807,7 +807,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '86b062708eb8de6e89e702ad4b750338')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9ab939c6d107b66615a7ec48ad8734ee')"
     ]
   }
 }

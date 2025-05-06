@@ -57,6 +57,6 @@ data class Device(
     @ColumnInfo(name = "device_serial")
     val deviceSerial: String,
 
-    @ColumnInfo(name = "device_name")
-    val deviceName: String,
+    @ColumnInfo(name = "color")
+    val color: String?,
 )

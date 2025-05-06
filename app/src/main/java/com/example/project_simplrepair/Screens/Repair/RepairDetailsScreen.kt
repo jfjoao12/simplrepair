@@ -486,7 +486,7 @@ fun RepairDetailsScreen(
                                 Text(
                                     text = "Model: ",
                                     modifier = Modifier
-                                        .semantics { contentDescription = "Model ${ticket!!.device.deviceId}" }
+                                        .semantics { contentDescription = "Model ${ticket!!.deviceWithSpecs.specs.name}" }
                                         .sharedElement(
                                             sharedTransitionScope.rememberSharedContentState("modelName-pica"),
                                             animatedVisibilityScope = animatedContentScope
@@ -510,7 +510,7 @@ fun RepairDetailsScreen(
                                         .semantics { contentDescription = "Model " }
                                 )
                                 Text(
-                                    text = ticket!!.device.deviceSerial,
+                                    text = ticket!!.deviceWithSpecs.device.deviceSerial,
                                     modifier = Modifier.semantics {
                                         contentDescription = "Device Model"
                                     }

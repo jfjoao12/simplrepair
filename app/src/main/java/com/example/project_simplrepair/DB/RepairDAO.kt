@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
@@ -29,6 +30,9 @@ interface RepairDAO {
      */
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(repair: Repair): Long
+
+    @Update
+    suspend fun updateRepair(repair: Repair): Int
 
     /**
      * Retrieves a repair by its ID.
@@ -87,6 +91,7 @@ interface RepairDAO {
     @Transaction
     @Query("SELECT * FROM repairs_table")
     fun streamAllFullTickets(): Flow<List<FullTicket>>
+
 
 
 }

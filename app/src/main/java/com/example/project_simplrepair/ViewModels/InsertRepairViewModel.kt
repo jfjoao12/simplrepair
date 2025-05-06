@@ -16,6 +16,8 @@ class InsertRepairViewModel : ViewModel() {
     var customerId by   mutableIntStateOf(0)
     var phoneSpecs by   mutableStateOf<PhoneSpecs?>(null)
     var phoneSpecsId by mutableIntStateOf(0)
+    var deviceIsSelected by mutableStateOf(false)
+    var phoneColor by mutableStateOf("")
     var price by   mutableStateOf("")
     var selectedType by   mutableStateOf(RepairType.BATTERY)
     var modelBrand by   mutableStateOf("Model")

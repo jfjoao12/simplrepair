@@ -10,7 +10,6 @@ import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.DevicePhoto
 import com.example.project_simplrepair.Models.PhoneSpecs
 import com.example.project_simplrepair.Models.Repair
-import com.example.project_simplrepair.Models.Technician
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -28,6 +27,25 @@ class TicketRepositoryImpl @Inject constructor(
 
     override fun getAllFullTickets(): Flow<List<FullTicket>> =
         repairDAO.streamAllFullTickets()
+
+    override suspend fun insertRepair(repair: Repair): Int =
+        repairDAO.insert(repair).toInt()
+
+    override suspend fun editRepair(repair: Repair): Int =
+        repairDAO.updateRepair(repair)
+
+    override suspend fun insertDevice(device: Device): Int =
+        deviceDAO.insert(device).toInt()
+
+    override suspend fun editDevice(device: Device): Int =
+        deviceDAO.updateDevice(device)
+
+    override suspend fun insertCustomer(customer: Customer): Int =
+        customerDAO.insert(customer).toInt()
+
+    override suspend fun editCustomer(customer: Customer): Int =
+        customerDAO.updateCustomer(customer)
+
 }
 
 data class FullTicket(
@@ -41,8 +59,20 @@ data class FullTicket(
     val customer: Customer,
 
     // embed our DeviceWithSpecs instead of a raw Device:
-    @Embedded(prefix = "fulldevice_")
-    val deviceWithSpecs: DeviceWithSpecs
+    @Relation(
+        entity = Device::class,
+        parentColumn = "device_id",
+        entityColumn = "id"
+    )
+    val deviceWithSpecs: DeviceWithSpecs,
+
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "repair_id"
+    )
+    val photos: List<DevicePhoto>
+
+
 )
 
 data class DeviceWithSpecs(
@@ -50,7 +80,7 @@ data class DeviceWithSpecs(
     val device: Device,
 
     @Relation(
-        parentColumn  = "fulldevice_specs_id",  // the FK column in Device
+        parentColumn  = "specs_id",  // the FK column in Device
         entityColumn  = "id"              // the PK column in DeviceSpecs
     )
     val specs: PhoneSpecs

@@ -80,6 +80,7 @@ fun InsertRepairScreen(
 ) {
     var customer by remember { mutableStateOf<Customer?>(null) }
     var device by remember { mutableStateOf<Device?>(null) }
+    var deviceColors by remember { mutableStateOf("")}
     var deviceModel by remember { mutableStateOf<String?>(null) }
     val devices by appDatabase.phoneModelsDAO().getModelByName(insertVm.modelName).collectAsState(initial = emptyList())
 
@@ -215,14 +216,83 @@ fun InsertRepairScreen(
                                             insertVm.phoneSpecs = models.first()
                                         } else {
                                             deviceBottomModalSheet = true
+                                            insertVm.phoneColor = ""
+
                                         }
                                     }
                                 }) {
                                     Icon(Icons.Default.Search, contentDescription = "Search models")
                                 }
                             },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .padding(vertical = 8.dp)
+                                .fillMaxWidth()
                         )
+
+                        // Device Colors
+                        // if device is selected, show a list of the available colors
+                        if (insertVm.deviceIsSelected) {
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = !expanded }
+                            ) {
+                                OutlinedTextField(
+                                    value = insertVm.phoneColor,
+                                    onValueChange = {},
+                                    label = { Text("Device Color") },
+                                    readOnly = true,
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                        .menuAnchor(MenuAnchorType.PrimaryEditable)
+
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    insertVm.phoneSpecs!!.colors!!.forEach { color ->
+                                        DropdownMenuItem(
+                                            text = { Text(color) },
+                                            onClick = {
+                                                insertVm.phoneColor = color
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        } else {
+                            ExposedDropdownMenuBox(
+                                expanded = expanded,
+                                onExpandedChange = { expanded = !expanded },
+                            ) {
+                                OutlinedTextField(
+                                    value = "Select a device first",
+                                    onValueChange = {},
+                                    enabled = false,
+                                    label = { Text("Device Color") },
+                                    readOnly = true,
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 8.dp)
+                                        .menuAnchor(MenuAnchorType.PrimaryEditable)
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                }
+                            }
+                        }
+
+                        // Device Serial
                         OutlinedTextField(
                             value = insertVm.serial,
                             onValueChange = { insertVm.serial = it },
@@ -287,6 +357,7 @@ fun InsertRepairScreen(
                                         insertVm.modelName = model.name
                                         insertVm.modelBrand = model.brand?.name.toString()
                                         insertVm.phoneSpecsId = model.id
+                                        insertVm.deviceIsSelected = true
                                         deviceBottomModalSheet = false
                                     }
                                     .padding(8.dp)
@@ -363,7 +434,7 @@ fun InsertRepairScreen(
                     coroutineScope.launch {
                         // Insert Device then Repair, then update photo with repairId
                         val newDeviceId = withContext(Dispatchers.IO) {
-                            val dev = deviceModel?.let {
+                            val dev = {
                                 Device(
                                     null,
                                     insertVm.phoneSpecsId,
@@ -371,11 +442,11 @@ fun InsertRepairScreen(
                                     insertVm.phoneSpecs?.id ?: 0,
                                     DeviceType.MOBILE,
                                     insertVm.serial,
-                                    it,
+                                    insertVm.modelName,
 
                                 )
                             }
-                            appDatabase.deviceDao().insert(dev!!)
+                            appDatabase.deviceDao().insert(dev)
                         }.toInt()
 
 
@@ -471,6 +542,7 @@ fun RepairInfoSection (
                 }
             }
         }
+
 
         OutlinedTextField(
             value = insertVm.price,

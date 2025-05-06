@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.example.project_simplrepair.Models.Customer
 import kotlinx.coroutines.flow.Flow
 
@@ -20,7 +21,11 @@ interface CustomerDAO {
      * @throws SQLiteConstraintException if a conflict occurs.
      */
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    fun insert(customer: Customer)
+    fun insert(customer: Customer): Long
+
+
+    @Update
+    suspend fun updateCustomer(customer: Customer): Int
 
     /**
      * Retrieves a customer's name by their ID.
