@@ -4,11 +4,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.RepairStatus
 import com.example.project_simplrepair.Models.Technician
+import com.example.project_simplrepair.hilt.FullTicket
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Data Access Object for the [Repair] entity.
@@ -42,20 +45,9 @@ interface RepairDAO {
      * @return A list of all [Repair] entries.
      */
     @Query("SELECT * FROM repairs_table")
-    suspend fun getAllRepairs(): List<Repair>
+    fun getAllRepairs(): Flow<List<Repair>>
 
-    /**
-     * Retrieves the [Customer] associated with a repair.
-     *
-     * @param id The ID of the repair.
-     * @return The [Customer] linked to the given repair ID.
-     */
-    @Query("""
-        SELECT * FROM customers_table 
-        INNER JOIN repairs_table ON repairs_table.customer_id = customers_table.id
-        WHERE repairs_table.id = :id
-    """)
-    suspend fun getCustomerByRepairId(id: Int): Customer
+
 
     /**
      * Retrieves the [Technician] associated with a repair.
@@ -70,18 +62,7 @@ interface RepairDAO {
     """)
     suspend fun getTechByRepairId(id: Int): Technician
 
-    /**
-     * Retrieves the [Device] associated with a repair.
-     *
-     * @param id The ID of the repair.
-     * @return The [Device] linked to the given repair ID.
-     */
-    @Query("""
-        SELECT * FROM device_table
-        INNER JOIN repairs_table ON repairs_table.technician_id = device_table.id
-        WHERE repairs_table.id = :id
-    """)
-    suspend fun getDeviceByRepairId(id: Int): Device
+
 
     @Query ("""
         UPDATE repairs_table
@@ -98,4 +79,14 @@ interface RepairDAO {
         """
     )
     suspend fun searchRepairById(searchParam: Int): List<Repair>
+
+    @Transaction
+    @Query("SELECT * FROM repairs_table WHERE id = :id")
+    fun streamFullTicketById(id: Int): Flow<FullTicket>
+
+    @Transaction
+    @Query("SELECT * FROM repairs_table")
+    fun streamAllFullTickets(): Flow<List<FullTicket>>
+
+
 }

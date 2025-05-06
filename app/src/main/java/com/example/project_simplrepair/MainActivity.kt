@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.foundation.Image
@@ -84,10 +85,14 @@ import com.example.project_simplrepair.Screens.Repair.RepairScreen
 import com.example.project_simplrepair.Screens.SearchScreen
 import com.example.project_simplrepair.Screens.SettingsScreen
 import com.example.project_simplrepair.ViewModels.InsertRepairViewModel
+import com.example.project_simplrepair.hilt.TicketViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,7 +109,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     val db = AppDatabase.getInstance(applicationContext)
                     val allPhoneBrands = PhonesApiManager(db)
-
+                    val ticketViewModel: TicketViewModel by viewModels()
 //                    allPhoneBrands.getPhoneSpecs(brandId = 66, database = db)
 //                    val cameraPermissionState: PermissionState =
 //                        rememberPermissionState(android.Manifest.permission.CAMERA)
@@ -337,7 +342,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                         repair?.let {
                             RepairDetailsScreen(
                                 modifier = Modifier.padding(paddingValues),
-                                repairItem = it,
+                                repairId = it.id!!,
                                 paddingValues = paddingValues,
                                 navController = navController,
                                 sharedTransitionScope = this@SharedTransitionLayout,

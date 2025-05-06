@@ -13,9 +13,10 @@ import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.project_simplrepair.Models.*
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 
-@DeleteTable(tableName = "phone_models_table")
-interface RemovePhoneModelsTable : AutoMigrationSpec
 /**
  * Main Room database class for the Simpl Repair application.
  * Holds DAOs for all tables and sets up the database configuration.
@@ -32,7 +33,7 @@ interface RemovePhoneModelsTable : AutoMigrationSpec
         Inventory::class,
         Invoice::class,
     ],
-    version = 40,
+    version = 41,
 )
 //abstract class SimplDatabase : RoomDatabase() {
 //
@@ -47,7 +48,8 @@ interface RemovePhoneModelsTable : AutoMigrationSpec
 //    )
 //    class Migration38To39 : AutoMigrationSpec
 //}
-@TypeConverters(Converters::class) // Uncomment if you add custom type converters
+
+@TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     /** Data access object for repairs table */
@@ -90,20 +92,6 @@ abstract class AppDatabase : RoomDatabase() {
          * @return Instance of [AppDatabase]
          */
         fun getInstance(context: Context): AppDatabase {
-//            val MIGRATION = object : Migration(38, 39) {
-//                override fun migrate(db: SupportSQLiteDatabase) {
-//                    // because you need the FK, we have to rebuild the table.
-//                    // 1. create your new table with the repair_id column + FK
-//                    db.execSQL("""
-//                      ALTER TABLE invoice_table
-//                      ADD COLUMN payment_method TEXT NOT NULL DEFAULT '';
-//                    """.trimIndent())
-//                                    db.execSQL("""
-//                      ALTER TABLE invoice_table
-//                      ADD COLUMN reference TEXT NOT NULL DEFAULT '';
-//                    """.trimIndent())
-//                }
-//            }
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,

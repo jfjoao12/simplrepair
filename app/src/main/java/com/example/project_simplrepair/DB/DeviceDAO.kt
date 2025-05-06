@@ -34,4 +34,25 @@ interface DeviceDAO {
         WHERE device_table.id = :id
     """)
     fun getModelNameByDeviceId(id: Int): String?
+
+    /**
+     * Retrieves the [Device] associated with a repair.
+     *
+     * @param id The ID of the repair.
+     * @return The [Device] linked to the given repair ID.
+     */
+    @Query("""
+        SELECT * FROM device_table
+        INNER JOIN repairs_table ON repairs_table.technician_id = device_table.id
+        WHERE repairs_table.id = :id
+    """)
+    suspend fun getDeviceByRepairId(id: Int): Device
+
+    @Query(
+        """
+            SELECT * FROM device_table
+            WHERE id = :id
+        """
+    )
+    suspend fun getDeviceById(id: Int): Device
 }

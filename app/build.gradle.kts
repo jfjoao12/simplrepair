@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp")
     alias(libs.plugins.google.gms.google.services)
+    id("dagger.hilt.android.plugin")
+
 }
 
 android {
@@ -80,6 +82,7 @@ dependencies {
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.graphics.shapes.android)
     implementation(libs.androidx.room.runtime.android)
+    implementation(libs.androidx.espresso.core)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -140,6 +143,11 @@ dependencies {
     androidTestImplementation(libs.ui.test.junit4)
     debugImplementation(libs.ui.test.manifest)
 
+    // Hilt
+    implementation (libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
 
+    // Compose ViewModel integration
+    implementation (libs.androidx.hilt.navigation.compose)
 }
 

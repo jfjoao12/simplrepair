@@ -123,7 +123,7 @@ fun InvoiceScreen(
     LaunchedEffect(repairItem.id) {
         GlobalScope.launch {
             // these DAO calls run off the main thread
-            val c = repairItem.id?.let { db.repairDAO().getCustomerByRepairId(it) }
+            val c = repairItem.id?.let { db.customerDao().getCustomerByRepairId(it) }
             customer = c
 
         }

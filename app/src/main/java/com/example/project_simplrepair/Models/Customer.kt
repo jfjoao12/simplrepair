@@ -3,6 +3,9 @@ package com.example.project_simplrepair.Models
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.project_simplrepair.DB.CustomerDAO
+import com.example.project_simplrepair.DB.RepairDAO
+import javax.inject.Inject
 
 /**
  * A customer of the shop.
@@ -21,6 +24,7 @@ import androidx.room.PrimaryKey
  */
 @Entity(tableName = "customers_table")
 data class Customer(
+
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     val customerId: Int?,

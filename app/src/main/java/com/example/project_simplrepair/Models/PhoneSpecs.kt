@@ -6,7 +6,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.ForeignKey
 import androidx.room.TypeConverters
+import com.example.project_simplrepair.DB.PhoneSpecsDAO
 import com.squareup.moshi.Json
+import javax.inject.Inject
 
 /**
  * Represents a phone model.

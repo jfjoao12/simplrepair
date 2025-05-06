@@ -4,12 +4,15 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.motionEventSpy
@@ -27,6 +30,15 @@ import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.RepairStatus
 import com.example.project_simplrepair.Models.Technician
+import kotlinx.coroutines.flow.Flow
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.project_simplrepair.hilt.TicketViewModel
+
 
 // Simple data holder to keep Repair + its related entities together
 private data class EnrichedRepair(
@@ -56,23 +68,25 @@ fun RepairScreen(
     db: AppDatabase,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
-    onItemClick: (Int) -> Unit
-) {
-    // 1) Load the raw list of repairs
-    var repairs by remember { mutableStateOf<List<Repair>>(emptyList()) }
-    LaunchedEffect(Unit) {
-        repairs = db.repairDAO().getAllRepairs()
-    }
+    onItemClick: (Int) -> Unit,
+    ticketVm: TicketViewModel = hiltViewModel()
 
-    // 2) Enrich each repair with its related customer, device, and technician
-    val enrichedRepairs by produceState(initialValue = emptyList<EnrichedRepair>(), repairs) {
-        value = repairs.map { r ->
-            val cust = db.repairDAO().getCustomerByRepairId(r.id!!)
-            val dev  = db.repairDAO().getDeviceByRepairId(r.id)
-            val tech = db.repairDAO().getTechByRepairId(r.id)
-            EnrichedRepair(r, cust, dev, tech)
-        }
-    }
+) {
+    val fullTickets by ticketVm.fullTickets.collectAsState()
+
+
+
+
+
+
+
+    // 1) Load the raw list of repairs
+//    var repairs by remember { mutableStateListOf<Flow<List<Repair>>>(emptyList()) }
+//    LaunchedEffect(Unit) {
+//        repairs = db.repairDAO().getAllRepairs()
+//    }
+
+
 
     Box(
         modifier = Modifier
@@ -83,7 +97,6 @@ fun RepairScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
                 .padding(bottom = paddingValues.calculateBottomPadding())
                 .semantics { contentDescription = "List of repairs" },
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -93,7 +106,7 @@ fun RepairScreen(
                 ScreenTitle("Repairs")
             }
 
-            if (enrichedRepairs.isEmpty()) {
+            if (fullTickets.isEmpty()) {
                 Text(
                     "All repairs cleared, good job!",
                     modifier = Modifier
@@ -101,24 +114,18 @@ fun RepairScreen(
                         .semantics { contentDescription = "No repairs found" }
                 )
             } else {
-                Column(
-                    modifier = Modifier
-                        .padding(16.dp)
-                ) {
-
-                    enrichedRepairs.forEach { (repair, customer, device, technician) ->
-                        if (repair.repairStatus == RepairStatus.IN_REPAIR) {
-                            RepairCard(
-                                navController = navController,
-                                animatedVisibilityScope = animatedContentScope,
-                                sharedTransitionScope = sharedTransitionScope,
-                                db = db,
-                                onBackPressed = { /* no-op */ },
-                                customerItem = customer,
-                                deviceItem = device,
-                                repairItem = repair
-                            )
-                        }
+                LazyColumn {
+                    items(fullTickets) { ticket ->
+                        RepairCard(
+                            navController = navController,
+                            animatedVisibilityScope = animatedContentScope,
+                            sharedTransitionScope = sharedTransitionScope,
+                            db = db,
+                            onBackPressed = { /* no-op */ },
+                            customerItem = ticket.customer,
+                            deviceItem = ticket.device,
+                            repairItem = ticket.repair
+                        )
                     }
                 }
             }

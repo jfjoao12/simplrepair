@@ -4,7 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.example.project_simplrepair.DB.RepairDAO
 import com.example.project_simplrepair.Operations.DeviceType
+import javax.inject.Inject
 
 /**
  * A physical device brought in for repair.
@@ -27,6 +29,11 @@ import com.example.project_simplrepair.Operations.DeviceType
             entity = Customer::class,
             parentColumns = ["id"],
             childColumns = ["customer_id"]
+        ),
+        ForeignKey(
+            entity = PhoneSpecs::class,
+            parentColumns = ["id"],
+            childColumns = ["specs_id"]
         )
     ]
 )
@@ -34,6 +41,9 @@ data class Device(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
     val deviceId: Int?,
+
+    @ColumnInfo(name = "specs_id")
+    val specsId: Int?,
 
     @ColumnInfo(name = "customer_id")
     val customerId: Int?,
@@ -45,5 +55,8 @@ data class Device(
     val deviceType: DeviceType = DeviceType.MOBILE,
 
     @ColumnInfo(name = "device_serial")
-    val deviceSerial: String
+    val deviceSerial: String,
+
+    @ColumnInfo(name = "device_name")
+    val deviceName: String,
 )

@@ -3,6 +3,7 @@ package com.example.project_simplrepair.DB
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import androidx.room.Update
 import com.example.project_simplrepair.Models.DevicePhoto
 import com.example.project_simplrepair.Models.PhoneSpecs
@@ -22,5 +23,13 @@ interface PhoneSpecsDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(phoneSpecifications: PhoneSpecs)
 
-
+    @Query
+        ("""
+            SELECT *
+            FROM phone_specs_table
+            INNER JOIN device_table
+            ON device_table.phone_model_id = phone_specs_table.id
+            WHERE device_table.id = :id
+        """)
+        suspend fun getSpecsByDeviceId(id: Int): PhoneSpecs
 }

@@ -4,7 +4,9 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import com.example.project_simplrepair.DB.RepairDAO
 import com.example.project_simplrepair.Operations.RepairType
+import javax.inject.Inject
 
 /**
  * Represents a repair entry in the database.
@@ -38,7 +40,7 @@ import com.example.project_simplrepair.Operations.RepairType
         )
     ]
 )
-data class Repair(
+data class Repair (
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id") val id: Int?,
 

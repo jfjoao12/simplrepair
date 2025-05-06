@@ -87,8 +87,8 @@ fun InsertRepairScreen(
         LaunchedEffect(repairItem.id) {
             GlobalScope.launch {
                 // these DAO calls run off the main thread
-                val c = repairItem.id?.let { appDatabase.repairDAO().getCustomerByRepairId(it) }
-                val d = repairItem.id?.let { appDatabase.repairDAO().getDeviceByRepairId(it) }
+                val c = repairItem.id?.let { appDatabase.customerDao().getCustomerByRepairId(it) }
+                val d = repairItem.id?.let { appDatabase.deviceDao().getDeviceByRepairId(it) }
                 val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
                 // now post them back to Compose state
                 customer = c
@@ -286,6 +286,7 @@ fun InsertRepairScreen(
                                         insertVm.phoneSpecs = model
                                         insertVm.modelName = model.name
                                         insertVm.modelBrand = model.brand?.name.toString()
+                                        insertVm.phoneSpecsId = model.id
                                         deviceBottomModalSheet = false
                                     }
                                     .padding(8.dp)
@@ -362,14 +363,19 @@ fun InsertRepairScreen(
                     coroutineScope.launch {
                         // Insert Device then Repair, then update photo with repairId
                         val newDeviceId = withContext(Dispatchers.IO) {
-                            val dev = Device(
-                                null,
-                                insertVm.customerId,
-                                insertVm.phoneSpecs?.id ?: 0,
-                                DeviceType.MOBILE,
-                                insertVm.serial
-                            )
-                            appDatabase.deviceDao().insert(dev)
+                            val dev = deviceModel?.let {
+                                Device(
+                                    null,
+                                    insertVm.phoneSpecsId,
+                                    insertVm.customerId,
+                                    insertVm.phoneSpecs?.id ?: 0,
+                                    DeviceType.MOBILE,
+                                    insertVm.serial,
+                                    it,
+
+                                )
+                            }
+                            appDatabase.deviceDao().insert(dev!!)
                         }.toInt()
 
 

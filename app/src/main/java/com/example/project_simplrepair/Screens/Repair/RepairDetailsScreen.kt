@@ -1,6 +1,7 @@
 package com.example.project_simplrepair.Screens.Repair
 
 import android.graphics.BitmapFactory.decodeFile
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
@@ -54,6 +55,7 @@ import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -78,6 +80,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.wear.compose.material.ExperimentalWearMaterialApi
 import androidx.wear.compose.material.FractionalThreshold
@@ -88,10 +93,12 @@ import com.example.project_simplrepair.Layouts.CustomCardLayout
 import com.example.project_simplrepair.Layouts.ScreenTitle
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
+import com.example.project_simplrepair.Models.DevicePhoto
 import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Models.RepairStatus
 import com.example.project_simplrepair.Models.Technician
 import com.example.project_simplrepair.Operations.showRepairID
+import com.example.project_simplrepair.hilt.TicketViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -119,48 +126,53 @@ import kotlinx.coroutines.launch
 fun RepairDetailsScreen(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    repairItem: Repair,
+    repairId: Int,
     navController: NavController,
     appDatabase: AppDatabase,
     sharedTransitionScope: SharedTransitionScope,
     animatedContentScope: AnimatedContentScope,
+    ticketVm: TicketViewModel = hiltViewModel(),
     onItemClick: (Int) -> Unit
 ) {
 
+    LaunchedEffect (repairId) {
+        ticketVm.loadFullTicket(repairId)
+    }
+    // obtain ViewModel instance
+    val ticket by ticketVm.fullTicket.collectAsState()
+
+
     // state holders for the related entities
-    var customer by remember { mutableStateOf<Customer?>(null) }
-    var device by remember { mutableStateOf<Device?>(null) }
-    var deviceModel by remember { mutableStateOf<String?>(null) }
     var technician by remember { mutableStateOf<Technician?>(null) }
-    var filePaths = remember { mutableStateListOf<String?>() }
+    var devicePhotos = remember { mutableStateListOf<String?>() }
     var boxExpanded by remember { mutableStateOf(false) }
     var boxHeight by remember { mutableIntStateOf(0) }
     var editCard by remember { mutableStateOf(false) }
 
 
 
-    // Kick off a one-time load when repairItem.id changes
-    LaunchedEffect(repairItem.id) {
-        GlobalScope.launch {
-            // these DAO calls run off the main thread
-            val c = repairItem.id?.let { appDatabase.repairDAO().getCustomerByRepairId(it) }
-            val d = repairItem.id?.let { appDatabase.repairDAO().getDeviceByRepairId(it) }
-            val t = repairItem.id?.let { appDatabase.repairDAO().getTechByRepairId(it) }
-            val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
-            val fp = appDatabase.devicePhotoDao().getPhotoPathsForRepair(repairItem.id)
-            // now post them back to Compose state
-            customer = c
-            device = d
-            technician = t
-            deviceModel = dm
-            fp.forEach() { path ->
-                filePaths += path
-            }
-        }
-    }
+    // Kick off a one-time load when ticket!!.repair.id changes
+//    LaunchedEffect(ticket!!.repair.id) {
+//        GlobalScope.launch {
+//            // these DAO calls run off the main thread
+//            val c = ticket!!.repair.id?.let { appDatabase.customerDao().getCustomerByRepairId(it) }
+//            val d = ticket!!.repair.id?.let { appDatabase.deviceDao().getDeviceByRepairId(it) }
+//            val t = ticket!!.repair.id?.let { appDatabase.repairDAO().getTechByRepairId(it) }
+//            val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
+//            val fp = appDatabase.devicePhotoDao().getPhotoPathsForRepair(ticket!!.repair.id)
+//            // now post them back to Compose state
+//            customer = c
+//            device = d
+//            technician = t
+//            deviceModel = dm
+//            fp.forEach() { path ->
+//                devicePhotos += path
+//            }
+//        }
+//    }
 
     // If any are still loading, show a spinner
-    if (customer == null || device == null || technician == null) {
+    if (ticket == null) {
         Box(
             Modifier
                 .fillMaxSize()
@@ -171,6 +183,7 @@ fun RepairDetailsScreen(
         }
         return
     }
+
 
     val swipeableState = rememberSwipeableState(0)
     val width = 96.dp
@@ -243,26 +256,26 @@ fun RepairDetailsScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = customer!!.customerName,
+                                    text = ticket!!.customer.customerName,
                                     modifier = Modifier
                                         .semantics {
                                             contentDescription =
-                                                "Customer ${customer!!.customerName}"
+                                                "Customer ${ticket!!.customer.customerName}"
                                         }
                                         .sharedBounds(
                                             sharedTransitionScope.rememberSharedContentState(
-                                                "customerName-${repairItem.id}"
+                                                "customerName-${ticket!!.repair.id}"
                                             ),
                                             animatedVisibilityScope = animatedContentScope
                                         ),
                                     fontWeight = MaterialTheme.typography.titleMedium.fontWeight
                                 )
                                 Text(
-                                    text = customer!!.customerPhone,
+                                    text = ticket!!.customer.customerPhone,
                                     modifier = Modifier
                                         .semantics {
                                             contentDescription =
-                                                "Customer ${customer!!.customerPhone}"
+                                                "Customer ${ticket!!.customer.customerPhone}"
                                         },
                                     fontWeight = MaterialTheme.typography.titleMedium.fontWeight
                                 )
@@ -281,7 +294,7 @@ fun RepairDetailsScreen(
                                             .fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
-                                        customer!!.customerEmail?.let { email ->
+                                        ticket!!.customer.customerEmail?.let { email ->
                                             Text(
                                                 text = "Email: ",
                                                 style = MaterialTheme.typography.bodySmall
@@ -303,7 +316,7 @@ fun RepairDetailsScreen(
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                         Text(
-                                            text = customer!!.customerAddress.toString(),
+                                            text = ticket!!.customer.customerAddress.toString(),
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -315,7 +328,7 @@ fun RepairDetailsScreen(
                                     ) {
                                         Text("")
                                         Text(
-                                            text = "${customer!!.customerCity}, ${customer!!.customerProv} ${customer!!.customerPostalCode}",
+                                            text = "${ticket!!.customer.customerCity}, ${ticket!!.customer.customerProv} ${ticket!!.customer.customerPostalCode}",
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -325,13 +338,13 @@ fun RepairDetailsScreen(
                     }
                     // ScreenTitle placed at the top and overlapping the card
                     ScreenTitle(
-                        showRepairID(repairItem.id),
+                        showRepairID(repairId),
                         Modifier
                             .align(Alignment.TopCenter)
                             .padding(horizontal = 16.dp)
                             .zIndex(1f)
                             .sharedElement(
-                                sharedTransitionScope.rememberSharedContentState("repairId-${repairItem.id}"),
+                                sharedTransitionScope.rememberSharedContentState("repairId-${repairId}"),
                                 animatedVisibilityScope = animatedContentScope,
                             )
                     )
@@ -353,7 +366,7 @@ fun RepairDetailsScreen(
                     ) {
                         ExpandablePhotoSection(
                             title = "Gallery",
-                            filePaths = filePaths,
+                            devicePhotos = ticket!!.photos,
                             modifier = Modifier
                                 .sharedBounds(
                                     sharedContentState = rememberSharedContentState(key = "repairInfo-bounds"),
@@ -386,7 +399,7 @@ fun RepairDetailsScreen(
                                         .semantics { contentDescription = "Repair Status" }
                                 )
                                 Text(
-                                    text = repairItem.repairStatus.displayName,
+                                    text = ticket!!.repair.repairStatus.displayName,
                                     modifier = Modifier.semantics {
                                         contentDescription = "Repair Status"
                                     }
@@ -400,14 +413,14 @@ fun RepairDetailsScreen(
                                 Text(
                                     text = "Repair Type: ",
                                     modifier = Modifier.semantics {
-                                        contentDescription = "Repair type ${repairItem.repairType}"
+                                        contentDescription = "Repair type ${ticket!!.repair.repairType}"
                                     }
                                 )
 
                                 Text(
-                                    text = repairItem.repairType.displayName,
+                                    text = ticket!!.repair.repairType.displayName,
                                     modifier = Modifier.semantics {
-                                        contentDescription = "Repair type ${repairItem.repairType}"
+                                        contentDescription = "Repair type ${ticket!!.repair.repairType}"
                                     }
                                 )
 
@@ -426,7 +439,7 @@ fun RepairDetailsScreen(
                                 )
 
                                 Text(
-                                    text = repairItem.price.toString(),
+                                    text = ticket!!.repair.price.toString(),
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier
@@ -456,7 +469,7 @@ fun RepairDetailsScreen(
                                         .padding(16.dp)
                                 ) {
                                     Text(
-                                        text = repairItem.notes,
+                                        text = ticket!!.repair.notes,
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
@@ -473,14 +486,14 @@ fun RepairDetailsScreen(
                                 Text(
                                     text = "Model: ",
                                     modifier = Modifier
-                                        .semantics { contentDescription = "Model $deviceModel" }
+                                        .semantics { contentDescription = "Model ${ticket!!.device.deviceId}" }
                                         .sharedElement(
-                                            sharedTransitionScope.rememberSharedContentState("modelName-${repairItem.id}"),
+                                            sharedTransitionScope.rememberSharedContentState("modelName-pica"),
                                             animatedVisibilityScope = animatedContentScope
                                         )
                                 )
                                 Text(
-                                    text = deviceModel!!,
+                                    text = "placeholder",
                                     modifier = Modifier.semantics {
                                         contentDescription = "Device Model"
                                     }
@@ -497,7 +510,7 @@ fun RepairDetailsScreen(
                                         .semantics { contentDescription = "Model " }
                                 )
                                 Text(
-                                    text = device!!.deviceSerial,
+                                    text = ticket!!.device.deviceSerial,
                                     modifier = Modifier.semantics {
                                         contentDescription = "Device Model"
                                     }
@@ -512,12 +525,19 @@ fun RepairDetailsScreen(
                         enter = fadeIn() + scaleIn(),
                         exit = fadeOut() + scaleOut(),
                     ){
+                        CustomCardLayout(
+                            title = "Edit Device Details",
+                            editable = true,
+                            onEditClick = {editCard = false},
+                        ) {
+
+                        }
 
                     }
             }
 
             // If repair is completed, it won't show the FABs
-            if (repairItem.repairStatus != RepairStatus.COMPLETED) {
+            if (ticket!!.repair.repairStatus != RepairStatus.COMPLETED) {
                 val rotation by animateFloatAsState(
                     targetValue   = if (editCard) 360f else 0f,
                     animationSpec = tween(durationMillis = 300)
@@ -535,7 +555,7 @@ fun RepairDetailsScreen(
                         ) {
                             FloatingActionButton(
                                 onClick = {
-                                    navController.navigate("invoice/${repairItem.id}")
+                                    navController.navigate("invoice/${ticket!!.repair.id}")
 
                                 },
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -625,7 +645,7 @@ fun CardSection(title: String, content: @Composable () -> Unit) {
 @Composable
 fun ExpandablePhotoSection(
     title: String,
-    filePaths: List<String?>,
+    devicePhotos: List<DevicePhoto>,
     collapsedThumbSize: Dp = 128.dp,
     expandedImageSize: Dp = 256.dp,
     modifier: Modifier
@@ -671,8 +691,8 @@ fun ExpandablePhotoSection(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    filePaths.forEach { path ->
-                        val bmp = remember(path) { decodeFile(path) }
+                    devicePhotos.forEach { path ->
+                        val bmp = remember(path) { decodeFile(path.filePath) }
                         if (bmp != null) {
                             Image(
                                 bitmap = bmp.asImageBitmap(),
@@ -704,8 +724,8 @@ fun ExpandablePhotoSection(
                         .padding(top = 8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(filePaths) { path ->
-                        val bmp = remember(path) { decodeFile(path) }
+                    items(devicePhotos) { path ->
+                        val bmp = remember(path) { decodeFile(path.filePath) }
                         if (bmp != null) {
                             Image(
                                 bitmap = bmp.asImageBitmap(),

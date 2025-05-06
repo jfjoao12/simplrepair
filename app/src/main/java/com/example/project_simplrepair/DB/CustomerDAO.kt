@@ -47,4 +47,25 @@ interface CustomerDAO {
      */
     @Query("SELECT * FROM customers_table WHERE customer_name LIKE '%' || :customerName || '%'")
     fun getCustomerByName(customerName: String): Flow<List<Customer>>
+
+    /**
+     * Retrieves the [Customer] associated with a repair.
+     *
+     * @param id The ID of the repair.
+     * @return The [Customer] linked to the given repair ID.
+     */
+    @Query("""
+        SELECT * FROM customers_table 
+        INNER JOIN repairs_table ON repairs_table.customer_id = customers_table.id
+        WHERE repairs_table.id = :id
+    """)
+    suspend fun getCustomerByRepairId(id: Int): Customer
+
+    @Query(
+        """
+            SELECT * FROM customers_table
+            WHERE id = :id
+        """
+    )
+    suspend fun getCustomerById(id: Int): Customer
 }
