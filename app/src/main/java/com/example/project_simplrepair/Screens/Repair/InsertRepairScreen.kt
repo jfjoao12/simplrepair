@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -47,6 +48,7 @@ import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.RepairType
 import com.example.project_simplrepair.ViewModels.InsertRepairViewModel
+import com.example.project_simplrepair.hilt.TicketViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -76,7 +78,8 @@ fun InsertRepairScreen(
     navController: NavController,
     photoPaths: List<String>,
     insertVm: InsertRepairViewModel,
-    repairItem: Repair? = null
+    repairItem: Repair? = null,
+    ticketVm: TicketViewModel = hiltViewModel()
 ) {
     var customer by remember { mutableStateOf<Customer?>(null) }
     var device by remember { mutableStateOf<Device?>(null) }
@@ -431,52 +434,34 @@ fun InsertRepairScreen(
                         Toast.makeText(context, "Please fill in serial & select customer", Toast.LENGTH_SHORT).show()
                         return@FloatingActionButton
                     }
-                    coroutineScope.launch {
-                        // Insert Device then Repair, then update photo with repairId
-                        val newDeviceId = withContext(Dispatchers.IO) {
-                            val dev = {
-                                Device(
-                                    null,
-                                    insertVm.phoneSpecsId,
-                                    insertVm.customerId,
-                                    insertVm.phoneSpecs?.id ?: 0,
-                                    DeviceType.MOBILE,
-                                    insertVm.serial,
-                                    insertVm.modelName,
-
-                                )
-                            }
-                            appDatabase.deviceDao().insert(dev)
-                        }.toInt()
-
-
-                        val newRepair = withContext(Dispatchers.IO) {
-                            val rep = Repair(
+                    // Insert Device then Repair, then update photo with repairId
+                        val dev =
+                            Device(
                                 null,
+                                insertVm.phoneSpecsId,
                                 insertVm.customerId,
-                                newDeviceId, 1,
-                                insertVm.price.toDoubleOrNull() ?: 0.0,
-                                insertVm.notes,
-                                repairType = insertVm.selectedType
+                                insertVm.phoneSpecs?.id ?: 0,
+                                DeviceType.MOBILE,
+                                insertVm.serial,
+                                insertVm.modelName,
+
                             )
-                            appDatabase.repairDAO().insert(rep)
-                        }
 
-                      withContext(Dispatchers.IO) {
-                            photoPaths.forEach{ path ->
-                                var devicePhoto =
-                                    DevicePhoto(
-                                        photoId = null,
-                                        repairId = newRepair.toInt(),
-                                        filePath = path,
-                                    )
-                                appDatabase.devicePhotoDao().updatePhotoRepairId(newRepair.toInt(), path)
-                            }
-                        }
 
+
+                        val rep = Repair(
+                            null,
+                            insertVm.customerId,
+                            null, 1,
+                            insertVm.price.toDoubleOrNull() ?: 0.0,
+                            insertVm.notes,
+                            repairType = insertVm.selectedType
+                        )
+
+                        ticketVm.insertNewRepair(rep, dev, customer!!, photoPaths)
 
                         navController.navigate(Destination.Main.route)
-                    }
+
                 },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,

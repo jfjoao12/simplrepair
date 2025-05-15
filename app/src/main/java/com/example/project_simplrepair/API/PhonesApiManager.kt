@@ -10,7 +10,6 @@ import com.example.project_simplrepair.Models.PhoneBrands
 import com.example.project_simplrepair.Models.PhoneBrandsItem
 import com.example.project_simplrepair.Models.PhoneListResponseDTO
 import com.example.project_simplrepair.Models.PhoneSpecs
-import com.example.project_simplrepair.Models.PhoneSpecsItems
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,7 +26,6 @@ import retrofit2.Response
 class PhonesApiManager(database: AppDatabase) {
 
     private var _phonesBrandsResponse = mutableStateOf<List<PhoneBrands>>(emptyList())
-    private var _phonesModelsResponse = mutableStateOf<List<PhoneSpecs>>(emptyList())
     private var _phoneSpecsResponse = mutableStateOf<List<PhoneSpecs>>(emptyList())
 
     private val apiKey = "51bc23d70dmsh6429272287e5c73p18d54cjsn834e6269ba89"

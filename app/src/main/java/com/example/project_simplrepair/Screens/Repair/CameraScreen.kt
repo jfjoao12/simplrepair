@@ -1,5 +1,6 @@
 package com.example.project_simplrepair.Screens.Repair
 
+import android.util.Log
 import androidx.camera.core.Preview
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.layout.Box
@@ -46,7 +47,6 @@ import java.util.concurrent.Executors
 @Composable
 fun CameraScreen(
     db: AppDatabase,
-    onPhotoTaken: (String) -> Unit,
     onCancel: () -> Unit,
 ) {
 
@@ -117,17 +117,11 @@ fun CameraScreen(
                 onClick = {
                     controller.takePhoto(
                         onPhotoTaken = { path ->
-                            GlobalScope.launch() {
-                                val photo = DevicePhoto(
-                                    photoId   = null,
-                                    repairId  = null,
-                                    filePath  = path
-                                )
-                                db.devicePhotoDao().insert(photo)
-                            }
-                            onPhotoTaken(path)
+                            //add paths to viewmodel
                         },
-                        onError = { /*…*/ }
+                        onError = {
+                            Log.i("CameraScreen", "Couldn't take picture")
+                        }
                     )
                 },
                 modifier = Modifier

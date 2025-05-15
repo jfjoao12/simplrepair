@@ -28,5 +28,4 @@ data class DevicePhoto (
 
     @ColumnInfo(name = "timestamp")
     val timestamp: Long = System.currentTimeMillis()
-
 )

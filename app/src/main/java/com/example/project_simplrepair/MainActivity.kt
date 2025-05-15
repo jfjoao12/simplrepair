@@ -412,9 +412,6 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                             val photoVm: PhotoViewModel = backStackEntry.sharedViewModel(navController)
 
                             CameraScreen(
-                                onPhotoTaken = { path ->
-                                    photoVm.add(path)
-                                },
                                 onCancel = {
                                     navController.popBackStack()
                                 },

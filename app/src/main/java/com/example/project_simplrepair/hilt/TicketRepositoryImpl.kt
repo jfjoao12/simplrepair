@@ -4,6 +4,7 @@ import androidx.room.Embedded
 import androidx.room.Relation
 import com.example.project_simplrepair.DB.CustomerDAO
 import com.example.project_simplrepair.DB.DeviceDAO
+import com.example.project_simplrepair.DB.DevicePhotoDAO
 import com.example.project_simplrepair.DB.RepairDAO
 import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
@@ -13,11 +14,11 @@ import com.example.project_simplrepair.Models.Repair
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-// TicketRepositoryImpl.kt
 class TicketRepositoryImpl @Inject constructor(
     private val repairDAO: RepairDAO,
     private val customerDAO: CustomerDAO,
-    private val deviceDAO: DeviceDAO
+    private val deviceDAO: DeviceDAO,
+    private val devicePhotoDAO: DevicePhotoDAO
 ) : TicketRepository {
     override fun getAllRepairs(): Flow<List<Repair>> =
         repairDAO.getAllRepairs()
@@ -31,20 +32,23 @@ class TicketRepositoryImpl @Inject constructor(
     override suspend fun insertRepair(repair: Repair): Int =
         repairDAO.insert(repair).toInt()
 
-    override suspend fun editRepair(repair: Repair): Int =
+    override suspend fun updateRepair(repair: Repair): Int =
         repairDAO.updateRepair(repair)
 
     override suspend fun insertDevice(device: Device): Int =
         deviceDAO.insert(device).toInt()
 
-    override suspend fun editDevice(device: Device): Int =
+    override suspend fun updateDevice(device: Device): Int =
         deviceDAO.updateDevice(device)
 
     override suspend fun insertCustomer(customer: Customer): Int =
         customerDAO.insert(customer).toInt()
 
-    override suspend fun editCustomer(customer: Customer): Int =
+    override suspend fun updateCustomer(customer: Customer): Int =
         customerDAO.updateCustomer(customer)
+
+    override suspend fun insertDevicePhoto(devicePhoto: DevicePhoto): Int =
+        devicePhotoDAO.insert(devicePhoto).toInt()
 
 }
 
@@ -58,7 +62,6 @@ data class FullTicket(
     )
     val customer: Customer,
 
-    // embed our DeviceWithSpecs instead of a raw Device:
     @Relation(
         entity = Device::class,
         parentColumn = "device_id",
@@ -80,8 +83,8 @@ data class DeviceWithSpecs(
     val device: Device,
 
     @Relation(
-        parentColumn  = "specs_id",  // the FK column in Device
-        entityColumn  = "id"              // the PK column in DeviceSpecs
+        parentColumn  = "specs_id",  //  FK column in Device
+        entityColumn  = "id"              //  PK column in DeviceSpecs
     )
     val specs: PhoneSpecs
 )
