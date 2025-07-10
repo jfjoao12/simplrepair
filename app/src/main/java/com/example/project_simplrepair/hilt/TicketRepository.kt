@@ -25,6 +25,7 @@ interface TicketRepository {
     // Customer
     suspend fun insertCustomer(customer: Customer): Int
     suspend fun updateCustomer(customer: Customer): Int
+    suspend fun getCustomerById(id: Int): Customer
 
     // Device photos
     suspend fun insertDevicePhoto(devicePhoto: DevicePhoto): Int

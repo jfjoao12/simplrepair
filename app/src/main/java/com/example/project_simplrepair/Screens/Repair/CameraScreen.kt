@@ -37,6 +37,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.project_simplrepair.Camera.CameraCaptureController
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Models.DevicePhoto
+import com.example.project_simplrepair.ViewModels.PhotoViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.concurrent.Executors
@@ -50,6 +51,7 @@ fun CameraScreen(
     onCancel: () -> Unit,
 ) {
 
+    val viewModel = PhotoViewModel()
     val lifecycleOwner = LocalLifecycleOwner.current
     val context = LocalContext.current
     val executor = remember { Executors.newSingleThreadExecutor() }
@@ -117,7 +119,9 @@ fun CameraScreen(
                 onClick = {
                     controller.takePhoto(
                         onPhotoTaken = { path ->
-                            //add paths to viewmodel
+                            viewModel.add(path)
+                            Log.i("CameraPath", path)
+                            Log.i("PhotoPaths", viewModel.photoPaths.toString())
                         },
                         onError = {
                             Log.i("CameraScreen", "Couldn't take picture")

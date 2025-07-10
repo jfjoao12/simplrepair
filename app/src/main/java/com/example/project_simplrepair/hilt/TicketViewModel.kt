@@ -8,6 +8,7 @@ import com.example.project_simplrepair.Models.Customer
 import com.example.project_simplrepair.Models.Device
 import com.example.project_simplrepair.Models.DevicePhoto
 import com.example.project_simplrepair.Models.Repair
+import com.example.project_simplrepair.ViewModels.PhotoViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,7 @@ import javax.inject.Inject
 class TicketViewModel @Inject constructor(
     private val ticketRepository: TicketRepository
 ): ViewModel() {
-
+    private val photoVm: PhotoViewModel = PhotoViewModel()
     private val _repairs = MutableStateFlow<List<Repair>>(emptyList())
     val repairs: StateFlow<List<Repair>> = _repairs
 
@@ -53,18 +54,25 @@ class TicketViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
     // INSERT
-    fun insertNewRepair(repair: Repair, device: Device, customer: Customer, photoPaths: List<String>) = viewModelScope.launch {
+    fun insertNewRepair(
+        repair: Repair,
+        device: Device,
+        customerId: Int,
+        photoPaths: List<String>
+    ) = viewModelScope.launch(Dispatchers.IO) {
         val newDeviceId = ticketRepository.insertDevice(device)
-        val updatedRepair = repair.copy(deviceId = newDeviceId, customerId = customer.customerId)
+        val updatedRepair = repair.copy(deviceId = newDeviceId, customerId = customerId)
         val newRepairId = ticketRepository.insertRepair(updatedRepair)
 
         photoPaths.forEach { path ->
-            var devicePhoto = DevicePhoto(
+            val devicePhoto = DevicePhoto(
                 photoId = null,
                 repairId = newRepairId,
                 filePath = path,
             )
+            ticketRepository.insertDevicePhoto(devicePhoto)
         }
+
         // now you have newRepairId and can—for example—navigate to details
     }
 

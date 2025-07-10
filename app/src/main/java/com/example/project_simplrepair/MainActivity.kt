@@ -3,6 +3,7 @@ package com.example.project_simplrepair
 import com.example.project_simplrepair.Screens.Repair.RepairDetailsScreen
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -384,7 +385,12 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 insertVm = insertVm,
                                 repairItem = repair!!
                             )
+                            Log.i(
+                                "PhotoPathsMain",
+                                photoVm.photoPaths.toString()
+                            )
                         }
+
                     }
                     // Handle navigation between these 2 screens to persist data
                     navigation(

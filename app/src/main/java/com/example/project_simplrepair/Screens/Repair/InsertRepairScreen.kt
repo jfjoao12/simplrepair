@@ -48,7 +48,9 @@ import com.example.project_simplrepair.Models.Repair
 import com.example.project_simplrepair.Operations.DeviceType
 import com.example.project_simplrepair.Operations.RepairType
 import com.example.project_simplrepair.ViewModels.InsertRepairViewModel
+import com.example.project_simplrepair.ViewModels.PhotoViewModel
 import com.example.project_simplrepair.hilt.TicketViewModel
+import com.example.project_simplrepair.sharedViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -81,6 +83,7 @@ fun InsertRepairScreen(
     repairItem: Repair? = null,
     ticketVm: TicketViewModel = hiltViewModel()
 ) {
+
     var customer by remember { mutableStateOf<Customer?>(null) }
     var device by remember { mutableStateOf<Device?>(null) }
     var deviceColors by remember { mutableStateOf("")}
@@ -434,6 +437,7 @@ fun InsertRepairScreen(
                         Toast.makeText(context, "Please fill in serial & select customer", Toast.LENGTH_SHORT).show()
                         return@FloatingActionButton
                     }
+
                     // Insert Device then Repair, then update photo with repairId
                         val dev =
                             Device(
@@ -447,8 +451,6 @@ fun InsertRepairScreen(
 
                             )
 
-
-
                         val rep = Repair(
                             null,
                             insertVm.customerId,
@@ -458,7 +460,7 @@ fun InsertRepairScreen(
                             repairType = insertVm.selectedType
                         )
 
-                        ticketVm.insertNewRepair(rep, dev, customer!!, photoPaths)
+                        ticketVm.insertNewRepair(rep, dev, insertVm.customerId, photoPaths)
 
                         navController.navigate(Destination.Main.route)
 
