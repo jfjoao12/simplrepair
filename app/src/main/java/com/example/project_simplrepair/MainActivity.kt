@@ -55,6 +55,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavBackStackEntry
@@ -381,9 +382,7 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                                 paddingValues = paddingValues,
                                 appDatabase = AppDatabase.getInstance(LocalContext.current),
                                 navController = navController,
-                                photoPaths = photoVm.photoPaths,
                                 insertVm = insertVm,
-                                repairItem = repair!!
                             )
                             Log.i(
                                 "PhotoPathsMain",
@@ -399,28 +398,32 @@ fun App (navController: NavController, modifier: Modifier, db: AppDatabase) {
                     ) {
 
                         composable(Destination.NewRepair.route) { backStackEntry  ->
-                            // 1) get the *same* navGraph entry for the VM:
-                            val photoVm: PhotoViewModel = backStackEntry.sharedViewModel(navController)
-                            val insertVm: InsertRepairViewModel =
-                                viewModel(backStackEntry)
+                            val parentEntry = remember(backStackEntry) {
+                                navController.getBackStackEntry("insertFlow")
+                            }
+                            // 2) pull your single shared VM from that parentEntry
+                            val insertVm: InsertRepairViewModel = hiltViewModel(parentEntry)
 
                             InsertRepairScreen(
                                 paddingValues = paddingValues,
                                 appDatabase = AppDatabase.getInstance(LocalContext.current),
                                 navController = navController,
-                                photoPaths = photoVm.photoPaths,
                                 insertVm = insertVm,
                             )
                         }
 
                         composable(Destination.Camera.route) { backStackEntry ->
-                            // again scope to the graph, not this screen
-                            val photoVm: PhotoViewModel = backStackEntry.sharedViewModel(navController)
+                            // same parentEntry trick here
+                            val parentEntry = remember(backStackEntry) {
+                                navController.getBackStackEntry("insertFlow")
+                            }
+                            val insertVm: InsertRepairViewModel = hiltViewModel(parentEntry)
 
                             CameraScreen(
                                 onCancel = {
                                     navController.popBackStack()
                                 },
+                                insertVm = insertVm,
                                 db = db
                             )
                         }

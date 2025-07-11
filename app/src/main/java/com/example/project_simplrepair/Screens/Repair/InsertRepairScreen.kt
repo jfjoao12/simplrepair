@@ -2,6 +2,8 @@ package com.example.project_simplrepair.Screens.Repair
 
 import android.Manifest
 import android.graphics.BitmapFactory.decodeFile
+import android.provider.ContactsContract.Contacts.Photo
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -30,6 +32,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -78,9 +81,7 @@ fun InsertRepairScreen(
     paddingValues: PaddingValues,
     appDatabase: AppDatabase,
     navController: NavController,
-    photoPaths: List<String>,
-    insertVm: InsertRepairViewModel,
-    repairItem: Repair? = null,
+    insertVm: InsertRepairViewModel = hiltViewModel(),
     ticketVm: TicketViewModel = hiltViewModel()
 ) {
 
@@ -90,31 +91,32 @@ fun InsertRepairScreen(
     var deviceModel by remember { mutableStateOf<String?>(null) }
     val devices by appDatabase.phoneModelsDAO().getModelByName(insertVm.modelName).collectAsState(initial = emptyList())
 
-    if (repairItem != null){
-        LaunchedEffect(repairItem.id) {
-            GlobalScope.launch {
-                // these DAO calls run off the main thread
-                val c = repairItem.id?.let { appDatabase.customerDao().getCustomerByRepairId(it) }
-                val d = repairItem.id?.let { appDatabase.deviceDao().getDeviceByRepairId(it) }
-                val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
-                // now post them back to Compose state
-                customer = c
-                device = d
-                deviceModel = dm
-            }
-        }
-        insertVm.serial = device!!.deviceSerial
-        insertVm.modelName = deviceModel.toString()
-        insertVm.customerName = customer!!.customerName
-        insertVm.customerId = customer!!.customerId!!
-        insertVm.price = repairItem.price.toString()
-        insertVm.selectedType = repairItem.repairType
-        insertVm.notes = repairItem.notes
-    }
+//    if (repairItem != null){
+//        LaunchedEffect(repairItem.id) {
+//            GlobalScope.launch {
+//                // these DAO calls run off the main thread
+//                val c = repairItem.id?.let { appDatabase.customerDao().getCustomerByRepairId(it) }
+//                val d = repairItem.id?.let { appDatabase.deviceDao().getDeviceByRepairId(it) }
+//                val dm = appDatabase.deviceDao().getModelNameByDeviceId(d!!.deviceId!!)
+//                // now post them back to Compose state
+//                customer = c
+//                device = d
+//                deviceModel = dm
+//            }
+//        }
+//        insertVm.serial = device!!.deviceSerial
+//        insertVm.modelName = deviceModel.toString()
+//        insertVm.customerName = customer!!.customerName
+//        insertVm.customerId = customer!!.customerId!!
+//        insertVm.price = repairItem.price.toString()
+//        insertVm.selectedType = repairItem.repairType
+//        insertVm.notes = repairItem.notes
+//    }
 
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
 
+    val photoViewModel = PhotoViewModel()
     // Bottom sheet states
     var expanded by  remember { mutableStateOf(false) }
     val brandSheetState = rememberModalBottomSheetState()
@@ -124,17 +126,18 @@ fun InsertRepairScreen(
     val deviceSheetState = rememberModalBottomSheetState()
     var deviceBottomModalSheet by remember { mutableStateOf(false) }
 
+    val photoPaths = insertVm.photoPaths
+
+
     // Camera Stuff
-    //var showCamera by remember { mutableStateOf(false) }
-    //var photoPaths by remember { mutableStateOf<List<String>>(emptyList()) }
+//    var showCamera by remember { mutableStateOf(false) }
+//    var photoPaths = remember { mutableStateListOf<String>() }
 //    val newPhotoPaths = remember { mutableStateListOf<String>() }
 
 
     val cameraPermissionState = rememberPermissionState(
         Manifest.permission.CAMERA
     )
-
-
 
 //    GlobalScope.launch {
 //        photoPaths = db.devicePhotoDao().getPhotosPath()
@@ -208,6 +211,15 @@ fun InsertRepairScreen(
 
                 // Device fields
                 item {
+                    Button(
+                        onClick = {
+                            Log.i("PhotoPathInsertScreen", photoPaths.toList().toString())
+                        }
+                    ) {
+                        Text(
+                            "Check"
+                        )
+                    }
                     CustomCardLayout("Device") {
                         OutlinedTextField(
                             value = insertVm.modelName,
@@ -448,7 +460,6 @@ fun InsertRepairScreen(
                                 DeviceType.MOBILE,
                                 insertVm.serial,
                                 insertVm.modelName,
-
                             )
 
                         val rep = Repair(
@@ -460,7 +471,7 @@ fun InsertRepairScreen(
                             repairType = insertVm.selectedType
                         )
 
-                        ticketVm.insertNewRepair(rep, dev, insertVm.customerId, photoPaths)
+                        ticketVm.insertNewRepair(rep, dev, insertVm.customerId, insertVm.photoPaths)
 
                         navController.navigate(Destination.Main.route)
 

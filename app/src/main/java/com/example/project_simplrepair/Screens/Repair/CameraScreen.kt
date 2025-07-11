@@ -33,10 +33,12 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.project_simplrepair.Camera.CameraCaptureController
 import com.example.project_simplrepair.DB.AppDatabase
 import com.example.project_simplrepair.Models.DevicePhoto
+import com.example.project_simplrepair.ViewModels.InsertRepairViewModel
 import com.example.project_simplrepair.ViewModels.PhotoViewModel
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -49,6 +51,7 @@ import java.util.concurrent.Executors
 fun CameraScreen(
     db: AppDatabase,
     onCancel: () -> Unit,
+    insertVm: InsertRepairViewModel = hiltViewModel( )
 ) {
 
     val viewModel = PhotoViewModel()
@@ -119,9 +122,9 @@ fun CameraScreen(
                 onClick = {
                     controller.takePhoto(
                         onPhotoTaken = { path ->
-                            viewModel.add(path)
+                            insertVm.addPhoto(path)
                             Log.i("CameraPath", path)
-                            Log.i("PhotoPaths", viewModel.photoPaths.toString())
+                            Log.i("PhotoPaths", insertVm.photoPaths.toString())
                         },
                         onError = {
                             Log.i("CameraScreen", "Couldn't take picture")
