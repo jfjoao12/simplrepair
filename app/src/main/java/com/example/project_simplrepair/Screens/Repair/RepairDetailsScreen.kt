@@ -546,68 +546,67 @@ fun RepairDetailsScreen(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(20.dp),
-
                 ) {
-                        AnimatedVisibility(
-                            visible = !editCard,
-                            enter = fadeIn() + scaleIn(),
-                            exit = fadeOut() + scaleOut(),
-                        ) {
-                            FloatingActionButton(
-                                onClick = {
-                                    navController.navigate("invoice/${ticket!!.repair.id}")
+                    AnimatedVisibility(
+                        visible = !editCard,
+                        enter = fadeIn() + scaleIn(),
+                        exit = fadeOut() + scaleOut(),
+                    ) {
+                        FloatingActionButton(
+                            onClick = {
+                                navController.navigate("invoice/${ticket!!.repair.id}")
 
-                                },
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier
-                                    .sharedBounds(
-                                        sharedContentState = rememberSharedContentState(key = "repairInfo-FAB"),
-                                        animatedVisibilityScope = this,
-                                        clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp))
-                                    )
-                                    .semantics { contentDescription = "Save new repair" }
-
-                            ) {
-                                Icon(
-                                    Icons.Filled.AttachMoney,
-                                    contentDescription = null,
-                                    modifier = Modifier
-
-                                        .graphicsLayer { rotationZ = rotation } // ← apply your spin
-
+                            },
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier
+                                .sharedBounds(
+                                    sharedContentState = rememberSharedContentState(key = "repairInfo-FAB"),
+                                    animatedVisibilityScope = this,
+                                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp))
                                 )
-                            }
-                        }
+                                .semantics { contentDescription = "Save new repair" }
 
-                        AnimatedVisibility(
-                            visible = editCard,
-                            enter = fadeIn() + scaleIn(),
-                            exit = fadeOut() + scaleOut(),
                         ) {
-                            FloatingActionButton(
-                                onClick = {
-                                    editCard = false
-                                },
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            Icon(
+                                Icons.Filled.AttachMoney,
+                                contentDescription = null,
                                 modifier = Modifier
-                                    .sharedBounds(
-                                        sharedContentState = rememberSharedContentState(key = "repairInfo-FAB"),
-                                        animatedVisibilityScope = this,
-                                        clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp))
-                                    )
-                                    .semantics { contentDescription = "Save Changes" }
 
-                            ) {
-                                Icon(
-                                    Icons.Filled.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .graphicsLayer { rotationZ = rotation } // ← apply your spin
-                                )
-                            }
+                                    .graphicsLayer { rotationZ = rotation } // ← apply your spin
+
+                            )
                         }
+                    }
+
+                    AnimatedVisibility(
+                        visible = editCard,
+                        enter = fadeIn() + scaleIn(),
+                        exit = fadeOut() + scaleOut(),
+                    ) {
+                        FloatingActionButton(
+                            onClick = {
+                                editCard = false
+                            },
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier
+                                .sharedBounds(
+                                    sharedContentState = rememberSharedContentState(key = "repairInfo-FAB"),
+                                    animatedVisibilityScope = this,
+                                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(16.dp))
+                                )
+                                .semantics { contentDescription = "Save Changes" }
+
+                        ) {
+                            Icon(
+                                Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .graphicsLayer { rotationZ = rotation } // ← apply your spin
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -122,6 +122,7 @@ fun RepairCard(
         ElevatedCard(
             elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
             modifier = Modifier
+                .padding(16.dp)
                 .fillMaxWidth()
                 .semantics {
                     contentDescription = "Repair for ${customerItem.customerName}, ID ${showRepairID(repairItem.id)}"

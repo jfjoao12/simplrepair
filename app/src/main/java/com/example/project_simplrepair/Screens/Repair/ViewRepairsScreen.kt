@@ -74,20 +74,6 @@ fun RepairScreen(
 ) {
     val fullTickets by ticketVm.fullTickets.collectAsState()
 
-
-
-
-
-
-
-    // 1) Load the raw list of repairs
-//    var repairs by remember { mutableStateListOf<Flow<List<Repair>>>(emptyList()) }
-//    LaunchedEffect(Unit) {
-//        repairs = db.repairDAO().getAllRepairs()
-//    }
-
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -97,11 +83,12 @@ fun RepairScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .align(Alignment.BottomEnd)
                 .padding(bottom = paddingValues.calculateBottomPadding())
                 .semantics { contentDescription = "List of repairs" },
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Mark the title as a heading for accessibility
+            // Title as a heading for accessibility
             Box(modifier = Modifier.semantics { heading() }) {
                 ScreenTitle("Repairs")
             }
@@ -114,7 +101,7 @@ fun RepairScreen(
                         .semantics { contentDescription = "No repairs found" }
                 )
             } else {
-                LazyColumn {
+                LazyColumn  {
                     items(fullTickets) { ticket ->
                         RepairCard(
                             navController = navController,
@@ -128,18 +115,18 @@ fun RepairScreen(
                         )
                     }
                 }
-            }
-        }
 
-        FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(20.dp),
-            onClick = { navController.navigate(Destination.NewRepair.route) },
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-        ) {
-            Icon(Icons.Filled.Add, contentDescription = "Add new repair")
+                FloatingActionButton(
+                    modifier = Modifier
+                        .padding(20.dp),
+                    onClick = { navController.navigate(Destination.NewRepair.route) },
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                ) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add new repair")
+                }
+
+            }
         }
     }
 }
